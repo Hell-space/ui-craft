@@ -7,10 +7,16 @@
 在 Codex 对话中粘贴这一行即可安装首个发布版。
 
 ```text
-请用 $skill-installer 从 https://github.com/Hell-space/ui-craft 安装 v1.0.0。技能在仓库根目录（--path .），安装名为 ui-craft（--name ui-craft）。
+请用 $skill-installer 从 https://github.com/Hell-space/ui-craft 安装 ui-craft，使用参数 --ref v1.0.0 --path . --name ui-craft --method download。
 ```
 
 手动安装时，将压缩包内的 `ui-craft` 文件夹放入 `~/.codex/skills/`。如果设置了 `CODEX_HOME`，请放入该目录下的 `skills/`。安装后，在下一条消息中用 `$ui-craft` 调用。[下载 v1.0.0 安装包](https://github.com/Hell-space/ui-craft/releases/download/v1.0.0/ui-craft-v1.0.0.zip)
+
+也可以在同一个 `skills/` 目录中用 Git 克隆这个版本。
+
+```sh
+git clone --depth 1 --branch v1.0.0 https://github.com/Hell-space/ui-craft.git ui-craft
+```
 
 ## 使用示例
 
