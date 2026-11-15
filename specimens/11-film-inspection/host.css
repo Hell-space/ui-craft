@@ -1,0 +1,166 @@
+/* 宿主品牌：深青底、纸白字、琥珀强调、细线分隔与顶栏原样保留；以下只在它们之上加检查台用的派生色。 */
+:root {
+  color-scheme: dark; --ground:#142b32; --panel:#1c383f; --paper:#f4efe0; --muted:#afc1bd; --accent:#ffb65d; --rule:#46616a;
+  --well:#112529;          /* 输入凹槽 */
+  --raise:#24464e;         /* 悬停与当前行 */
+  --edge:#6f8a91;          /* 可操作边框，对 panel ≥ 3:1 */
+  --ink:#142b32;           /* 片盒标签上的字 */
+  --ink-soft:#4a5d5f;
+  --fault:#ff9a85;
+  --fault-wash:rgba(255,154,133,.09);
+  --good:#9fd6b4;
+  --mono:ui-monospace,"Cascadia Mono","Cascadia Code",Consolas,"SF Mono",Menlo,monospace;
+  font-family:"Microsoft YaHei UI",system-ui,sans-serif; background:var(--ground); color:var(--paper);
+  -webkit-text-size-adjust:100%;
+}
+*{box-sizing:border-box}body{margin:0;background:var(--ground)}#hostbar {display:flex; align-items:center;justify-content:space-between;border-bottom:1px solid var(--rule);padding:14px clamp(15px,5vw,80px);color:var(--muted)}
+#hostbar a{color:var(--paper);text-underline-offset:.28em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+button{font:inherit;color:inherit;cursor:pointer}
+kbd{display:inline-block;min-width:1.6em;margin-right:2px;padding:0 .35em;font-family:var(--mono);font-size:.75rem;line-height:1.5;text-align:center;color:var(--paper);background:var(--well);border:1px solid var(--edge);border-bottom-width:2px;border-radius:3px}
+
+/* —— 台面 —— */
+main{line-height:1.5;margin:0 auto;max-width:1200px;padding:clamp(16px,3vw,36px) clamp(16px,4vw,48px) 56px}
+.desk-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;margin-bottom:clamp(14px,2vw,22px)}
+h1{margin:0;font-size:clamp(1.45rem,1.1rem + 1vw,2rem);line-height:1.15;font-weight:700;letter-spacing:.04em}
+.keys{margin:0;display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.8125rem;color:var(--muted)}
+
+.bench{display:grid;grid-template-columns:minmax(250px,310px) minmax(0,1fr);gap:clamp(16px,2vw,24px);align-items:start}
+.shelf,.record{min-width:0;background:var(--panel);border:1px solid var(--rule)}
+
+/* —— 拷贝架：查找与列表 —— */
+.shelf{position:sticky;top:16px;padding:16px 0 6px}
+.finder{display:grid;gap:6px;padding:0 16px}
+.finder__head{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;font-size:.8125rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.finder__head label{margin-right:auto;font-size:.875rem;font-weight:700}
+.finder input{-webkit-appearance:none;appearance:none;width:100%;min-height:44px;padding:8px 12px;font:inherit;font-size:1rem;color:var(--paper);background:var(--well);border:1px solid var(--edge);border-radius:4px}
+.finder input::placeholder,.notes textarea::placeholder{color:#7f9693;opacity:1}
+.hint{margin:0;font-size:.8125rem;color:var(--muted)}
+
+.pending{color:var(--accent);animation:appear .2s .18s both}
+.draft-count{color:var(--accent)}
+@keyframes appear{from{opacity:0}to{opacity:1}}
+
+.shelf-note{display:grid;gap:10px;justify-items:start;margin:14px 16px 12px;padding:14px;border:1px dashed var(--edge);border-radius:4px;transition:opacity .12s}
+.shelf-note p{margin:0;font-size:.9375rem}
+.shelf-note[aria-busy=true]{opacity:.55;transition-delay:.18s}
+
+.reels{margin:14px 0 0;padding:0;list-style:none;display:grid;transition:opacity .12s}
+.reels[aria-busy=true]{opacity:.5;transition-delay:.18s}
+.reels li{margin:0}
+.reels li + li{border-top:1px solid var(--rule)}
+.reel{display:grid;grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"id meta flags" "title title title";align-items:baseline;gap:2px 10px;width:100%;min-height:60px;padding:10px 16px 11px 13px;text-align:left;color:var(--paper);background:transparent;border:0;border-left:3px solid transparent;border-radius:0}
+.reel__id{grid-area:id;font-family:var(--mono);font-size:1.0625rem;font-weight:700;letter-spacing:.02em}
+.reel__meta{grid-area:meta;min-width:0;overflow:hidden;font-size:.75rem;color:var(--muted);white-space:nowrap;text-overflow:ellipsis}
+.reel__flags{grid-area:flags;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}
+.reel__title{grid-area:title;font-size:.9375rem;line-height:1.4}
+.reel[aria-current=true]{background:var(--raise);border-left-color:var(--accent)}
+.reel[aria-current=true] .reel__id{color:var(--accent)}
+.reel:focus-visible{outline-offset:-2px}
+.flag{padding:2px 5px;font-size:.6875rem;line-height:1.2;white-space:nowrap;border:1px solid currentColor;border-radius:3px}
+.flag--draft{color:var(--accent)}
+.flag--fault{color:var(--fault)}
+
+/* —— 按钮 —— */
+.btn{min-height:44px;padding:0 16px;font-weight:700;color:var(--paper);background:transparent;border:1px solid var(--edge);border-radius:4px}
+.btn--primary{color:#1d1407;background:var(--accent);border-color:var(--accent)}
+@media (hover:hover){
+  .reel:hover{background:var(--raise)}
+  .btn:hover{background:var(--raise)}
+  .btn--primary:hover{background:#ffc67f}
+}
+.btn[aria-disabled=true],.btn[aria-disabled=true]:hover{color:var(--muted);background:transparent;border-color:var(--rule);cursor:default}
+
+/* —— 片检记录：顶上一张片盒标签 —— */
+.can-label{padding:16px 20px 14px;color:var(--ink);background:var(--paper);border-bottom:1px solid var(--rule)}
+.can-label h2{margin:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px;font-size:clamp(1.2rem,1rem + .8vw,1.6rem);line-height:1.3;font-weight:700}
+.can-label h2:focus-visible{outline-color:var(--ink);outline-offset:4px}
+.can-label__id{padding:0 .3em;font-family:var(--mono);font-size:1.12em;letter-spacing:.03em;border:2px solid var(--ink);border-radius:3px}
+.can-label__title.is-waiting{font-weight:400;color:var(--ink-soft)}
+.can-label__meta{display:flex;flex-wrap:wrap;gap:2px 20px;margin:8px 0 0;font-size:.875rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+
+.readings-wrap{position:relative}
+.loadbar{position:absolute;inset:0 0 auto;height:2px;overflow:hidden;z-index:1}
+.loadbar::after{content:"";position:absolute;inset:0;width:30%;background:var(--accent);animation:scan 1.1s ease-in-out infinite}
+@keyframes scan{from{transform:translateX(-100%)}to{transform:translateX(340%)}}
+
+.readings{margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--rule);border-bottom:1px solid var(--rule)}
+.reading{min-width:0;padding:14px 20px 16px;background:var(--panel)}
+.reading dt{font-size:.8125rem;color:var(--muted)}
+.reading dd{margin:4px 0 0;font-family:var(--mono);font-size:clamp(1.2rem,1rem + 1vw,1.5rem);font-weight:600;line-height:1.25;white-space:nowrap;font-variant-numeric:tabular-nums}
+.readings-wrap[aria-busy=true] dd{color:var(--muted)}
+.unit{margin:0 .4em 0 .15em;font-family:"Microsoft YaHei UI",system-ui,sans-serif;font-size:.8125rem;font-weight:400;color:var(--muted)}
+.unit:last-child{margin-right:0}
+
+/* 琥珀浅底叠在深青上会发灰发浑，这里只留琥珀竖条与标签，底色跟面板一致。 */
+.finding{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:baseline;gap:4px 16px;padding:14px 20px 15px 16px;background:var(--panel);border-left:4px solid var(--accent);border-bottom:1px solid var(--rule)}
+.finding__label{font-size:.8125rem;font-weight:700;color:var(--accent);white-space:nowrap}
+.finding p{margin:0;font-size:1.0625rem;line-height:1.5}
+.finding.is-waiting{border-left-color:var(--rule)}
+.finding.is-waiting .finding__label,.finding.is-waiting p{color:var(--muted);font-size:.9375rem}
+
+.fault{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 16px;padding:16px 20px 16px 16px;background:var(--fault-wash);border-left:4px solid var(--fault);border-bottom:1px solid var(--rule)}
+.fault p{margin:0}
+.fault__title{font-weight:700;color:var(--fault)}
+.fault__msg{margin-top:2px;font-size:.875rem;color:var(--muted)}
+.fault--inline{margin-bottom:10px;border:1px solid var(--fault);border-left-width:4px;border-radius:4px}
+
+/* —— 备注 —— */
+.notes{padding:16px 20px 20px}
+.notes__head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;margin-bottom:8px}
+.notes__head label{font-weight:700}
+.notes__target{font-size:.8125rem;color:var(--muted)}
+.notes__target b{font-family:var(--mono);color:var(--paper)}
+.notes textarea{display:block;width:100%;min-height:10rem;padding:10px 12px;font:inherit;font-size:1rem;line-height:1.65;color:var(--paper);background:var(--well);border:1px solid var(--edge);border-radius:4px;resize:vertical}
+.notes textarea[data-dirty]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.notes textarea[readonly]{opacity:.6}
+.notes__foot{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:12px}
+.note-state{display:flex;align-items:center;gap:7px;margin:0 auto 0 0;font-size:.875rem;color:var(--muted)}
+.note-state--dirty{color:var(--accent)}
+.note-state--fault{color:var(--fault)}
+.dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.tick{color:var(--good);font-weight:700}
+.keys-inline{font-size:.75rem;color:var(--muted)}
+
+/* —— 键帽提示：宽屏且有鼠标时常显；窄屏和纯触屏只在真用过键盘后出现。快捷键本身始终有效。 —— */
+.keys,.keys-inline{display:none}
+@media (min-width:880px) and (hover:hover) and (pointer:fine){.keys{display:flex}.keys-inline{display:inline}}
+main[data-keys] .keys{display:flex}
+main[data-keys] .keys-inline{display:inline}
+
+/* —— 窄屏：查找收成一行半，三盘并排成切换条，选中拷贝与读数留在首屏 —— */
+@media (max-width:879px){
+  main{padding-top:14px}
+  .desk-head{margin-bottom:12px}
+  .bench{grid-template-columns:minmax(0,1fr);gap:12px}
+  .shelf{position:static;padding:12px 0}
+  .finder{padding:0 12px}
+  .hint{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .shelf-note{margin:12px 12px 0}
+  .reels{grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:6px;margin-top:10px;padding:0 12px}
+  .reels li{display:flex}
+  .reels li + li{border-top:0}
+  .reel{grid-template-columns:minmax(0,1fr);grid-template-areas:"id" "title" "flags";align-content:start;gap:1px;min-height:56px;padding:7px 8px 8px;border:1px solid var(--rule);border-radius:3px;box-shadow:inset 0 3px 0 transparent}
+  .reel[aria-current=true]{border-color:var(--rule);box-shadow:inset 0 3px 0 var(--accent)}
+  .reel__id{font-size:1rem}
+  .reel__meta{display:none}
+  .reel__title{overflow:hidden;font-size:.8125rem;white-space:nowrap;text-overflow:ellipsis}
+  .reel__flags{justify-content:flex-start;margin-top:3px}
+}
+@media (max-width:560px){
+  .can-label{padding:12px 16px 10px}
+  .can-label__meta{margin-top:4px}
+  .reading{padding:10px 16px 12px}
+  .finding,.fault{padding:12px 16px 12px 12px}
+  .notes{padding:14px 16px 16px}
+  .notes textarea{min-height:8rem}
+  .notes__foot .btn--primary{flex:1 1 100%}
+}
+@media (prefers-reduced-motion:reduce){
+  .loadbar::after{width:100%;opacity:.5;animation:none}
+}
+@media (forced-colors:active){
+  .reel[aria-current=true]{outline:2px solid Highlight;outline-offset:-2px}
+  .can-label{border:1px solid CanvasText}
+}

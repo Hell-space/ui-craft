@@ -1,0 +1,53 @@
+<!--@kind email-->
+<!--@title 你订的手冲壶已经发货-->
+<!--@use HTML 邮件：订单、发货、预约确认、账单、验证码、周报等事务邮件。表格布局、样式全部写在标签上、宽 600。脚手架会把 {{角色}} 换成预设配色的色值。只改文字、数字和链接-->
+<!--@sample 手冲壶 600ml|SF1408 2231 0967|山间咖啡器物-->
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light only">
+<meta name="generator" content="ui-craft email">
+<title>{{title}}</title>
+</head>
+<body style="margin:0; padding:0; background:{{bg}};">
+<!-- 预览文字：收件箱列表里标题后面那一行灰字 -->
+<div style="display:none; max-height:0; overflow:hidden;">顺丰 SF1408 2231 0967，预计 11 月 14 日（周六）送到。</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:{{bg}};">
+  <tr><td align="center" style="padding:32px 16px;">
+    <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif; color:{{text}};">
+      <!-- 品牌 -->
+      <tr><td style="padding:0 4px 20px; font-size:16px; font-weight:700; letter-spacing:.02em; color:{{text}};">山间咖啡器物</td></tr>
+      <!-- 主卡片 -->
+      <tr><td style="background:{{surface}}; border:1px solid {{border}}; border-radius:12px; padding:36px 36px 32px;">
+        <p style="margin:0 0 8px; font-size:13px; font-weight:600; color:{{accent-text}};">订单 #20261112-0381 · 已发货</p>
+        <h1 style="margin:0 0 14px; font-size:24px; line-height:1.4; font-weight:700; color:{{text}};">你订的手冲壶已经在路上了</h1>
+        <p style="margin:0 0 24px; font-size:15px; line-height:1.8; color:{{text-muted}};">顺丰 SF1408 2231 0967，预计 <b style="color:{{text}};">11 月 14 日（周六）</b>送到。签收前请当面检查壶嘴，磕碰可以直接拒收。</p>
+        <!-- 按钮：用表格做，Outlook 里也是圆角色块 -->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+          <td style="background:{{accent}}; border-radius:8px;"><a href="https://example.cn/track/SF1408223109" style="display:inline-block; padding:12px 22px; font-size:15px; font-weight:600; color:{{accent-fg}}; text-decoration:none;">查看物流</a></td>
+        </tr></table>
+        <!-- 明细 -->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:32px; border-top:1px solid {{border}}; font-size:14px;">
+          <tr><td style="padding:14px 0 6px; color:{{text}};">手冲壶 600ml · 细口</td><td align="right" style="padding:14px 0 6px; color:{{text}};">¥299.00</td></tr>
+          <tr><td style="padding:6px 0; color:{{text}};">滤纸 V60 · 100 片 × 2</td><td align="right" style="padding:6px 0; color:{{text}};">¥58.00</td></tr>
+          <tr><td style="padding:6px 0 14px; color:{{text-subtle}};">运费</td><td align="right" style="padding:6px 0 14px; color:{{text-subtle}};">¥0.00</td></tr>
+          <tr><td style="padding:14px 0 0; border-top:1px solid {{border}}; font-weight:700; color:{{text}};">实付</td><td align="right" style="padding:14px 0 0; border-top:1px solid {{border}}; font-size:18px; font-weight:700; color:{{text}};">¥357.00</td></tr>
+        </table>
+        <!-- 提示 -->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px;"><tr>
+          <td style="background:{{accent-subtle}}; border-radius:8px; padding:14px 16px; font-size:13px; line-height:1.7; color:{{text}};">第一次用细口壶？水温 92°C、粉水比 1:15 是个好起点。<a href="https://example.cn/guide" style="color:{{accent-text}};">两分钟冲煮指南</a></td>
+        </tr></table>
+      </td></tr>
+      <!-- 页脚 -->
+      <tr><td style="padding:24px 4px 0; font-size:12px; line-height:1.8; color:{{text-subtle}};">
+        有问题直接回复这封邮件，工作日 2 小时内回复。<br>
+        山间咖啡器物 · 成都市武侯区玉林北路 18 号<br>
+        <a href="https://example.cn/unsubscribe" style="color:{{text-subtle}};">不再接收发货通知</a>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

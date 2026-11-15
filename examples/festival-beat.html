@@ -1,0 +1,182 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>翻花鼓</title><style>
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #f5dc9f; color: #352638; font-family: "Microsoft YaHei","PingFang SC",sans-serif; }
+main { height: 100vh; height: 100dvh; position: relative; overflow: hidden; --lane-half: 16px; }
+canvas { display: block; width: 100%; height: 100%; }
+.caption { position: absolute; left: 5%; top: 5%; display: grid; gap: 3px; pointer-events: none; }
+h1 { font-size: clamp(32px,5.2vw,72px); letter-spacing: .04em; margin: 0; line-height: 1.1; color: #372032; }
+.tally { font-size: clamp(15px,1.8vw,22px); font-weight: 700; }
+#score { font-variant-numeric: tabular-nums; }
+.judgment { position: absolute; top: calc(75% + var(--lane-half) + 7px); left: 50%; transform: translateX(-50%); white-space: nowrap; pointer-events: none; }
+#feedback { display: inline-flex; align-items: center; gap: .4em; color: #39263c; font-weight: 700; font-size: clamp(14px,1.8vw,20px); }
+#feedback:empty { visibility: hidden; }
+#feedback[data-result="hit"]::before, #feedback[data-result="miss"]::before { content: ""; width: .56em; height: .56em; }
+#feedback[data-result="hit"]::before { background: currentColor; transform: rotate(45deg); }
+#feedback[data-result="miss"]::before {
+    background: linear-gradient(45deg, transparent 42%, currentColor 43% 57%, transparent 58%),
+                linear-gradient(-45deg, transparent 42%, currentColor 43% 57%, transparent 58%);
+}
+footer { position: absolute; right: 5%; bottom: max(3%,14px); }
+#beat { min-height: 46px; min-width: 94px; border: 2px solid #362b3b; border-radius: 2px; padding: 8px 18px; color: #fff0b7; background: #3a2b40; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+#beat:focus-visible { outline: 3px solid #34438b; outline-offset: 3px; }
+#beat:active { background: #654050; }
+.shortcut { font-size: .82em; margin-inline-start: .55em; opacity: .82; }
+main[data-input="touch"] .shortcut { display: none; }
+@media (hover: none) { main:not([data-input="keyboard"]) .shortcut { display: none; } }
+@media (max-height: 370px) {
+    .judgment { left: 50%; top: calc(75% - var(--lane-half) - 23px); }
+    footer { bottom: 8px; }
+}
+</style></head><body><main><canvas aria-label="翻花鼓节拍带，鼓点中心进入亮窗时击鼓。键盘可用空格。"></canvas><div class="caption"><h1>翻花鼓</h1><span class="tally">合拍 <output id="score">0 / 8</output></span></div><div class="judgment"><span id="feedback" role="status">鼓点中心进窗时击鼓</span></div><footer><button id="beat" type="button">开始</button></footer></main>
+<script>
+const c=document.querySelector("canvas"),g=c.getContext("2d"),b=document.querySelector("#beat"),sc=document.querySelector("#score"),feedback=document.querySelector("#feedback");
+const reduce=matchMedia("(prefers-reduced-motion: reduce)");let W,H,d,epoch,stage="ready",score=0,hits=[],pulse=-2,notice=0;
+const beatTimes=Array.from({length:8},(_,i)=>1.15+i*.68);
+const hitWindowSeconds = .21;
+let lastStrike = null;
+
+function laneSize() {
+    return Math.max(28,40 * Math.min(W / 850, H / 540));
+}
+function noteX(beatTime, elapsed) {
+    return W * .5 + (beatTime - elapsed) * W * .29;
+}
+function resize() {
+    W = c.clientWidth;
+    H = c.clientHeight;
+    d = Math.min(devicePixelRatio || 1,2);
+    c.width = Math.round(W*d);
+    c.height = Math.round(H*d);
+    c.parentElement.style.setProperty("--lane-half", (laneSize()*.57)+"px");
+}
+function shape(p,col){g.beginPath();p.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();g.fillStyle=col;g.fill()}
+function stroke(p,col,w){g.beginPath();p.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.lineWidth=w;g.strokeStyle=col;g.stroke()}
+function tile(x,y,scale,angle,col){
+ g.save();g.translate(x,y);g.rotate(angle);g.scale(scale,scale);
+ shape([[-21,-15],[15,-19],[21,-6],[13,17],[-12,20],[-24,4]],col);
+ shape([[-14,-5],[-1,-15],[12,-6],[4,-1],[11,7],[-1,14],[-12,6],[-5,-1]],"#f7db9e");g.restore()
+}
+function drum(x,y,k){
+ g.save();g.translate(x,y);g.scale(k,k);
+ g.beginPath();g.ellipse(0,18,93,28,0,0,Math.PI*2);g.fillStyle="#b26c57";g.fill();
+ shape([[-75,-18],[77,-20],[63,25],[46,41],[-44,42],[-66,24]],"#bd493b");
+ for(let i=-2;i<=2;i++)stroke([[i*24-11,-11],[i*21,24],[i*24+10,-11]],"#f1c16c",3);
+ g.beginPath();g.ellipse(0,-14,77,31,0,0,Math.PI*2);g.fillStyle="#4a3044";g.fill();
+ g.beginPath();g.ellipse(0,-19,77,29,0,0,Math.PI*2);g.fillStyle="#ffe8a9";g.fill();g.strokeStyle="#3e303b";g.lineWidth=3;g.stroke();
+ for(let i=0;i<16;i++){const a=i*Math.PI/8;g.beginPath();g.arc(Math.cos(a)*67,-19+Math.sin(a)*23,1.9,0,7);g.fillStyle="#774744";g.fill()}
+ stroke([[-4,-22],[38,-76]],"#873f35",5);stroke([[13,-21],[65,-63]],"#873f35",5);g.restore();
+}
+function action() {
+    if (stage !== "play") {
+        stage = "play";
+        epoch = performance.now();
+        score = 0;
+        hits = [];
+        pulse = -2;
+        notice = 0;
+        lastStrike = null;
+        sc.textContent = "0 / 8";
+        b.textContent = "击鼓";
+        const shortcut = document.createElement("span");
+        shortcut.className = "shortcut";
+        shortcut.textContent = "空格";
+        b.append(shortcut);
+        feedback.textContent = "鼓点中心进窗时击鼓";
+        delete feedback.dataset.result;
+        return;
+    }
+    const t = (performance.now() - epoch) / 1000;
+    const n = beatTimes.findIndex((v,i) => !hits.includes(i) && Math.abs(t-v) <= hitWindowSeconds);
+    lastStrike = {time: t, beat: n};
+    if (n >= 0) {
+        hits.push(n);
+        score++;
+        sc.textContent = score + " / 8";
+        pulse = t;
+        feedback.textContent = "合拍";
+        feedback.dataset.result = "hit";
+    } else {
+        feedback.textContent = "未合拍";
+        feedback.dataset.result = "miss";
+    }
+    notice = t + .42;
+}
+b.addEventListener("pointerdown", event => {
+    c.parentElement.dataset.input = event.pointerType === "touch" ? "touch" : "pointer";
+});
+b.onclick = action;
+window.addEventListener("keydown", e => {
+    if (e.code === "Space") {
+        e.preventDefault();
+        c.parentElement.dataset.input = "keyboard";
+        if (!e.repeat) action();
+    }
+});
+
+function drawWindow(mid,lineY,band) {
+    const left = noteX(0,hitWindowSeconds);
+    const right = noteX(hitWindowSeconds,0);
+    const top = lineY - band*.48;
+    const bottom = lineY + band*.48;
+    const lip = Math.min(10,band*.22);
+    g.fillStyle = "#68505a";
+    g.fillRect(left,top,right-left,bottom-top);
+    stroke([[left+lip,top],[left,top],[left,bottom],[left+lip,bottom]],"#fff0b5",2.5);
+    stroke([[right-lip,top],[right,top],[right,bottom],[right-lip,bottom]],"#fff0b5",2.5);
+    stroke([[mid,top],[mid,bottom]],"#b09891",1);
+}
+
+function drawStrike(t,mid,lineY,band) {
+    if (!lastStrike || t < lastStrike.time || t-lastStrike.time > .25) return;
+    const half = band*.2;
+    if (lastStrike.beat >= 0) {
+        const x = noteX(beatTimes[lastStrike.beat], lastStrike.time);
+        stroke([[x,lineY-half],[x+half,lineY],[x,lineY+half],[x-half,lineY],[x,lineY-half]],"#fff4c8",2.5);
+    } else {
+        stroke([[mid-half,lineY-half],[mid+half,lineY+half]],"#fff4c8",2.5);
+        stroke([[mid+half,lineY-half],[mid-half,lineY+half]],"#fff4c8",2.5);
+    }
+}
+function paint(stamp){
+ const t=stage==="play"?(stamp-epoch)/1000:0,k=Math.min(W/850,H/540),mid=W*.5,lineY=H*.75;
+ g.setTransform(d,0,0,d,0,0);g.fillStyle="#f5dc9f";g.fillRect(0,0,W,H);
+ shape([[W*.42,0],[W,0],[W,H*.52],[W*.81,H*.57],[W*.58,H*.27]],"#ed7750");
+ shape([[W*.68,0],[W,0],[W,H*.22],[W*.92,H*.32]],"#c54445");
+ shape([[0,H*.48],[W*.22,H*.38],[W*.53,H*.68],[W*.58,H*.83],[0,H*.88]],"#e9ad52");
+ for(let i=0;i<14;i++){const x=(.04+i*.078)*W,y=H*(.30+.04*Math.sin(i*.9));if(x<W*.17)continue;
+  stroke([[x-W*.043,y-5],[x+W*.043,y+4]],"#795145",1.1);
+  shape([[x-10*k,y-3],[x+12*k,y],[x+1*k,y+26*k]],["#5b5595","#bd4041","#893e5c"][i%3])}
+ const age=t-pulse,celebrate=age>=0&&age<.42;
+ const lift=celebrate&&!reduce.matches?Math.sin(age/.42*Math.PI)*8*k:0;
+ drum(W*.62,H*.53-lift,Math.max(.53,k));
+ if(celebrate){for(let j=0;j<12;j++){const a=j/12*Math.PI*2,rr=(reduce.matches?36:35+age*115)*k;
+  tile(W*.62+Math.cos(a)*rr,H*.42+Math.sin(a)*rr*.67,.15*k,a,["#bd4041","#6757a5","#9e4470"][j%3])}}
+ for(let j=0;j<4;j++)tile(W*(.11+j*.09),H*(.56+.045*Math.sin(j)),k*(.28+j*.028),j*.48,["#645995","#b14551","#d78634","#815172"][j]);
+ const band=laneSize();
+ g.fillStyle="#413248";g.fillRect(0,lineY-band*.57,W,band*1.14);
+ stroke([[0,lineY],[W,lineY]],"#b19ba0",1);
+ drawWindow(mid,lineY,band);
+ if (stage === "play") {
+     beatTimes.forEach((v,i) => {
+         if (hits.includes(i)) return;
+         const x = noteX(v,t);
+         if (x < -16 || x > W+16) return;
+         shape([[x,lineY-band*.33],[x+band*.27,lineY],[x,lineY+band*.33],[x-band*.27,lineY]],i%2?"#ffd173":"#ffe9ad");
+     });
+     drawStrike(t,mid,lineY,band);
+     if (t > 6.55) {
+         stage = "done";
+         b.textContent = "再打一轮";
+         feedback.textContent = "本轮结束";
+         delete feedback.dataset.result;
+     } else if (t > notice && notice > 0) {
+         feedback.textContent = "";
+         delete feedback.dataset.result;
+         notice = 0;
+     }
+ } else if (stage === "ready") {
+     shape([[mid+band*2,lineY-band*.3],[mid+band*2.26,lineY],[mid+band*2,lineY+band*.3],[mid+band*1.74,lineY]],"#ffcf78");
+ }
+ requestAnimationFrame(paint)
+}resize();window.addEventListener("resize",resize);requestAnimationFrame(paint);
+</script></body></html>

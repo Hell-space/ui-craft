@@ -1,0 +1,142 @@
+<!--@title 设置 · 账户-->
+<!--@use 应用的设置页、账户中心、个人资料、偏好设置。立场：一张写得清楚的表，每一项都说清改了会怎样。结构：左侧分组导航 → 中间一组组设置（每行左边是名字和后果，右边是控件）→ 右侧"别人看到的你"随输入实时更新 → 改动后浮出保存条。危险操作单独一行，写清能不能找回-->
+<!--@sample 苏禾|suhe@qingwu.cn|青梧工作室-->
+<style>
+/* 本页的版式与细节。颜色和字体都来自预设变量，换 --style / --accent 会跟着变。 */
+.settings { --mono: var(--font-mono, ui-monospace, monospace); display: grid; grid-template-columns: 12rem minmax(0, 44rem) 17rem; gap: clamp(2rem, 4vw, 3.5rem);
+            justify-content: center; padding: clamp(2rem, 4vw, 3.5rem) var(--gutter) var(--s-9); }
+.settings > * { min-width: 0; }
+.side { position: sticky; top: 2rem; align-self: start; display: grid; gap: 2px; }
+.side h1 { font-family: var(--font-display); font-size: 1.75rem; margin-bottom: 1.25rem; padding-left: var(--s-2); }
+.side .side-item { font-size: .9375rem; }
+.side .count { font: .6875rem var(--mono); }
+
+.group { padding-block: 2rem 1rem; border-top: 1px solid var(--text); scroll-margin-top: 2rem; }
+.group:first-child { padding-top: 0; border-top: 0; }
+.group > header { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: .5rem; }
+.group > header h2 { font-family: var(--font-display); font-size: 1.375rem; }
+.group > header p { font-size: var(--fs-sm); color: var(--text-subtle); }
+.group:first-child > header { padding-bottom: 1rem; border-bottom: 1px solid var(--text); margin-bottom: 0; }
+
+/* 每一行：左边名字和后果，右边控件 */
+.line { display: grid; grid-template-columns: minmax(0, 15rem) minmax(0, 1fr); gap: .5rem 2rem; align-items: start; padding: 1.1rem 0; border-bottom: 1px solid var(--border); }
+.line > div:first-child b { display: block; font-weight: 600; font-size: .9375rem; }
+.line > div:first-child span { display: block; margin-top: .2rem; font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.6; }
+.line .ctl { display: flex; align-items: center; justify-content: flex-end; gap: .75rem; min-width: 0; }
+.line .ctl.fill { display: grid; justify-content: stretch; }
+.line .ctl .input, .line .ctl .textarea { width: 100%; }
+.line .hint { font-size: .75rem; color: var(--text-subtle); }
+.who-row { display: flex; align-items: center; gap: 1rem; justify-content: flex-end; }
+.devices { display: grid; gap: .4rem; width: 100%; }
+.devices li { display: flex; justify-content: space-between; gap: 1rem; font-size: var(--fs-sm); color: var(--text-muted); }
+.devices li b { font-weight: 500; color: var(--text); }
+.devices li em { font-style: normal; font: .75rem var(--mono); color: var(--ok); }
+.line.danger > div:first-child b { color: var(--danger); }
+.line.danger { border-bottom: 0; }
+
+/* 别人看到的你：随输入实时更新 */
+.preview { position: sticky; top: 2rem; align-self: start; }
+.preview .kick { font: 500 .6875rem/1 var(--mono); letter-spacing: .12em; color: var(--text-subtle); }
+.namecard { margin-top: .9rem; padding: 1.25rem; border-radius: var(--r-lg); background: var(--surface); box-shadow: 0 0 0 1px var(--border), 0 14px 30px -20px rgb(var(--shade, 0 0 0) / .4); }
+.namecard .top { display: flex; align-items: center; gap: .75rem; }
+.namecard .avatar { width: 2.75rem; height: 2.75rem; font-size: 1rem; background: var(--accent); color: var(--accent-fg); }
+.namecard b { display: block; font-family: var(--font-display); font-size: 1.125rem; }
+.namecard small { display: block; font-size: .8125rem; color: var(--text-muted); }
+.namecard p { margin-top: 1rem; padding-top: .9rem; border-top: 1px dashed var(--border-strong); font-size: .875rem; line-height: 1.7; color: var(--text-muted); min-height: 3.4em; }
+.namecard .mail { margin-top: .6rem; padding-top: 0; border-top: 0; min-height: 0; font: .75rem var(--mono); color: var(--text-subtle); }
+.preview .note2 { margin-top: .9rem; font-size: .75rem; color: var(--text-subtle); line-height: 1.7; }
+
+.savebar { position: fixed; left: 50%; bottom: 1.5rem; z-index: 50; display: flex; align-items: center; gap: 1rem; padding: .5rem .5rem .5rem 1.25rem;
+           border-radius: var(--r-lg); background: var(--text); color: var(--bg); box-shadow: 0 18px 40px -16px rgb(var(--shade, 0 0 0) / .5);
+           translate: -50% calc(100% + 2rem); opacity: 0; pointer-events: none; transition: translate 420ms cubic-bezier(.2,.9,.2,1.05), opacity 200ms ease; }
+.savebar.show { translate: -50% 0; opacity: 1; pointer-events: auto; }
+.savebar .btn.ghost { color: color-mix(in srgb, var(--bg) 75%, transparent); }
+.savebar .btn.ghost:hover { background: rgb(255 255 255 / .1); color: var(--bg); }
+@media (max-width: 1180px) { .settings { grid-template-columns: 11rem minmax(0, 44rem); } .preview { display: none; } }
+@media (max-width: 760px) {
+  .settings { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+  .side { position: static; grid-auto-flow: column; overflow-x: auto; } .side h1 { display: none; }
+  .line { grid-template-columns: minmax(0, 1fr); } .line .ctl { justify-content: flex-start; } .who-row { justify-content: flex-start; }
+}
+</style>
+
+<div class="settings">
+  <nav class="side" aria-label="设置分组">
+    <h1>设置</h1>
+    <a class="side-item" href="#profile" aria-current="page"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>个人资料</a>
+    <a class="side-item" href="#notify"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6M10 20h4"/></svg>通知<span class="count">2/3</span></a>
+    <a class="side-item" href="#security"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>安全</a>
+    <a class="side-item" href="#danger"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 4.3 2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/></svg>注销账户</a>
+  </nav>
+
+  <form id="form" novalidate>
+    <section class="group" id="profile" aria-labelledby="h-profile">
+      <header><h2 id="h-profile">个人资料</h2><p>团队成员和客户会看到</p></header>
+      <div class="line"><div><b>头像</b><span>正方形图片，至少 256 像素</span></div><div class="ctl who-row"><span class="avatar lg">苏</span><button class="btn sm" type="button">上传新头像</button></div></div>
+      <div class="line"><div><b><label for="name">姓名</label></b><span>出现在评论、任务和文档的署名里</span></div><div class="ctl fill"><input class="input" id="name" value="苏禾" autocomplete="name"></div></div>
+      <div class="line"><div><b><label for="team">团队</label></b><span>写在名字下面的那一行</span></div><div class="ctl fill"><input class="input" id="team" value="青梧工作室 · 品牌设计"></div></div>
+      <div class="line"><div><b><label for="mail">邮箱</label></b><span>改了以后，要在新邮箱里点确认链接才会生效</span></div><div class="ctl fill"><input class="input" id="mail" type="email" value="suhe@qingwu.cn" autocomplete="email"></div></div>
+      <div class="line"><div><b><label for="bio">简介</label></b><span>一两句话，让别人知道什么事该找你</span></div><div class="ctl fill"><textarea class="textarea" id="bio" maxlength="120" rows="3">负责品牌和包装设计，周二周四在店里。</textarea><span class="hint" id="bio-n">还能写 102 字</span></div></div>
+    </section>
+
+    <section class="group" id="notify" aria-labelledby="h-notify">
+      <header><h2 id="h-notify">通知</h2><p>只在真正需要你处理时打扰你</p></header>
+      <label class="line"><div><b>有人 @ 我</b><span>评论、任务和文档里提到你时，立刻推送</span></div><div class="ctl"><input class="switch" type="checkbox" checked></div></label>
+      <label class="line"><div><b>任务快到期</b><span>截止前一天上午 9 点提醒一次，不会重复</span></div><div class="ctl"><input class="switch" type="checkbox" checked></div></label>
+      <label class="line"><div><b>每周小结</b><span>周一早上发到邮箱：上周完成了什么、这周有什么要到期</span></div><div class="ctl"><input class="switch" type="checkbox"></div></label>
+    </section>
+
+    <section class="group" id="security" aria-labelledby="h-security">
+      <header><h2 id="h-security">安全</h2><p>上次修改密码：2026 年 8 月 3 日</p></header>
+      <div class="line"><div><b>登录密码</b><span>至少 10 位，包含字母和数字</span></div><div class="ctl"><button class="btn sm" type="button">修改密码</button></div></div>
+      <label class="line"><div><b>两步验证</b><span>在新设备登录时，额外输入手机验证码</span></div><div class="ctl"><input class="switch" type="checkbox" checked></div></label>
+      <div class="line"><div><b>已登录的设备</b><span>不认识的设备，退出后改一次密码</span></div>
+        <div class="ctl fill"><ul class="devices"><li><b>MacBook Air · 成都</b><em>当前设备</em></li><li><b>iPhone 15 · 成都</b><span>2 小时前</span></li><li><b>Windows · 杭州</b><span>11 月 2 日</span></li></ul>
+        <button class="btn sm ghost" type="button" style="justify-self:start">退出其他设备</button></div></div>
+    </section>
+
+    <section class="group" id="danger" aria-labelledby="h-danger">
+      <header><h2 id="h-danger">注销账户</h2><p>需要输入密码确认</p></header>
+      <div class="line danger"><div><b>注销我的账户</b><span>30 天内可以找回；30 天后你的文档、任务和评论会被永久删除。团队里的其他人不受影响。</span></div><div class="ctl"><button class="btn danger sm" type="button">注销账户</button></div></div>
+    </section>
+
+    <div class="savebar" id="savebar" role="status"><span>有 <b id="changes">0</b> 处修改还没保存</span><button class="btn ghost sm" type="reset">放弃</button><button class="btn primary sm" type="submit">保存修改</button></div>
+  </form>
+
+  <!-- 别人看到的你：改左边，这里立刻跟着变 -->
+  <aside class="preview" aria-label="资料预览">
+    <p class="kick">别人看到的你</p>
+    <div class="namecard">
+      <div class="top"><span class="avatar" id="pv-av">苏</span><div><b id="pv-name">苏禾</b><small id="pv-team">青梧工作室 · 品牌设计</small></div></div>
+      <p id="pv-bio">负责品牌和包装设计，周二周四在店里。</p>
+      <p class="mail" id="pv-mail">suhe@qingwu.cn</p>
+    </div>
+    <p class="note2">悬停在评论里的名字上时，会弹出这张卡片。</p>
+  </aside>
+</div>
+
+<script>
+// 改动后浮出保存条；保存与放弃后收起。资料预览跟着输入实时更新。
+(function () {
+  var form = document.getElementById('form'), bar = document.getElementById('savebar'), n = document.getElementById('changes');
+  var $ = function (id) { return document.getElementById(id); };
+  var start = new Map();
+  form.querySelectorAll('input, textarea').forEach(function (el) { start.set(el, el.type === 'checkbox' ? el.checked : el.value); });
+  function preview() {
+    var name = $('name').value.trim() || '未命名';
+    $('pv-name').textContent = name; $('pv-av').textContent = name.slice(0, 1);
+    $('pv-team').textContent = $('team').value; $('pv-bio').textContent = $('bio').value; $('pv-mail').textContent = $('mail').value;
+    $('bio-n').textContent = '还能写 ' + (120 - $('bio').value.length) + ' 字';
+  }
+  function check() {
+    var c = 0; start.forEach(function (v, el) { if ((el.type === 'checkbox' ? el.checked : el.value) !== v) c++; });
+    n.textContent = c; bar.classList.toggle('show', c > 0); preview();
+  }
+  form.addEventListener('input', check);
+  form.addEventListener('change', check);
+  form.addEventListener('reset', function () { setTimeout(check, 0); });
+  form.addEventListener('submit', function (e) { e.preventDefault();
+    form.querySelectorAll('input, textarea').forEach(function (el) { start.set(el, el.type === 'checkbox' ? el.checked : el.value); }); check(); });
+  preview();
+})();
+</script>

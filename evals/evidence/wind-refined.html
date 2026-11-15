@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#eef1e8">
+<title>风洞试验室 · 自行车头盔外形比较</title>
+<style>
+:root{font-family:"Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;color:#1b2a23;background:#f2f3ec;font-synthesis:none;--ink:#1b2a23;--muted:#536258;--line:#bdc7b8;--green:#155c42;--number:"Bahnschrift","Arial Narrow",Arial,sans-serif}
+*{box-sizing:border-box}
+body{margin:0}
+button,input{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible+label{outline:3px solid #c16a16;outline-offset:3px}
+.shell{max-width:1456px;margin:auto;padding:0 clamp(18px,4.3vw,70px) 40px}
+.mast{display:flex;align-items:center;gap:15px;min-height:126px;border-bottom:2px solid var(--ink)}
+.brandmark{width:49px;height:49px;flex:none}
+h1,h2,h3,p,fieldset{margin:0}
+h1{font-size:clamp(31px,3.1vw,48px);line-height:1.15;letter-spacing:-.065em;font-weight:800}
+.product{margin:8px 0 0;color:var(--muted);font-size:13px;letter-spacing:.07em}
+.demo{margin-left:auto;white-space:nowrap;display:flex;align-items:center;gap:9px;font-size:13px;font-weight:650}
+.demo{padding:5px 8px;border:1px solid #7f8e7b;letter-spacing:.055em;font-weight:600}
+.lab{display:grid;grid-template-columns:minmax(0,1.54fr) minmax(305px,1fr);grid-template-rows:1fr auto;grid-template-areas:"stage readings" "picker readings";gap:18px clamp(23px,3vw,52px);padding:26px 0 24px}
+.stage{grid-area:stage;background:#102d29;isolation:isolate;position:relative;margin:0;min-width:0;min-height:320px;overflow:hidden;color:#f0f3df}
+.stage::after{position:absolute;content:"";inset:0;pointer-events:none;box-shadow:inset 0 0 70px #071d1e2e}
+.stage-back{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stagetop,.stagefoot{position:absolute;left:clamp(15px,2.15vw,32px);right:clamp(15px,2.15vw,32px);z-index:1;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.stagetop{top:22px;align-items:flex-start;pointer-events:none}
+.specimen-tag{font:600 12px/1.2 var(--number);letter-spacing:.14em;color:#b4d597;display:flex;align-items:center;gap:7px}
+.specimen-tag::before{content:"";width:18px;height:2px;background:currentColor}
+.stagetop h2{font-size:clamp(23px,2.6vw,39px);line-height:1.15;letter-spacing:.035em;margin-top:6px}
+.view-label{color:#bacdc3;letter-spacing:.08em;font-size:11px;margin-top:1px}
+.stagefoot{bottom:16px;color:#cbdfcb;font-size:11px;letter-spacing:.07em}
+.airdirection{display:inline-flex;align-items:center;gap:8px}
+.airdirection svg{width:27px;height:10px}
+.stage-speed{font:600 16px/1 var(--number);font-variant-numeric:tabular-nums;color:#dbefbd}
+.stage-speed small{font-size:11px;font-weight:400}
+fieldset{border:0;min-width:0;padding:0}
+.picker{grid-area:picker}
+.picker legend,.speed-row legend{font-size:13px;color:var(--muted);font-weight:650;margin-bottom:9px;padding:0}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.radio{position:absolute;width:1px;height:1px;margin:0;opacity:0;clip-path:inset(50%)}
+.model{min-width:0;position:relative;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:1px 5px;padding:10px 11px 9px;border:1px solid #b9c5b5;background:#f7f8f1;transition:background .15s,border-color .15s}
+.model:hover{border-color:#53725e}
+.radio:checked+.model{border:2px solid var(--green);padding:9px 10px 8px;background:#e0ecd9}
+.card-id{font:550 11px/1.05 var(--number);letter-spacing:.1em;color:#536658}
+.model b{font-size:clamp(14px,1.2vw,18px);line-height:1.5;font-weight:750}
+.card-shape{grid-column:2;grid-row:1/3;width:clamp(42px,4.6vw,72px);height:40px;color:#576957}
+.radio:checked+.model .card-shape{color:#23563c}
+.card-cut{grid-column:1/-1;margin-top:4px;white-space:nowrap;color:var(--muted);font-size:11px}
+.readings{grid-area:readings;min-width:0;display:flex;flex-direction:column}
+.panel-heading,.summary-heading{font-weight:780;line-height:1.25;letter-spacing:-.035em}
+.panel-heading{font-size:clamp(22px,2.1vw,32px)}
+.speed-row{margin:15px 0 2px}
+.speed-row legend{margin:0 0 7px}
+.speed-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid #aab9a7}
+.speed-choice{display:flex;align-items:baseline;justify-content:center;gap:5px;font:600 19px/1 var(--number);background:#f8f8f1;padding:12px 4px 10px;cursor:pointer}
+.speed-choice:not(:last-child){border-right:1px solid #aab9a7}
+.speed-choice small{font-size:11px;font-weight:450}
+.speed-choice:hover{background:#e4ebdd}
+.radio:checked+.speed-choice{background:#214936;color:#fff;border-color:#214936}
+.metric{padding:16px 0 13px;border-bottom:1px solid var(--line)}
+.metric-head,.value-row,.base-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.metric-head h3{font-size:16px;line-height:1.35}
+.metric-head .direction{color:var(--muted);font-size:11px}
+.value-row{margin:3px 0 8px}
+.reading{font:600 clamp(35px,3.8vw,56px)/1.08 var(--number);font-variant-numeric:tabular-nums;letter-spacing:-.045em;white-space:nowrap}
+.reading .unit{font-size:.39em;color:#425448;letter-spacing:0;font-weight:500;padding-left:5px}
+.delta{font-size:12px;color:#3e5244;text-align:right}
+.delta strong{font:600 15px var(--number);color:var(--ink);white-space:nowrap}
+.track{height:5px;position:relative;background:#dae1d6}
+.fill{height:100%;background:#4d8064;display:block}
+.tick{position:absolute;top:-3px;height:11px;width:2px;background:#263a2c;box-shadow:0 0 0 1px #f2f3ec}
+.base-row{justify-content:flex-start;gap:6px;margin-top:6px;font-size:11px;color:var(--muted)}
+.base-row::before{content:"";width:2px;height:9px;background:#263a2c}
+.base-row strong{font:550 13px var(--number);color:#344a38}
+.base-config{margin-top:auto;padding-top:15px}
+.ref-name{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:13px;color:var(--muted)}
+.ref-name strong{color:var(--ink);font-size:14px}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.baseline-btn{min-height:39px;padding:8px 12px;display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#e4eadc;color:#214b33;border:1px solid #96ad96;font-size:13px;font-weight:650}
+.baseline-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.baseline-btn:hover:enabled{background:#d3e2cc;border-color:#62856d}
+.restore{min-height:39px;padding:7px 4px;background:none;border:0;color:#244e36;font-size:12px;text-decoration:underline;text-underline-offset:4px}
+button:disabled{color:#69756a;cursor:default}
+.restore:disabled{text-decoration:none}
+.summary{border-top:2px solid var(--ink);padding-top:17px}
+.summary-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+.summary-heading{font-size:22px}
+.summary-key{font-size:12px;color:var(--muted);line-height:1.5}
+.summary-key b{color:var(--ink)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid #cbd3c6}
+th{font-size:12px;color:var(--muted);font-weight:600}
+tbody th,td{font:500 16px/1.15 var(--number);color:var(--ink)}
+thead{background:#e6eadf}
+th:not(:first-child),td{text-align:right}
+.pair-rest{color:#58675c}
+.pair-sep{padding:0 6px;color:#8c9a8b}
+.active-row{background:#e4eddf}
+.active-row th{box-shadow:inset 3px 0 #336a4d}
+.sr{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;clip:rect(0,0,0,0);overflow:hidden;white-space:nowrap;border:0}
+.defs{position:absolute;width:0;height:0;overflow:hidden}
+@media (min-width:1250px){.lab{padding-top:32px}.mast{min-height:134px}.stage{min-height:365px}.metric{padding:19px 0 16px}}
+@media (max-width:900px){.shell{padding-inline:22px}.lab{grid-template-columns:minmax(0,1.2fr) minmax(280px,1fr);column-gap:20px}.model{grid-template-columns:1fr}.card-shape{width:46px;height:31px}.mast{min-height:104px}.stage{min-height:304px}.card-cut{font-size:10px}}
+@media (max-width:700px){.shell{padding-inline:16px}.mast{min-height:86px;gap:10px}.brandmark{width:36px;height:36px}.product{font-size:11px;margin-top:4px}.demo{font-size:11px;gap:6px}.demo::before{width:6px;height:6px}.lab{grid-template-columns:1fr;grid-template-rows:auto;grid-template-areas:"stage" "picker" "readings";padding:15px 0 20px;gap:14px}.stage{min-height:0;height:clamp(205px,50vw,307px)}.stagetop{top:14px}.stagetop h2{font-size:24px;margin-top:4px}.stagefoot{bottom:11px}.view-label{font-size:10px}.picker legend{margin-bottom:6px}.cards{gap:6px}.model{grid-template-columns:minmax(0,1fr) auto;padding:8px}.radio:checked+.model{padding:7px}.card-shape{width:clamp(35px,10.2vw,60px);height:32px}.card-id{font-size:10px}.card-cut{margin-top:1px;font-size:10px}.readings{border-top:1px solid var(--line);padding-top:14px}.panel-heading{font-size:23px}.speed-row{margin:0;display:flex;align-items:center;gap:8px}.speed-row legend{float:left;padding:12px 0;margin:0;min-width:31px}.speed-controls{flex:1}.speed-choice{padding:10px 2px 9px;font-size:17px}.panel-header{display:grid;grid-template-columns:auto minmax(180px,1fr);align-items:center;gap:14px}.speed-row legend{position:absolute;clip-path:inset(50%);width:1px;height:1px;min-width:0;overflow:hidden}.metric{padding:12px 0}.reading{font-size:40px}.base-config{padding-top:13px}.ref-name{margin-bottom:5px}.summary{padding-top:13px}.summary-head{align-items:flex-start;flex-direction:column;margin-bottom:7px;gap:4px}.summary-heading{font-size:20px}th,td{padding:9px 7px}}
+@media (max-width:355px){.shell{padding-inline:11px}.card-shape{width:29px}.card-id{font-size:9px}.panel-header{gap:8px}.reading{font-size:34px}.delta{font-size:11px}.brandmark{width:30px;height:30px}.speed-choice small{font-size:9px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.stage{background:#16372f}
+.stage-back{background:radial-gradient(ellipse at 50% 45%,#315244,#16332e 75%)}
+.stagefoot{gap:14px;justify-content:flex-start;color:#d4e1ce;text-shadow:0 1px 3px #0d281e}
+.wake-legend{display:inline-flex;align-items:center;gap:6px;color:#e3eddb}
+.wake-mark{display:inline-block;width:19px;height:0;border-top:2px solid #c0e5a2}
+.wake-mark.reference{border-top:2px dashed #efb580;margin-left:6px}
+.stage-speed{margin-left:auto}
+.model.is-base .card-id{color:#724321}
+.role-base{padding-left:6px;border-left:1px solid #a59175;margin-left:5px;letter-spacing:0;font:600 10px/1 var(--sans,"Microsoft YaHei",sans-serif);color:#754923}
+.speed-choice{min-height:44px}
+.delta{font-size:12px;font-weight:650;display:flex;align-items:baseline;justify-content:flex-end;gap:5px}
+.delta strong{font:650 16px/1 var(--number);color:inherit}
+.delta.good{color:#17613d}
+.delta.cost{color:#8b491f}
+.benefit-arrow{font:650 19px/1 var(--number)}
+.base-row{gap:7px}
+.base-config{border:1px solid #bac8b4;background:#e8ede3;display:flex;align-items:center;justify-content:space-between;gap:7px;padding:9px 10px;margin-top:12px}
+.ref-name{display:block;margin:0;flex:1;min-width:55px}
+.ref-name>span,.ref-name>strong{display:block}
+.ref-name>span{font-size:11px;margin-bottom:3px}
+.ref-name>strong{white-space:nowrap;font-size:13px}
+.base-config .controls{gap:5px;justify-content:flex-end}
+.baseline-btn{background:#f3f6ec;min-height:39px;padding:7px 10px;font-size:12px;gap:4px}
+.restore{padding-inline:3px}
+.method{margin-top:13px;font-size:12px;color:#4c6050;line-height:1.7;max-width:760px}
+.method summary{display:list-item;min-height:34px;cursor:pointer;font-weight:600;width:fit-content;padding:4px 0}
+.method summary:focus-visible{outline:3px solid #c16a16;outline-offset:2px}
+.method p{margin:0 0 7px 14px}
+@media (min-width:701px) and (max-width:1100px){.base-config{flex-wrap:wrap}.ref-name{display:flex;gap:8px;align-items:baseline}.ref-name>span{margin:0}.base-config .controls{justify-content:flex-start}.role-base{padding-left:3px;margin-left:3px;font-size:9px}}
+@media (max-width:700px){.lab{grid-template-areas:"picker" "stage" "readings";row-gap:11px}.stage{height:clamp(197px,51vw,278px)}.stagefoot{left:12px;right:12px;gap:9px;font-size:10px}.stagefoot .airdirection{gap:4px}.stagefoot .airdirection svg{width:17px}.wake-mark{width:12px}.wake-mark.reference{margin-left:3px}.wake-legend{gap:4px}.stage-speed{font-size:14px}.role-base{padding-left:0;border:0;margin-left:2px;font-size:9px}.readings{padding-top:12px}.panel-header{grid-template-columns:auto minmax(170px,1fr);gap:13px}.speed-choice{align-items:center}.base-config{margin-top:10px}.picker legend{font-size:12px}.metric{padding:10px 0}.value-row{margin:1px 0 6px}.delta{font-size:12px}.delta strong{font-size:15px}.track{height:4px}.base-row{margin-top:4px}}
+@media (max-width:405px){.role-base{font-size:0;width:0;height:0;position:absolute;overflow:hidden}.model.is-base::after{content:"";position:absolute;right:4px;top:4px;width:7px;height:7px;border-top:2px solid #945f34;border-right:2px solid #945f34}.wake-legend{gap:3px}.base-config{padding:7px 8px}.delta{gap:3px}.stage-speed small{font-size:9px}}
+</style>
+</head>
+<body>
+<svg class="defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><defs>
+<linearGradient id="shellpaint" x1=".08" y1=".06" x2=".76" y2=".98" gradientUnits="objectBoundingBox"><stop stop-color="#ffffe6"/><stop offset=".2" stop-color="#e1e6c9"/><stop offset=".44" stop-color="#d1d9b9"/><stop offset=".67" stop-color="#a9b29a"/><stop offset=".86" stop-color="#788879"/><stop offset="1" stop-color="#485f55"/></linearGradient>
+<linearGradient id="sidepaint" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#dfe6c5"/><stop offset=".48" stop-color="#aebba0"/><stop offset="1" stop-color="#687a6b"/></linearGradient>
+<linearGradient id="ventpaint" x1="0" y1="0" x2=".5" y2="1"><stop stop-color="#172c27"/><stop offset=".37" stop-color="#203730"/><stop offset=".7" stop-color="#3d5142"/><stop offset="1" stop-color="#667861"/></linearGradient>
+<linearGradient id="foampaint" x1="0" y1="0" x2=".35" y2="1"><stop stop-color="#6d7764"/><stop offset=".31" stop-color="#3e4d40"/><stop offset="1" stop-color="#1e3028"/></linearGradient>
+<pattern id="foamgrain" width="7" height="6" patternUnits="userSpaceOnUse"><path d="M1 3l1-1m2 3 1-1" stroke="#b4b99c" stroke-width=".9" opacity=".42"/></pattern>
+<pattern id="webbing" width="3" height="3" patternUnits="userSpaceOnUse"><path d="m0 2 3-1" stroke="#a8b296" opacity=".31" stroke-width=".65"/></pattern>
+<pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse"><path d="M36 0H0v36" fill="none" stroke="#638572" stroke-width="1" opacity=".22"/><path d="M18 16v4m-2-2h4" stroke="#688877" opacity=".15"/></pattern>
+<linearGradient id="flowcol"><stop stop-color="#8cc99d" stop-opacity=".13"/><stop offset=".19" stop-color="#adddb2" stop-opacity=".52"/><stop offset=".55" stop-color="#c4ebc5" stop-opacity=".54"/><stop offset=".9" stop-color="#83c29a" stop-opacity=".35"/><stop offset="1" stop-color="#659775" stop-opacity=".08"/></linearGradient>
+<radialGradient id="chamber"><stop stop-color="#315846"/><stop offset=".59" stop-color="#214438"/><stop offset="1" stop-color="#112e29"/></radialGradient>
+<linearGradient id="headform" x1=".03" y1=".1" x2=".8" y2="1"><stop stop-color="#a1b3a4"/><stop offset=".44" stop-color="#798f82"/><stop offset=".72" stop-color="#58776a"/><stop offset="1" stop-color="#365549"/></linearGradient>
+<linearGradient id="wake-fade"><stop stop-color="#d3e7a2" stop-opacity=".18"/><stop offset=".57" stop-color="#b6d391" stop-opacity=".10"/><stop offset="1" stop-color="#afce91" stop-opacity=".03"/></linearGradient>
+<linearGradient id="wake-edge"><stop stop-color="#e0eab0" stop-opacity=".56"/><stop offset=".58" stop-color="#c4e3a1" stop-opacity=".95"/><stop offset="1" stop-color="#a4cf92" stop-opacity=".39"/></linearGradient>
+<g id="cross" fill="none" stroke="#b2cfaf" stroke-width="1"><path d="M-4 0h8M0-4v8"/></g>
+<g id="pin"><path d="M9.2 2 14 6.8l-2.1.5-2.3 2.4-.5 2-1.8-1.8L3 14.2l-.8-.8 4.3-4.3-1.8-1.8 2-.5L9 4.4z"/></g>
+</defs></svg>
+<div class="shell">
+<header class="mast">
+  <svg class="brandmark" viewBox="0 0 54 54" aria-hidden="true"><rect width="54" height="54" rx="27" fill="#244e39"/><g fill="none" stroke="#e8f0d9" stroke-width="3" stroke-linecap="round"><path d="M9 31c10 0 13-16 29-16h5"/><path d="M10 38c13 0 16-16 30-16h5"/><path d="M18 42c10-1 13-13 25-13"/></g></svg>
+  <div><h1>风洞试验室</h1><p class="product">自行车头盔外形比较</p></div><span class="demo">演示测量</span>
+</header>
+<main>
+<div class="lab">
+  <figure class="stage" aria-labelledby="model-title">
+    <div class="stagetop"><div><div class="specimen-tag" id="code"></div><h2 id="model-title"></h2></div><span class="view-label">试验段侧视</span></div>
+    <svg id="main-art" class="stage-back" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 345" role="img" aria-label="头模上的当前头盔及与基准比较的尾流示意"><svg width="760" height="345"><rect width="760" height="345" fill="url(#chamber)"/><rect width="760" height="345" fill="url(#grid)"/><g id="flow"></g><g opacity=".58"><use href="#cross" x="30" y="86"/><use href="#cross" x="730" y="86"/><use href="#cross" x="30" y="277"/><use href="#cross" x="730" y="277"/></g><g id="specimen"></g><g id="wake"></g></svg></svg>
+    <figcaption class="stagefoot"><span class="airdirection"><svg viewBox="0 0 29 10" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true"><path d="M0 5h26M23 1l4 4-4 4"/></svg><span>尾流示意</span></span><span class="wake-legend"><span class="wake-mark"></span><span id="wake-current"></span><span class="wake-mark reference"></span><span id="wake-base"></span></span><span class="stage-speed"><span id="art-speed"></span> <small>km/h</small></span></figcaption>
+  </figure>
+  <fieldset class="picker"><legend>选择外形</legend><div id="models" class="cards"></div></fieldset>
+  <section class="readings" aria-labelledby="reading-title">
+    <div class="panel-header"><h2 id="reading-title" class="panel-heading">工况读数</h2>
+    <fieldset class="speed-row"><legend>试验风速</legend><div id="speeds" class="speed-controls"></div></fieldset></div>
+    <div id="metrics"></div>
+    <div class="base-config"><div class="ref-name"><span>固定基准</span><strong id="base-label"></strong></div>
+    <div class="controls"><button class="baseline-btn" type="button" id="set-base"><svg viewBox="0 0 16 16" aria-hidden="true"><use href="#pin"/></svg><span></span></button><button class="restore" type="button" id="restore-base">恢复初始基准</button></div></div>
+  </section>
+</div>
+<section class="summary" aria-labelledby="all-title">
+  <div class="summary-head"><h2 class="summary-heading" id="all-title">全风速对照</h2><p class="summary-key" id="summary-key"></p></div>
+  <table aria-labelledby="all-title" aria-describedby="summary-key"><thead><tr><th scope="col">风速 <span lang="en">km/h</span></th><th scope="col">阻力 N</th><th scope="col">通风量 L/s</th></tr></thead><tbody id="matrix"></tbody></table>
+  <details class="method"><summary>演示测量口径</summary><p>同一头模、正面来流。阻力为头盔与头模沿来流方向所受的力（N），通风量为每秒通过壳体通风口的空气体积（L/s）。尾流带由壳尾位置与阻力读数绘制，用于比较演示。</p></details>
+</section>
+<p id="status" class="sr" role="status"></p>
+</main>
+</div>
+<script>
+'use strict';
+const models = {
+  ridge: {
+    name:'纵脊',code:'WT–01',cut:'直通式风槽',outlet:[399,109],drag:[0.46,1.42,2.92],air:[3.3,5.8,8.4],
+    outline:'M36 139C42 107 76 75 124 52C166 31 220 24 259 32C307 37 356 58 381 85L399 109L382 134L386 144L356 166L326 172L302 182L221 170L158 165L104 151L58 151Q39 153 36 139Z',
+    lower:'M40 141Q64 154 124 151Q200 152 276 139Q331 128 387 103L377 130L348 139Q276 159 190 161L144 160L86 150L56 151Z',
+    crease:'M45 136Q115 118 189 98T336 62 M72 145Q165 137 234 116T371 85',
+    vents:[
+      'M54 120Q68 91 108 69Q149 46 183 41Q125 70 98 96Q81 110 54 120Z',
+      'M86 120Q123 90 169 69Q213 49 263 45Q211 65 168 86Q125 108 86 120Z',
+      'M118 134Q167 107 219 87Q272 66 319 64Q275 79 229 101Q172 127 118 134Z',
+      'M203 138Q248 117 294 99Q339 82 361 83Q338 101 295 115Q249 133 203 138Z',
+      'M302 145Q338 130 375 112L380 105Q365 128 347 136Z'
+    ]
+  },
+  foil: {
+    name:'折翼',code:'WT–02',cut:'长尾导流壳',outlet:[431,109],drag:[0.40,1.23,2.50],air:[2.6,4.5,6.4],
+    outline:'M32 141C36 108 76 71 125 50C177 27 230 21 274 33C323 46 365 68 397 90L431 109L411 125L390 129L382 146L346 156L315 175L271 179L202 171L124 158L70 151L47 154Q34 152 32 141Z',
+    lower:'M36 143Q83 137 148 130Q221 121 269 104Q310 90 340 85Q320 104 297 112Q236 134 175 141Q113 148 75 153L49 151Q39 150 36 143Z',
+    crease:'M52 127Q109 99 173 73Q226 51 277 45 M93 144Q161 138 218 125T311 95 M259 151Q324 132 384 107L422 110',
+    vents:[
+      'M49 120Q67 88 108 65Q135 50 162 43Q124 62 97 87Q73 108 49 120Z',
+      'M92 113Q146 76 210 53Q237 42 264 42Q233 48 208 59Q151 86 92 113Z',
+      'M122 134Q191 111 241 93Q285 76 334 75Q306 83 278 95Q214 122 150 133Q134 136 122 134Z',
+      'M276 146Q317 123 391 105Q367 121 342 131Q313 142 276 146Z',
+      'M350 147Q374 133 393 130L379 143Z'
+    ]
+  },
+  cell: {
+    name:'岚孔',code:'WT–03',cut:'分区开孔壳',outlet:[392,113],drag:[0.52,1.62,3.29],air:[4.2,7.4,10.6],
+    outline:'M42 143Q43 119 62 95Q87 61 129 44L151 43L165 35Q201 23 244 29L256 33L268 31Q318 37 352 63L354 71L366 72Q388 91 392 113L377 127L382 139L357 158L331 165L302 182L253 178L208 170L146 163L87 151L57 154Q45 153 42 143Z',
+    lower:'M47 142Q68 150 96 142Q153 128 200 126Q256 123 291 111L319 89L346 84L323 112Q317 125 298 130Q248 144 177 146Q101 150 74 153L52 151Z',
+    crease:'M54 133Q76 124 95 102L132 71 M119 135Q146 118 164 86 M210 136Q234 97 279 74 M304 148Q338 128 377 120',
+    vents:[
+      'M52 125Q61 99 79 85L103 71Q96 88 86 104Q77 116 52 125Z',
+      'M95 107Q100 83 121 62Q139 47 157 45Q152 62 138 78Q118 99 95 107Z',
+      'M158 85Q174 54 203 41Q220 36 238 38Q229 50 207 64Q181 79 158 85Z',
+      'M120 131Q136 112 163 96L204 80Q202 94 181 110Q157 126 120 131Z',
+      'M201 114Q217 91 243 73Q267 59 298 57Q290 73 262 89Q231 108 201 114Z',
+      'M260 116Q275 94 311 77Q328 71 343 73Q336 89 317 99Q288 114 260 116Z',
+      'M322 128Q342 104 379 95Q377 110 359 117Q340 125 322 128Z'
+    ]
+  }
+};
+const speeds=[20,35,50], initial={model:'foil',baseline:'ridge',speed:35}, key='wt-helmet-tunnel-v1';
+const $=selector=>document.querySelector(selector);
+let state={...initial};
+try{const last=JSON.parse(localStorage.getItem(key))||{};for(const prop of ['model','baseline'])if(Object.hasOwn(models,last[prop]))state[prop]=last[prop];if(speeds.includes(last.speed))state.speed=last.speed}catch{}
+const html=(pieces,...values)=>pieces.reduce((out,part,i)=>out+part+(i<values.length?String(values[i]):''),'');
+const strapA='M108 144L126 147L181 229L205 243L199 253L172 237Z';
+const strapB='M314 160L327 160L285 206L208 250L198 246L272 199Z';
+const foam='M41 136Q81 139 134 147Q185 151 238 158Q291 169 320 162L374 133L376 144L345 169L312 178L297 187L270 188L233 175Q187 169 159 170L144 165L89 154L54 155Q40 154 41 136Z';
+function helmet(m){
+  const vents=m.vents.map(p=>html`<path d="${p}" transform="translate(0,2.1)" fill="none" stroke="#efefd3" stroke-width="2.6" opacity=".8"/><path d="${p}" fill="url(#ventpaint)" stroke="#405348" stroke-width="1.4" stroke-linejoin="round"/>`).join('');
+  return html`<g stroke-linejoin="round">
+    <path d="${strapA} ${strapB}" fill="#596653" stroke="#1a3025" stroke-width="1.8"/><path d="${strapA} ${strapB}" fill="url(#webbing)"/>
+    <path d="M115 150L178 232L199 246M317 166L279 204L206 245" fill="none" stroke="#aab198" stroke-width="1" opacity=".75"/>
+    <path d="M177 226l14 10-6 10-14-10zM198 242l12 3 1 7-8 7-12-6z" fill="#1b2e24" stroke="#8b9581" stroke-width="1.2"/>
+    <path d="m196 249 8 3M177 231l7 5" stroke="#bac1a5" fill="none" stroke-width="1.4"/>
+    <path d="M299 163l25-3 6 6-12 16-16 4-15-7z" fill="#415043" stroke="#202f26" stroke-width="2"/><ellipse cx="310" cy="177" rx="13" ry="8.5" transform="rotate(-22 310 177)" fill="#253c30" stroke="#909b83" stroke-width="1.4"/>
+    <path d="M303 181l-1-3 1-4m3 7-1-4 1-5m3 7v-4l2-4m1 6 1-4 2-3" fill="none" stroke="#9ba58b" stroke-width="1.1"/>
+    <path d="${foam}" fill="url(#foampaint)" stroke="#24382c" stroke-width="2.4"/><path d="${foam}" fill="url(#foamgrain)"/>
+    <path d="${m.outline}" fill="url(#shellpaint)" stroke="#253d2e" stroke-width="2.7"/>
+    <path d="${m.lower}" fill="url(#sidepaint)" stroke="#84947c" stroke-width="1.2"/>
+    <path d="${m.crease}" stroke="#fafbe1" opacity=".65" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+    ${vents}
+    <path d="M45 140Q93 147 142 155M159 161Q218 164 266 174" stroke="#f0f0d0" opacity=".55" stroke-width="1.5" fill="none"/>
+    <path d="m231 146 12-3m-8 5 14-3m-11 6 14-3" fill="none" stroke="#425e48" stroke-width="2" stroke-linecap="round"/></g>`;
+}
+function thumb(m){return html`<svg viewBox="18 17 425 203" class="card-shape" aria-hidden="true"><path d="${m.outline}" fill="currentColor"/>${m.vents.map(p=>html`<path d="${p}" fill="#edf2df"/>`).join('')}<path d="m109 147 69 91 20 11 81-46 35-38" fill="none" stroke="currentColor" stroke-width="8"/></svg>`;}
+const rig={x:80,y:12,scale:1.16};
+function headform(){
+  return `<g stroke-linecap="round" stroke-linejoin="round">
+  <path d="M170 236Q203 229 233 210L270 204L266 233Q280 245 302 250L321 261Q282 280 200 288L181 278L163 251Z" fill="#546e61" stroke="#3b574a" stroke-width="1.4"/>
+  <path d="M94 115Q132 84 185 86Q238 85 274 112Q298 133 302 158Q303 186 285 204Q266 220 239 232Q218 243 186 255Q164 263 145 256Q134 253 132 243L133 235Q122 233 122 227Q121 221 128 218Q118 216 121 210L121 204Q104 205 102 198Q101 195 105 189L116 176Q123 165 117 157L112 147Q102 141 94 135Z" fill="url(#headform)" stroke="#345347" stroke-width="1.65"/>
+  <path d="M117 163Q134 157 152 163Q142 168 130 170L118 170Z" fill="#5c7569"/><path d="M120 165Q134 162 143 164" fill="none" stroke="#a4b3a3" stroke-width="1.25"/>
+  <path d="M120 203l12-1m-6 15 12 2m-15 6 12-1M142 245q13 7 28 4" fill="none" stroke="#5e7869" stroke-width="1.4"/>
+  <path d="M178 254Q218 243 239 232Q262 219 278 202Q257 233 216 257L198 272Z" fill="#567368" opacity=".64"/>
+  <path d="M204 180Q204 171 214 169Q227 167 230 176Q232 187 226 196Q222 201 215 199Q209 196 209 190Z" fill="#789082" stroke="#577567" stroke-width="1.4"/><path d="M211 181Q215 171 223 176Q229 181 219 187l-2 6" fill="none" stroke="#586f60" stroke-width="1.6"/>
+  <path d="M212 289L271 270L295 279L279 310H217Z" fill="#3b574a" stroke="#78917a" stroke-width="1.4"/><path d="m222 292 38-12" fill="none" stroke="#a2af96" stroke-width="1.1"/>
+  </g>`;
+}
+function wakeShape(m,i){
+  const x=rig.x+m.outlet[0]*rig.scale,y=rig.y+m.outlet[1]*rig.scale;
+  const thickness=8+m.drag[i]*13,length=762-x;
+  const curve=(side,reverse=false)=>{
+    const p1=[x,y],p2=[x+length*.18,y+5+thickness*.4*side],p3=[x+length*.36,y+13+thickness*.96*side],p4=[x+length*.56,y+16+thickness*side],p5=[x+length*.72,y+20+thickness*.96*side],p6=[x+length*.88,y+23+thickness*.8*side],p7=[762,y+24+thickness*.68*side];
+    const pair=p=>p.map(n=>n.toFixed(1)).join(' ');
+    return reverse?'L'+pair(p7)+' C'+[p6,p5,p4].map(pair).join(' ')+' C'+[p3,p2,p1].map(pair).join(' '):'M'+pair(p1)+' C'+[p2,p3,p4].map(pair).join(' ')+' C'+[p5,p6,p7].map(pair).join(' ');
+  };
+  return {x,y,curve};
+}
+function wakeBand(model,base,i){
+  const current=wakeShape(model,i),ref=wakeShape(base,i);
+  const upper=current.curve(-1),lower=current.curve(1),baseEdges=ref.curve(-1)+' '+ref.curve(1);
+  const layers=[html`<defs><mask id="free-air" maskUnits="userSpaceOnUse" x="0" y="0" width="760" height="345"><rect width="760" height="345" fill="white"/><path d="${model.outline}" transform="translate(${rig.x} ${rig.y}) scale(${rig.scale})" fill="black"/></mask></defs><g mask="url(#free-air)"><path d="${upper} ${current.curve(1,true)}Z" fill="url(#wake-fade)"/>`];
+  for(const t of [-.55,-.22,.18,.5])layers.push(html`<path d="${current.curve(t)}" fill="none" stroke="url(#wake-edge)" stroke-width=".65" opacity=".47"/>`);
+  layers.push(html`<path d="${upper} ${lower}" stroke="url(#wake-edge)" stroke-width="2.15" fill="none" stroke-linecap="round"/>`);
+  layers.push(html`<path d="${baseEdges}" stroke="#efb580" stroke-width="1.35" stroke-dasharray="5 5" stroke-linecap="round" opacity=".88" fill="none"/></g>`);
+  return layers.join('');
+}
+function airPaths(m,speed){
+  const num=speed===20?12:speed===50?21:16;
+  const output=[];
+  for(let i=0;i<num;i++){
+    const start=30+(i/(num-1))*280;
+    const center=180;const top=start<center;
+    const separation=Math.sin(Math.PI*Math.min(1,Math.max(0,(start-18)/307)));
+    const spread=(top?-1:1)*separation*(top?62:47);
+    const wake=(m===models.foil?3:m===models.cell?10:7)*Math.sin(i*1.75);
+    output.push(html`<path d="M-20 ${start} C63 ${start-1} 110 ${start+spread*.18} 191 ${start+spread*.69} S325 ${start+spread} 419 ${start+spread*.79} S589 ${start+spread*.17+wake} 782 ${start+wake*.4}" fill="none" stroke="url(#flowcol)" opacity=".76" stroke-width="${i%5===2?1.1:.65}"/>`);
+  }
+  return output.join('');
+}
+$('#models').innerHTML=Object.entries(models).map(([id,m])=>html`<input class="radio" type="radio" name="model" id="model-${id}" value="${id}"><label class="model" for="model-${id}"><span class="card-id">${m.code}</span><b>${m.name}</b>${thumb(m)}<span class="card-cut">${m.cut}</span></label>`).join('');
+$('#speeds').innerHTML=speeds.map(s=>html`<input class="radio" type="radio" name="speed" id="speed-${s}" value="${s}"><label class="speed-choice" for="speed-${s}">${s} <small>km/h</small></label>`).join('');
+const measures=[
+ {id:'drag',label:'阻力',unit:'N',trend:'越低越省力',lower:'阻力降低',higher:'阻力增加',lowerIsBetter:true,places:2,max:3.6},
+ {id:'air',label:'通风量',unit:'L/s',trend:'越高通风越强',lower:'通风减弱',higher:'通风增强',lowerIsBetter:false,places:1,max:12}
+];
+function metric(measure,model,base,i){
+  const {id,label,unit,trend,places,max}=measure, current=model[id][i], reference=base[id][i],diff=Number((current-reference).toFixed(places));
+  const consequence=diff===0?'与基准持平':diff>0?measure.higher:measure.lower;
+  const delta=diff===0?'':Math.abs(diff).toFixed(places)+' '+unit;
+  const tone=diff===0?'':(diff<0)===measure.lowerIsBetter?'good':'cost';
+  return html`<section class="metric"><div class="metric-head"><h3>${label}</h3><span class="direction">${trend}</span></div>
+  <div class="value-row"><div class="reading" data-metric="${id}">${current.toFixed(places)}<span class="unit">${unit}</span></div><div class="delta ${tone}"><span class="benefit-arrow" aria-hidden="true">${diff===0?'=':diff>0?'↑':'↓'}</span><span>${consequence}</span><strong>${delta}</strong></div></div>
+  <div class="track" aria-hidden="true"><i class="fill" style="width:${current/max*100}%"></i><i class="tick" style="left:calc(${reference/max*100}% - 1px)"></i></div>
+  <div class="base-row">基准 · ${base.name}<strong>${reference.toFixed(places)} ${unit}</strong></div></section>`;
+}
+function refresh(){
+  const model=models[state.model],base=models[state.baseline],i=speeds.indexOf(state.speed);
+  $('#model-'+state.model).checked=true;$('#speed-'+state.speed).checked=true;
+  $('#code').textContent=model.code;$('#model-title').textContent=model.name;$('#art-speed').textContent=state.speed;
+  $('#specimen').setAttribute('transform','translate('+rig.x+' '+rig.y+') scale('+rig.scale+')');$('#specimen').innerHTML=headform()+helmet(model);$('#flow').innerHTML=airPaths(model,state.speed);
+  $('#wake').innerHTML=wakeBand(model,base,i);$('#wake-current').textContent=model.name;$('#wake-base').textContent='基准 '+base.name;
+  $('#main-art').setAttribute('aria-label',model.name+'头盔，'+model.cut+'。同一头模从左向右来流，风速 '+state.speed+' km/h。实线为当前尾流示意，虚线为固定基准'+base.name+'。');
+  for(const [id,item] of Object.entries(models)){const label=document.querySelector('label[for="model-'+id+'"]');label.classList.toggle('is-base',id===state.baseline);label.querySelector('.card-id').innerHTML=item.code+(id===state.baseline?'<span class="role-base">基准</span>':'')}
+  $('#metrics').innerHTML=measures.map(m=>metric(m,model,base,i)).join('');
+  $('#base-label').textContent=base.code+' '+base.name;
+  const same=state.baseline===state.model;$('#set-base span').textContent=same?'此方案已是基准':'将'+model.name+'设为基准';$('#set-base').disabled=same;$('#restore-base').disabled=state.baseline===initial.baseline;
+  $('#summary-key').innerHTML=html`读数顺序　<b>${model.name}</b> ／ 基准 ${base.name}`;
+  $('#matrix').innerHTML=speeds.map((speed,j)=>html`<tr class="${j===i?'active-row':''}"><th scope="row">${speed}${j===i?'<span class="sr"> 当前风速</span>':''}</th>${measures.map(({id,places})=>html`<td>${model[id][j].toFixed(places)}<span class="pair-sep">/</span><span class="pair-rest">${base[id][j].toFixed(places)}</span></td>`).join('')}</tr>`).join('');
+}
+function update(prop,value){
+  state[prop]=value;refresh();let saved=true;try{localStorage.setItem(key,JSON.stringify(state))}catch{saved=false}
+  const i=speeds.indexOf(state.speed),m=models[state.model];
+  $('#status').textContent=m.name+'，风速 '+state.speed+' km/h，阻力 '+m.drag[i].toFixed(2)+' N，通风量 '+m.air[i].toFixed(1)+' L/s。固定基准 '+models[state.baseline].name+'。'+(saved?'':'浏览器未能保存本次选择。');
+}
+document.addEventListener('change',event=>{if(event.target.name==='model')update('model',event.target.value);if(event.target.name==='speed')update('speed',Number(event.target.value))});
+$('#set-base').addEventListener('click',()=>{update('baseline',state.model);if(!$('#restore-base').disabled)$('#restore-base').focus();else $('#model-'+state.model).focus()});
+$('#restore-base').addEventListener('click',()=>{update('baseline',initial.baseline);if(!$('#set-base').disabled)$('#set-base').focus();else $('#model-'+state.model).focus()});
+refresh();
+</script>
+</body>
+</html>

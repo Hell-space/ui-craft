@@ -1,0 +1,171 @@
+<!--@title 叠印 · 扫描稿配准-->
+<!--@use 苹果风格的软件宣传页、修图、对位与处理效果演示。两张同坐标素材支持拖动对照与共同放大。-->
+<!--@sample 逐笔对齐。|放大叶缘|两份模拟扫描。-->
+<style>
+.product-page {
+  --page-edge: clamp(1.35rem, 6.2vw, 6rem);
+  --page-limit: 94rem;
+  --chapter-type: clamp(2.4rem, 4.8vw, 4.4rem);
+}
+.bound { width: min(100%, var(--page-limit)); margin-inline: auto; padding-inline: var(--page-edge); }
+.product-page a { color: inherit; text-decoration: none; }
+.product-page :is(a, label, input) { -webkit-tap-highlight-color: transparent; }
+.product-page .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.product-nav, .product-footer { display: flex; justify-content: space-between; align-items: center; gap: var(--s-4); }
+.product-nav { min-height: 4rem; border-bottom: 1px solid var(--border); }
+.product-brand { display: inline-flex; align-items: center; gap: var(--s-2); min-height: 44px; font-size: var(--fs-xl); line-height: 1; font-weight: 700; }
+.product-brand svg { width: 1.65rem; height: 1.65rem; }
+.product-links { display: flex; align-items: center; gap: clamp(1rem, 3.4vw, 3rem); }
+.product-links a, .return-link { display: inline-flex; align-items: center; gap: var(--s-2); min-height: 44px; font-size: var(--fs-sm); font-weight: 600; }
+.product-links a:hover, .return-link:hover { color: var(--accent-text); }
+.product-links svg, .hero-action svg, .return-link svg { width: 1rem; height: 1rem; }
+.product-hero { display: grid; grid-template-columns: minmax(0, .83fr) minmax(0, 1.38fr); align-items: center; min-height: clamp(32rem, 74svh, 48rem); }
+.hero-copy { position: relative; z-index: 1; padding-block: var(--s-7); }
+.hero-category { font-size: var(--fs-md); font-weight: 600; color: var(--accent-text); }
+.product-page .product-hero h1 { margin: var(--s-3) 0 var(--s-5); font-size: clamp(3.4rem, 5.65vw, 5.7rem); line-height: 1.16; letter-spacing: 0; font-weight: 700; }
+.product-hero h1 span { display: block; }
+.hero-intro { max-width: 20em; font-size: var(--fs-lg); line-height: 1.8; color: var(--text-muted); }
+.product-page .hero-action { margin-top: var(--s-6); display: inline-flex; align-items: center; gap: var(--s-3); min-height: 46px; padding: 0 var(--s-5); border-radius: 999px; background: var(--text); color: var(--bg); font-size: var(--fs-md); font-weight: 600; transition: background-color 180ms, transform 180ms; }
+.product-page .hero-action:hover { background: var(--text-muted); }
+.hero-action:active { transform: scale(.98); }
+.hero-visual { width: 114%; margin-left: -7%; pointer-events: none; overflow: clip; }
+.hero-visual img { width: 100%; height: auto; }
+/* 动效默认开启（不理会系统的减少动态效果） */
+  .hero-visual img { animation: product-settle 850ms var(--ease-out-expo) both; }
+  .scan-art { transition: transform 420ms var(--ease-out-expo); }
+  @keyframes product-settle { from { transform: translate(1%, 1%) scale(1.016); } to { transform: none; } }
+
+.product-story { color: var(--stage-ink); background: var(--stage); }
+.story-layout { padding-block: clamp(3.5rem, 6vw, 6rem) clamp(3rem, 5vw, 5rem); }
+.detail-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: var(--s-6); }
+.story-copy { grid-row: 1; grid-column: 1; }
+.product-page .story-copy h2 { color: var(--stage-ink); font-size: var(--chapter-type); line-height: 1.22; font-weight: 600; letter-spacing: 0; }
+.story-copy p { margin-top: var(--s-3); color: var(--stage-muted); font-size: var(--fs-md); line-height: 1.65; }
+.detail-choices { display: inline-flex; grid-row: 1; grid-column: 2; padding: 3px; gap: 1px; border: 1px solid color-mix(in srgb, var(--stage-ink) 29%, transparent); border-radius: 999px; }
+.detail-choices label { display: inline-flex; justify-content: center; align-items: center; padding: 0 var(--s-4); min-height: 44px; min-width: 4.5rem; border-radius: 999px; color: var(--stage-muted); font-size: var(--fs-sm); font-weight: 600; cursor: pointer; transition: color 170ms, background-color 170ms; }
+.detail-choices label:hover { color: var(--stage-ink); background: color-mix(in srgb, var(--stage-ink) 11%, transparent); }
+#view-whole:checked ~ .detail-choices label[for="view-whole"], #view-detail:checked ~ .detail-choices label[for="view-detail"] { color: var(--stage); background: var(--stage-ink); }
+#view-whole:focus-visible ~ .detail-choices label[for="view-whole"], #view-detail:focus-visible ~ .detail-choices label[for="view-detail"] { outline: 2px solid var(--stage-ink); outline-offset: 4px; }
+.compare-figure { grid-column: 1/-1; min-width: 0; width: min(100%, 64rem); justify-self: center; }
+.scan-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2) var(--s-4); margin-bottom: var(--s-2); }
+.scan-legend, .layer-choice { display: inline-flex; align-items: center; gap: var(--s-2); font-size: var(--fs-sm); color: var(--stage-ink); }
+.scan-legend::before, .layer-choice::after { content: ""; width: 1rem; height: 3px; background: #73adbb; }
+.layer-choice { min-height: 44px; cursor: pointer; }
+.layer-choice::after { background: #e59177; }
+.layer-choice:has(input:not(:checked))::after { opacity: .3; }
+.layer-choice input { width: 1rem; height: 1rem; accent-color: var(--stage-ink); }
+.layer-choice input:focus-visible { outline: 2px solid var(--stage-ink); outline-offset: 3px; }
+.compare-board { --compare-focus: var(--stage-ink); width: 100%; aspect-ratio: auto; overflow: visible; }
+.compare-board[data-compare-ready] { margin-bottom: 38px; }
+.compare-board[data-compare-ready]::before { content: ""; position: absolute; top: calc(100% + 19px); inset-inline: 0; height: 1px; background: color-mix(in srgb, var(--stage-ink) 40%, transparent); }
+.compare-board [data-compare-grip] { top: calc(100% + 2px); transform: translateX(-50%); height: 34px; border-radius: 999px; }
+.compare-board > input[type="range"] { height: calc(100% + 38px); }
+.plate-side { background: var(--stage); }
+.compare-board > [data-compare-after], .compare-board [data-compare-after] .scan-art { position: relative; inset: auto; height: auto; }
+.scan-art { position: absolute; inset: 0; transform-origin: 50% 50%; }
+.scan-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.scan-art .fixed-scan { position: static; height: auto; }
+.compare-figure:has(#moving-scan:not(:checked)) :is([data-compare-before], .with-moving-scan, [data-compare-grip], input[type="range"]),
+.compare-figure:has(#moving-scan:not(:checked)) .compare-board::before,
+.compare-figure:has(#moving-scan:not(:checked)) .compare-board::after { visibility: hidden; }
+/* 两种视口都将原稿上约 (63%, 30%) 的叶缘缺口移到画面中央。 */
+#view-detail:checked ~ .compare-figure .scan-art { transform: scale(2.4) translate(-13%, 20%); }
+.compare-board[data-compare-endpoint]::after { visibility: hidden; }
+.compare-ends { display: grid; grid-template-columns: max-content 1fr max-content; align-items: center; gap: var(--s-3); padding-block: var(--s-2); font-size: var(--fs-sm); color: var(--stage-muted); }
+.compare-ends .before { grid-column: 1; }
+.compare-ends .after { grid-column: 3; }
+.compare-ends .solo { display: none; grid-column: 1/-1; }
+.compare-ends span { grid-row: 1; }
+.compare-figure:has(#moving-scan:not(:checked)) .compare-ends > span { display: none; }
+.compare-figure:has(#moving-scan:not(:checked)) .compare-ends .solo { display: block; }
+.compare-board[data-compare-endpoint="before"] + .compare-ends .after,
+.compare-board[data-compare-endpoint="after"] + .compare-ends .before { visibility: hidden; }
+.compare-figure figcaption { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3) var(--s-5); padding-top: var(--s-4); color: var(--stage-muted); font-size: var(--fs-sm); line-height: 1.65; }
+.compare-figure figcaption strong { font-size: var(--fs-md); color: var(--stage-ink); font-weight: 600; }
+.product-footer { padding-block: var(--s-4); }
+.product-footer .product-brand { font-size: var(--fs-md); }
+@media (max-width: 56rem) {
+  .product-page { --page-edge: clamp(1.4rem,5vw,2.8rem); }
+  .product-hero { min-height: 31rem; grid-template-columns: minmax(0, .91fr) minmax(0, 1.27fr); }
+  .product-page .product-hero h1 { font-size: clamp(3.4rem, 6.5vw, 4.4rem); }
+  .hero-intro { font-size: var(--fs-md); }
+}
+@media (max-width: 42rem) {
+  .product-nav { min-height: 3.5rem; }
+  .product-links { gap: var(--s-4); }
+  .product-hero { grid-template-columns: minmax(0,1fr); min-height: 0; padding-top: clamp(2.8rem, 8svh, 4rem); padding-bottom: var(--s-3); }
+  .hero-copy { padding: 0; }
+  .product-page .product-hero h1 { margin: var(--s-2) 0 var(--s-4); font-size: clamp(3rem, 12.5vw, 4.6rem); }
+  .hero-intro { max-width: 22em; }
+  .product-page .hero-action { margin-top: var(--s-4); }
+  .hero-visual { width: calc(100% + 2 * var(--page-edge)); margin: 0 calc(-1 * var(--page-edge)); }
+  .story-layout { padding-block: var(--s-7) var(--s-6); }
+  .detail-picker { grid-template-columns: minmax(0,1fr); gap: var(--s-4); }
+  .story-copy p { max-width: 24em; }
+  .detail-choices { grid-column: 1; grid-row: 2; justify-self: start; }
+  .compare-figure figcaption { display: grid; gap: var(--s-1); padding-top: var(--s-3); }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-respect-reduced-motion] .detail-choices label, :root[data-respect-reduced-motion] .product-page .hero-action { transition: none; }
+  :root[data-respect-reduced-motion] .hero-action:active { transform: none; }
+
+  :root[data-respect-reduced-motion] .hero-visual img { animation: none; }
+  :root[data-respect-reduced-motion] .scan-art { transition: none; }
+}
+</style>
+<div class="product-page" id="top">
+  <header class="bound">
+    <nav class="product-nav" aria-label="产品导航">
+      <a class="product-brand" href="#top" aria-label="叠印首页">
+        <svg viewBox="0 0 28 28" aria-hidden="true" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="1.8"><path d="m3 11 12-6 10 5-12 6z"/><path d="m3 15 10 5 12-6" stroke="var(--accent-text)"/><path d="m3 19 10 5 12-6"/></svg><span>叠印</span>
+      </a>
+      <div class="product-links"><a href="#overview">概览</a><a href="#compare">配准演示 <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.5 5.5 14 15m-7 0h7v-7"/></svg></a></div>
+    </nav>
+  </header>
+  <main>
+    <section class="product-hero bound" id="overview" aria-labelledby="product-name">
+      <div class="hero-copy">
+        <p class="hero-category">本地扫描稿配准工具</p>
+        <h1 id="product-name"><span>两次扫描，</span><span>逐笔对齐。</span></h1>
+        <p class="hero-intro">同一张手稿，再扫一次也会错开。叠印在本地对齐两份扫描，让你看清每一笔。</p>
+        <a class="hero-action" href="#compare">比较两次扫描 <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M10 3v13m-5-5 5 5 5-5"/></svg></a>
+      </div>
+      <figure class="hero-visual"><img src="media/ginkgo-sheets.webp" width="1330" height="1030" fetchpriority="high" decoding="async" alt="两张半透明描图纸上印着同一片银杏叶，一张为青蓝色，另一张为朱红色。错开的叶尖和叶柄显出两层轮廓。"></figure>
+    </section>
+    <section class="product-story" id="compare" aria-labelledby="compare-title">
+      <div class="story-layout bound">
+        <div class="detail-picker" role="group" aria-labelledby="compare-title">
+          <div class="story-copy">
+            <h2 id="compare-title">配准前后。</h2>
+            <p>青蓝是固定稿，朱红是移动稿，两线重合处呈深褐色。</p>
+          </div>
+          <input class="sr-only" type="radio" id="view-whole" name="viewport" value="whole" checked>
+          <input class="sr-only" type="radio" id="view-detail" name="viewport" value="detail">
+          <div class="detail-choices"><label for="view-whole">全幅</label><label for="view-detail">放大叶缘</label></div>
+          <figure class="compare-figure">
+            <div class="scan-controls">
+              <span class="scan-legend">青蓝 · 固定稿</span>
+              <label class="layer-choice"><input type="checkbox" id="moving-scan" checked>叠加朱红稿</label>
+            </div>
+            <div class="compare-board" id="board" data-compare data-before-label="配准前" data-after-label="配准后">
+              <div class="plate-side" data-compare-after><div class="scan-art">
+                <img class="fixed-scan" src="media/registration-reference.webp" width="2000" height="1300" loading="lazy" decoding="async" alt="青蓝固定稿，叶柄端点和叶缘缺口提供对位参照。">
+                <img class="with-moving-scan" src="media/registration-after.webp" width="2000" height="1300" loading="lazy" decoding="async" alt="配准后，朱红和青蓝在叶缘缺口和叶柄端点重合，叠成深线。">
+              </div></div>
+              <div class="plate-side" data-compare-before><div class="scan-art">
+                <img src="media/registration-before.webp" width="2000" height="1300" loading="lazy" decoding="async" alt="配准前，朱红和青蓝的叶缘与叶柄各有两道错开的轮廓。">
+              </div></div>
+              <span data-compare-grip aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m8 8-4 4 4 4m8-8 4 4-4 4"/></svg></span>
+              <label for="curtain" class="sr-only">配准前后分界位置</label>
+              <input id="curtain" type="range" min="0" max="100" step="1" value="75" aria-describedby="slider-help">
+            </div>
+            <div class="compare-ends" aria-hidden="true"><span class="before">配准前</span><span class="solo">仅青蓝固定稿</span><span class="after">配准后</span></div>
+            <p id="slider-help" class="sr-only">使用左右方向键微调。按 Home 显示配准后，按 End 显示配准前。</p>
+            <figcaption><strong>银杏叶 · 原创线稿</strong><span>两份模拟扫描。固定第一份，校正第二份的位移和 2.75° 倾斜。</span></figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="product-footer bound"><span class="product-brand">叠印</span><a class="return-link" href="#top">回到顶部 <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 16V4m-5 5 5-5 5 5"/></svg></a></footer>
+</div>

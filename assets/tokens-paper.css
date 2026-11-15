@@ -1,0 +1,73 @@
+/* ==========================================================================
+   Design tokens · 纸墨语域（叠加在 tokens.css 之后）
+   --------------------------------------------------------------------------
+   Opus 5.5 认真做内容、品牌、消费类界面时的本色：暖纸底、暖墨字、一个从题材里
+   取的低彩强调色、细线、几乎没有阴影、衬线负责"声音"。
+   数值取自八个样本中六个纸墨样本的中位（见 references/opus-taste.md 第 4、6 节）。
+
+   用法：<link> tokens.css 之后再 <link> 本文件；然后必须做两件事——
+     1. 选强调色：它要对得上题材里的一件实物（见下方配方）。
+     2. 决定衬线的用量：只给标题与大数字，还是连正文也用（阅读型、中文品牌页）。
+   ========================================================================== */
+
+:root {
+  /* 纸、卡面、下沉面：靠明度差分层，不靠阴影 */
+  --bg:             light-dark(#F5F2EB, #171512);
+  --surface:        light-dark(#FFFDF8, #1E1B17);
+  --surface-raised: light-dark(#FFFEFB, #26221C);
+  --surface-sunken: light-dark(#EEEAE0, #12100D);
+
+  /* 两档线。再加一档"墨线"：1px 实墨色，表示一个栏目从这里开始 */
+  --border:         light-dark(#E4DED3, #312C25);
+  --border-strong:  light-dark(#D2C9B9, #463F35);
+  --border-control: light-dark(#928A7B, #7F7667);
+  --rule-ink:       var(--text);
+
+  /* 三级墨 + 一档只给非必要信息的淡墨 */
+  --text:           light-dark(#1E1B17, #ECE5D8);
+  --text-muted:     light-dark(#524C44, #B8AE9C);
+  --text-subtle:    light-dark(#6E675B, #988F7F);
+  --text-faint:     light-dark(#A69E90, #6C6457);
+
+  /* 强调色配方（浅 / 暗 / 浅底 / 暗底）——全部来自样本，选一个对得上题材的，或按同样的
+     明度彩度自己取：浅色 L 0.41–0.56、C 0.06–0.14；暗色提亮到 L 0.71–0.77。
+       烘焙铜    #9A4A22 / #D98A5E / #F3E6DC / #3A2619     陶瓷、木柄、焙火
+       丹岩锈红  #9E4A2F / #DC8B6C / #EAD3C3 / #3B241B     岩壁、红土
+       茶汤琥珀  #9A5B1E / #D49A57 / #F2E6D2 / #382A17     茶汤、蜂蜜、黄铜
+       洋红      #873F61 / #E394B5 / #F3E5EB / #35232D     花瓣、布墨
+       钴蓝      #345498 / #95B8FA / #E5EBF8 / #242D44     标注、档案
+       深海蓝    #1D5266 / #86BFD1 / #DCE8EC / #18292F     海、仪器、期刊
+     默认不设，沿用 tokens.css 里的墨色主按钮。 */
+
+  /* 字体：衬线负责声音（标题、引文、大数字），无衬线负责功能，等宽负责元数据 */
+  --font-display: var(--font-serif);
+
+  /* 圆角更小。印刷感最强时整套用 2px */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+
+  /* 卡片不投影；浮层的投影带暖色相 */
+  --shadow-tint:   light-dark(rgb(42 29 13 / 0.05), rgb(0 0 0 / 0.35));
+  --shadow-tint-2: light-dark(rgb(42 29 13 / 0.14), rgb(0 0 0 / 0.50));
+  --shadow-tint-3: light-dark(rgb(42 29 13 / 0.20), rgb(0 0 0 / 0.65));
+  --shadow-ring:   light-dark(rgb(42 29 13 / 0.08), rgb(255 255 255 / 0.10));
+  --shadow-1: none;
+
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* 衬线标题：字重 400–500 就够，大字收紧（中文不收） */
+h1, h2 { font-weight: 450; }
+:lang(zh) :is(h1, h2) { font-weight: 600; letter-spacing: 0.04em; }
+
+/* 可选：纸面噪点。透明度很低，肉眼只能感到"纸"而看不出颗粒。
+   做成 body 自己的背景图（随页面滚动，浏览器只解码一次），不要做成全屏固定的覆盖层再加 mix-blend-mode——
+   那样滚动时每一帧都要把整屏重新混合一遍，是最常见的掉帧原因。
+body {
+  background-image: linear-gradient(rgb(255 255 255 / .55), rgb(255 255 255 / .55)), url("data:image/png;base64,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");
+  background-size: auto, 72px 72px;
+}
+*/

@@ -1,0 +1,173 @@
+<!--@title Orbit T1 · rille.-->
+<!--@use 产品宣传官网、工业设计或软件功能展示。整机主视觉、原生滚动拆解、可切换特写与规格。-->
+<!--@sample Orbit T1|移开转盘|椭圆唱针沿声槽运动-->
+<style>
+.product-page { --page-edge: clamp(1.35rem, 6vw, 6.5rem); --page-limit: 96rem; --chapter-type: clamp(2.45rem, 4.65vw, 4.9rem); }
+.product-page .bound { width: min(100%, var(--page-limit)); margin-inline: auto; padding-inline: var(--page-edge); }
+.product-page a { color: inherit; text-decoration: none; }
+.product-page :is(a, label) { -webkit-tap-highlight-color: transparent; }
+.product-page h2 { font-size: var(--chapter-type); line-height: 1.18; letter-spacing: 0; font-weight: 600; }
+.product-page .chap { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; font: 500 .75rem/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .14em; color: var(--accent-text); }
+.product-page .chap::after { content: ""; width: 2.5rem; height: 1px; background: currentColor; opacity: .6; }
+.product-story .chap { color: var(--stage-muted, currentColor); }
+/* 首屏下的三个关键数字：细线分栏，数字用 display 字体 */
+.hero-facts { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; margin-top: var(--s-6); border-top: 1px solid var(--text); }
+.hero-facts > div { padding: .8rem 1.75rem 0 0; }
+.hero-facts > div + div { padding-left: 1.25rem; border-left: 1px solid var(--border); }
+.hero-facts dt { font-size: .75rem; color: var(--text-subtle); }
+.hero-facts dd { margin: .3rem 0 0; font: 600 1.375rem/1.1 var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: -.01em; white-space: nowrap; }
+.hero-facts dd small { font: 400 .75rem var(--font-body); color: var(--text-muted); margin-left: .2rem; }
+.product-page .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.product-nav { min-height: 4.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); gap: var(--s-5); }
+.product-brand { display: inline-flex; align-items: center; min-height: 44px; font: 700 var(--fs-2xl)/1 var(--font-display); letter-spacing: -.085em; }
+.product-links { display: flex; align-items: center; gap: clamp(1rem, 3vw, 2.5rem); }
+.product-links a, .return-link { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--fs-sm); }
+.product-links a:hover, .return-link:hover { color: var(--accent-text); }
+.product-hero { min-height: clamp(33rem, calc(100svh - 4.25rem), 58rem); display: grid; grid-template-columns: minmax(0, .94fr) minmax(0, 1.63fr); align-items: center; }
+.hero-copy { z-index: 1; padding-block: var(--s-7); }
+.hero-category { font-size: var(--fs-md); font-weight: 600; color: var(--text-muted); }
+.product-hero h1 { margin: var(--s-3) 0 var(--s-5); font-size: clamp(4.6rem, 7.7vw, 8.2rem); line-height: 1; font-weight: var(--display-weight); }
+.product-page .product-hero h1:lang(en) { letter-spacing: var(--display-tracking); }
+.hero-intro { max-width: 20em; font-size: clamp(1.06rem, 1.38vw, 1.38rem); line-height: 1.72; color: var(--text-muted); text-wrap: pretty; }
+.product-page .hero-action { margin-top: var(--s-6); display: inline-flex; align-items: center; gap: var(--s-3); min-height: 46px; padding: 0 var(--s-5); border-radius: 999px; background: var(--text); color: var(--bg); font-size: var(--fs-md); font-weight: 600; transition: background-color 180ms, transform 180ms; }
+.product-page .hero-action:hover { background: var(--text-muted); }
+.hero-action:active { transform: scale(.98); }
+.hero-action svg { width: 16px; height: 16px; }
+.hero-visual { width: 113%; margin-left: -5%; pointer-events: none; overflow: clip; }
+.hero-visual img { width: 100%; height: auto; }
+/* 动效默认开启（不理会系统的减少动态效果） */
+  .hero-visual img { animation: product-settle 850ms var(--ease-out-expo) both; }
+  @keyframes product-settle { from { transform: translate(1.25%, 1%) scale(1.03); } to { transform: none; } }
+
+
+.product-story { color: var(--stage-ink); background: var(--stage); --scene-travel: 95svh; }
+.story-frame { display: grid; align-items: center; }
+.story-layout { display: grid; grid-template-columns: minmax(0, .76fr) minmax(0, 1.35fr); align-items: center; gap: clamp(1.5rem, 4vw, 4.5rem); padding-block: clamp(2.5rem, 6svh, 6rem); }
+.story-copy p { margin-top: var(--s-5); max-width: 18em; color: var(--stage-muted); line-height: 1.75; font-size: var(--fs-lg); }
+.exploded-view { position: relative; aspect-ratio: 1.31; line-height: 1; }
+.exploded-view .plate { position: absolute; inset-inline: 0; bottom: 0; aspect-ratio: 1240 / 760; }
+.plate img { display: block; width: 100%; height: 100%; }
+.plate-base { transform: translateY(calc(var(--scene-progress) * 11%)); }
+.plate-middle { --lift: clamp(0, calc((var(--scene-progress) - .30) * 1.7), 1); transform: translateY(calc(var(--lift) * -17%)); }
+.plate-top { --lift: clamp(0, calc((var(--scene-progress) - .04) * 1.6), 1); transform: translateY(calc(var(--lift) * -46%)); }
+.plate-label { position: absolute; left: 65%; top: 43%; display: flex; align-items: center; gap: var(--s-2); white-space: nowrap; color: var(--stage-ink); font-size: var(--fs-sm); opacity: clamp(0, calc((var(--scene-progress) - .68) * 4), 1); }
+.plate-label::before { content: ""; width: clamp(1rem, 3vw, 3.5rem); height: 1px; background: var(--stage-muted); }
+.plate-middle .plate-label { top: 48%; }
+
+.product-detail { padding-block: clamp(4rem, 9vw, 9rem); }
+.detail-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; column-gap: var(--s-5); row-gap: var(--s-6); }
+.detail-picker h2 { grid-column: 1; grid-row: 1; }
+.detail-choices { grid-column: 2; grid-row: 1; display: inline-flex; padding: 3px; border: 1px solid var(--border-strong); border-radius: 999px; gap: 2px; }
+.detail-choices label { display: inline-flex; align-items: center; justify-content: center; min-width: 5rem; min-height: 44px; border-radius: 999px; padding: 0 var(--s-4); cursor: pointer; font-size: var(--fs-md); color: var(--text-muted); transition: color 180ms, background-color 180ms; }
+.detail-choices label:hover { background: var(--surface-sunken); color: var(--text); }
+#view-stylus:checked ~ .detail-choices [for="view-stylus"], #view-balance:checked ~ .detail-choices [for="view-balance"] { background: var(--text); color: var(--bg); }
+#view-stylus:focus-visible ~ .detail-choices [for="view-stylus"], #view-balance:focus-visible ~ .detail-choices [for="view-balance"] { outline: 2px solid var(--accent); outline-offset: 3px; }
+.detail-views { display: grid; grid-column: 1/-1; }
+.detail-view { grid-area: 1/1; visibility: hidden; opacity: 0; transition: opacity 360ms var(--ease-out-expo), visibility 0s 360ms; }
+.detail-view img { width: 100%; height: auto; aspect-ratio: 2.15; object-fit: cover; border-radius: var(--r-lg); }
+.detail-view figcaption { margin-top: var(--s-4); font-size: var(--fs-md); color: var(--text-muted); }
+#view-stylus:checked ~ .detail-views .stylus-view, #view-balance:checked ~ .detail-views .balance-view { visibility: visible; opacity: 1; transition-delay: 0s; }
+.product-specs { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.3fr); align-items: start; gap: var(--s-7); border-top: 1px solid var(--border-strong); padding-block: clamp(3.5rem, 7vw, 7rem); }
+.spec-list > div { display: grid; grid-template-columns: minmax(6.5rem, .65fr) minmax(0, 1fr); padding-block: var(--s-4); border-bottom: 1px solid var(--border); gap: var(--s-4); }
+.spec-list > div:first-child { padding-top: 0; }
+.spec-list dt { color: var(--text-subtle); font: 500 .8125rem/1.8 var(--font-mono, ui-monospace, monospace); letter-spacing: .04em; }
+.spec-list dd { font: 600 1.125rem/1.5 var(--font-display); font-variant-numeric: tabular-nums; }
+.spec-list dd small { display: block; font: 400 .8125rem/1.6 var(--font-body); color: var(--text-muted); }
+.product-footer { display: flex; justify-content: space-between; align-items: center; padding-block: var(--s-4); border-top: 1px solid var(--border); }
+@media (max-width: 52rem) {
+  .product-page { --page-edge: clamp(1.4rem, 5vw, 2.75rem); }
+  .product-hero { grid-template-columns: minmax(0, .94fr) minmax(0, 1.1fr); min-height: 32rem; }
+  .product-hero h1 { font-size: clamp(4rem, 9vw, 6rem); }
+  .hero-visual { width: 116%; margin-left: -6%; }
+  .story-layout { gap: var(--s-4); }
+}
+@media (max-width: 42rem), (max-width: 52rem) and (orientation: portrait) {
+  .product-nav { min-height: 3.75rem; gap: var(--s-4); }
+  .product-links { gap: var(--s-4); }
+  .product-links a { font-size: var(--fs-sm); }
+  .product-hero { min-height: auto; grid-template-columns: minmax(0, 1fr); gap: 0; padding-block: clamp(2.5rem, 7svh, 4rem) 1.5rem; }
+  .hero-copy { padding-block: 0; }
+  .product-hero h1 { font-size: clamp(4rem, 16vw, 6rem); margin: var(--s-2) 0 var(--s-3); }
+  .hero-intro { max-width: 20em; font-size: var(--fs-md); }
+  .product-page .hero-action { margin-top: var(--s-4); padding-inline: var(--s-4); }
+  .hero-visual { width: calc(100% + 2 * var(--page-edge)); margin: 0 calc(-1 * var(--page-edge)); }
+  .story-frame { align-items: start; }
+  .story-layout { grid-template-columns: minmax(0, 1fr); gap: var(--s-4); padding-block: clamp(3rem, 10svh, 6rem) var(--s-7); }
+  .story-copy p { font-size: var(--fs-md); max-width: 27em; margin-top: var(--s-3); }
+  .exploded-view { width: min(100%, 36rem); justify-self: center; }
+  .plate-label { gap: var(--s-1); font-size: var(--fs-xs); }
+  .detail-picker { grid-template-columns: 1fr; row-gap: var(--s-5); }
+  .detail-choices { grid-column: 1; grid-row: 2; justify-self: start; }
+  .detail-view img { aspect-ratio: 1.2; }
+  .stylus-view img { object-position: 68% 55%; }
+  .balance-view img { object-position: 53% center; }
+  .product-specs { grid-template-columns: 1fr; gap: var(--s-6); }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-respect-reduced-motion] .detail-view, :root[data-respect-reduced-motion] .detail-choices label, :root[data-respect-reduced-motion] .product-page .hero-action { transition: none; }
+  :root[data-respect-reduced-motion] .hero-action:active { transform: none; }
+
+  :root[data-respect-reduced-motion] .hero-visual img { animation: none; }
+}
+</style>
+<div class="product-page" id="top">
+  <header class="bound">
+    <nav class="product-nav" aria-label="产品导航">
+      <a class="product-brand" href="#top" lang="en" aria-label="rille. 产品首页">rille.</a>
+      <div class="product-links"><a href="#structure">转盘结构</a><a href="#details">唱臂细节</a><a href="#specs">技术规格</a></div>
+    </nav>
+  </header>
+  <main>
+    <section class="product-hero bound" aria-labelledby="product-name">
+      <div class="hero-copy">
+        <p class="chap">手动直驱黑胶唱机</p>
+        <h1 id="product-name" lang="en">Orbit T1</h1>
+        <p class="hero-intro">一体式铝合金底座，<br>搭配可调配重的直唱臂。</p>
+        <dl class="hero-facts"><div><dt>驱动</dt><dd>直驱</dd></div><div><dt>抖晃率</dt><dd>0.03<small>%</small></dd></div><div><dt>整机</dt><dd>9.6<small>kg</small></dd></div></dl>
+        <a class="hero-action" href="#structure">探索结构 <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3v13m-5-5 5 5 5-5"/></svg></a>
+      </div>
+      <figure class="hero-visual"><img src="media/whole.webp" width="1680" height="1070" fetchpriority="high" alt="Orbit T1 银色唱机的四分之三视图。直唱臂横跨黑胶唱片，唱片中央是朱红色纸标。"></figure>
+    </section>
+    <section class="product-story" id="structure" data-scroll-scene aria-labelledby="structure-title">
+      <div class="story-frame" data-scene-pin>
+        <div class="story-layout bound">
+          <div class="story-copy">
+            <p class="chap">01 · 结构</p>
+            <h2 id="structure-title">转盘之下。</h2>
+            <p>铝制转盘承托唱片。移开转盘，就能看见从底座中央传递动力的直驱主轴。</p>
+          </div>
+          <figure class="exploded-view" role="img" aria-label="同轴拆解图，从上到下依次为黑胶唱片、铝制转盘、带中央驱动主轴的底座。">
+            <div class="plate plate-base"><img src="media/deck.webp" width="1240" height="760" loading="lazy" decoding="async" alt=""></div>
+            <div class="plate plate-middle"><img src="media/platter.webp" width="1240" height="760" loading="lazy" decoding="async" alt=""><span class="plate-label" aria-hidden="true">铝制转盘</span></div>
+            <div class="plate plate-top"><img src="media/record.webp" width="1240" height="760" loading="lazy" decoding="async" alt=""><span class="plate-label" aria-hidden="true">黑胶唱片</span></div>
+          </figure>
+        </div>
+      </div>
+    </section>
+    <section class="product-detail bound" id="details" aria-labelledby="detail-title">
+      <div class="detail-picker" role="group" aria-labelledby="detail-title">
+        <h2 id="detail-title"><span class="chap">02 · 细节</span>唱臂的两端。</h2>
+        <input class="sr-only" type="radio" id="view-stylus" name="arm-view" checked>
+        <input class="sr-only" type="radio" id="view-balance" name="arm-view">
+        <div class="detail-choices"><label for="view-stylus">唱头</label><label for="view-balance">配重</label></div>
+        <div class="detail-views">
+          <figure class="detail-view stylus-view"><img src="media/stylus.webp" width="1500" height="900" loading="lazy" decoding="async" alt="朱红色唱针组件的特写，针尖落在唱片外缘的声槽上。"><figcaption>椭圆唱针沿声槽运动，动磁唱头把细小的振动转为电信号。</figcaption></figure>
+          <figure class="detail-view balance-view"><img src="media/balance.webp" width="1500" height="900" loading="lazy" decoding="async" alt="唱臂尾端的圆柱配重、针压刻度环与轴承。"><figcaption>旋转尾端配重，先让唱臂平衡，再按唱头要求设定针压。</figcaption></figure>
+        </div>
+      </div>
+    </section>
+    <div class="bound">
+      <section class="product-specs" id="specs" aria-labelledby="spec-title">
+        <h2 id="spec-title"><span class="chap">03 · 规格</span>技术规格</h2>
+        <dl class="spec-list">
+          <div><dt>驱动方式</dt><dd>直驱，手动落针<small>电机就在转盘正下方，没有皮带</small></dd></div>
+          <div><dt>转速</dt><dd>33⅓ / 45 rpm<small>抖晃率 0.03% WRMS</small></dd></div>
+          <div><dt>机身</dt><dd>阳极氧化铝合金<small>一体铣削，9.6 kg</small></dd></div>
+          <div><dt>唱臂与唱头</dt><dd>直唱臂，动磁唱头<small>有效长度 230 mm，针压 1.5–2.5 g</small></dd></div>
+          <div><dt>尺寸</dt><dd>450 × 350 × 125 mm<small>盖上防尘罩高 168 mm</small></dd></div>
+        </dl>
+      </section>
+      <footer class="product-footer"><span class="product-brand" lang="en">rille.</span><a class="return-link" href="#top">回到顶部 ↑</a></footer>
+    </div>
+  </main>
+</div>

@@ -1,0 +1,1054 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LED-482 · Ledgerline Issues</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* ---------- Tokens ---------- */
+:root {
+  color-scheme: light;
+  --font-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, Menlo, monospace;
+
+  --canvas:   oklch(0.972 0.004 85);   /* sidebar + app chrome */
+  --surface:  oklch(0.995 0.002 85);   /* list + detail */
+  --raised:   oklch(1 0 0);            /* menus, cards */
+  --hover:    oklch(0.955 0.005 85);
+  --press:    oklch(0.93 0.006 85);
+  --line:     oklch(0.912 0.006 85);
+  --line-2:   oklch(0.86 0.008 85);
+
+  --text:     oklch(0.235 0.012 265);
+  --text-2:   oklch(0.45 0.012 265);
+  --text-3:   oklch(0.6 0.01 265);
+
+  --accent:      oklch(0.53 0.16 264);
+  --accent-text: oklch(0.47 0.16 264);
+  --accent-soft: oklch(0.955 0.022 264);
+  --sel:         oklch(0.952 0.02 264);
+  --sel-hover:   oklch(0.935 0.028 264);
+  --focus:       oklch(0.6 0.17 264);
+
+  --st-todo:     oklch(0.6 0.01 265);
+  --st-progress: oklch(0.72 0.15 72);
+  --st-review:   oklch(0.58 0.14 295);
+  --st-done:     oklch(0.6 0.13 155);
+  --st-canceled: oklch(0.66 0.01 265);
+  --urgent:      oklch(0.61 0.19 32);
+
+  --label-l: 0.64; --label-c: 0.15;
+  --av-l: 0.86; --av-c: 0.06; --av-text: oklch(0.3 0.04 265);
+
+  --code-bg: oklch(0.962 0.005 85);
+  --shadow-pop: 0 1px 2px oklch(0.2 0.02 265 / 0.06), 0 8px 24px -4px oklch(0.2 0.02 265 / 0.14);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --canvas:   oklch(0.165 0.006 265);
+    --surface:  oklch(0.19 0.007 265);
+    --raised:   oklch(0.235 0.008 265);
+    --hover:    oklch(0.225 0.008 265);
+    --press:    oklch(0.25 0.009 265);
+    --line:     oklch(0.262 0.008 265);
+    --line-2:   oklch(0.33 0.01 265);
+    --text:     oklch(0.93 0.006 265);
+    --text-2:   oklch(0.74 0.01 265);
+    --text-3:   oklch(0.57 0.012 265);
+    --accent:      oklch(0.68 0.14 264);
+    --accent-text: oklch(0.76 0.12 264);
+    --accent-soft: oklch(0.27 0.045 264);
+    --sel:         oklch(0.245 0.03 264);
+    --sel-hover:   oklch(0.265 0.036 264);
+    --focus:       oklch(0.7 0.14 264);
+    --st-todo:     oklch(0.6 0.012 265);
+    --st-progress: oklch(0.78 0.14 75);
+    --st-review:   oklch(0.7 0.13 295);
+    --st-done:     oklch(0.7 0.13 155);
+    --st-canceled: oklch(0.55 0.01 265);
+    --urgent:      oklch(0.68 0.17 35);
+    --label-l: 0.7; --label-c: 0.13;
+    --av-l: 0.4; --av-c: 0.07; --av-text: oklch(0.94 0.01 265);
+    --code-bg: oklch(0.165 0.006 265);
+    --shadow-pop: 0 0 0 1px oklch(0.32 0.01 265), 0 12px 32px -6px oklch(0 0 0 / 0.55);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas:   oklch(0.165 0.006 265);
+  --surface:  oklch(0.19 0.007 265);
+  --raised:   oklch(0.235 0.008 265);
+  --hover:    oklch(0.225 0.008 265);
+  --press:    oklch(0.25 0.009 265);
+  --line:     oklch(0.262 0.008 265);
+  --line-2:   oklch(0.33 0.01 265);
+  --text:     oklch(0.93 0.006 265);
+  --text-2:   oklch(0.74 0.01 265);
+  --text-3:   oklch(0.57 0.012 265);
+  --accent:      oklch(0.68 0.14 264);
+  --accent-text: oklch(0.76 0.12 264);
+  --accent-soft: oklch(0.27 0.045 264);
+  --sel:         oklch(0.245 0.03 264);
+  --sel-hover:   oklch(0.265 0.036 264);
+  --focus:       oklch(0.7 0.14 264);
+  --st-todo:     oklch(0.6 0.012 265);
+  --st-progress: oklch(0.78 0.14 75);
+  --st-review:   oklch(0.7 0.13 295);
+  --st-done:     oklch(0.7 0.13 155);
+  --st-canceled: oklch(0.55 0.01 265);
+  --urgent:      oklch(0.68 0.17 35);
+  --label-l: 0.7; --label-c: 0.13;
+  --av-l: 0.4; --av-c: 0.07; --av-text: oklch(0.94 0.01 265);
+  --code-bg: oklch(0.165 0.006 265);
+  --shadow-pop: 0 0 0 1px oklch(0.32 0.01 265), 0 12px 32px -6px oklch(0 0 0 / 0.55);
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 20px;
+  font-feature-settings: "tnum" 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+input, textarea { font: inherit; color: inherit; }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+::selection { background: color-mix(in oklch, var(--accent) 28%, transparent); }
+.mono { font-family: var(--font-mono); font-size: 12px; letter-spacing: -0.01em; }
+.num { font-variant-numeric: tabular-nums; }
+kbd {
+  font-family: var(--font-mono); font-size: 11px; line-height: 16px;
+  min-width: 18px; padding: 0 4px; display: inline-block; text-align: center;
+  color: var(--text-2); background: var(--surface);
+  border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: 4px;
+}
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- Shell ---------- */
+.app {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 228px minmax(440px, 5fr) minmax(500px, 6fr);
+  min-width: 1168px;
+}
+
+/* ---------- Sidebar ---------- */
+.side { display: flex; flex-direction: column; padding: 10px 8px 8px; min-height: 0; }
+.ws {
+  display: flex; align-items: center; gap: 8px;
+  height: 32px; padding: 0 8px; border-radius: 6px;
+  font-weight: 600; letter-spacing: -0.005em;
+}
+.ws-mark { width: 20px; height: 20px; flex: none; }
+.side-actions { display: flex; gap: 6px; margin: 10px 0 14px; }
+.btn-new {
+  flex: 1; display: flex; align-items: center; gap: 8px;
+  height: 30px; padding: 0 8px 0 10px; border-radius: 6px;
+  background: var(--surface); border: 1px solid var(--line-2);
+  box-shadow: 0 1px 0 oklch(0.2 0.02 265 / 0.04);
+  font-weight: 500;
+}
+.btn-new:hover { background: var(--raised); border-color: color-mix(in oklch, var(--line-2), var(--text) 12%); }
+.btn-new:active { background: var(--hover); }
+.btn-new kbd { margin-left: auto; }
+.nav { display: flex; flex-direction: column; gap: 1px; }
+.nav-h { font-size: 12px; color: var(--text-3); padding: 0 8px; margin: 18px 0 4px; display: flex; align-items: center; gap: 6px; }
+.nav-h .team-dot { width: 8px; height: 8px; border-radius: 2px; background: oklch(0.65 0.13 155); }
+.nav-i {
+  display: flex; align-items: center; gap: 10px;
+  height: 28px; padding: 0 8px; border-radius: 6px;
+  color: var(--text-2); text-align: left; width: 100%;
+}
+.nav-i svg { flex: none; color: var(--text-3); }
+.nav-i:hover { background: var(--hover); color: var(--text); }
+.nav-i[aria-current="page"] { background: var(--press); color: var(--text); font-weight: 500; }
+.nav-i[aria-current="page"] svg { color: var(--text-2); }
+.nav-i .count { margin-left: auto; font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; font-weight: 400; }
+.proj { display: flex; align-items: center; gap: 10px; height: 28px; padding: 0 8px; color: var(--text-2); }
+.proj .pct { margin-left: auto; font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.side-foot { margin-top: auto; display: flex; align-items: center; gap: 8px; padding: 6px 4px 0 8px; border-top: 1px solid var(--line); padding-top: 10px; }
+.side-foot .who { line-height: 16px; min-width: 0; }
+.side-foot .who b { display: block; font-weight: 500; }
+.side-foot .who span { font-size: 12px; color: var(--text-3); }
+.icon-btn {
+  width: 28px; height: 28px; border-radius: 6px; display: grid; place-items: center; color: var(--text-3); flex: none;
+}
+.icon-btn:hover { background: var(--hover); color: var(--text); }
+.icon-btn:active { background: var(--press); }
+.icon-btn[disabled] { opacity: .35; pointer-events: none; }
+#themeBtn { margin-left: auto; }
+
+/* ---------- Panes ---------- */
+.pane { background: var(--surface); min-height: 0; display: flex; flex-direction: column; }
+.list-pane { border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+.bar {
+  height: 48px; flex: none; display: flex; align-items: center; gap: 12px;
+  padding: 0 12px 0 20px; border-bottom: 1px solid var(--line);
+}
+.bar h1 { font-size: 14px; line-height: 20px; font-weight: 600; margin: 0; letter-spacing: -0.005em; white-space: nowrap; }
+.bar .meta { color: var(--text-3); font-size: 12px; white-space: nowrap; }
+.search {
+  margin-left: auto; position: relative; display: flex; align-items: center;
+}
+.search svg { position: absolute; left: 8px; color: var(--text-3); pointer-events: none; }
+.search input {
+  width: 188px; height: 28px; padding: 0 30px 0 28px;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--canvas);
+  font-size: 13px; transition: width .18s ease, border-color .12s, background .12s;
+}
+.search input::placeholder { color: var(--text-3); }
+.search input:hover { border-color: var(--line-2); }
+.search input:focus { width: 240px; border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px var(--accent-soft); }
+.search kbd { position: absolute; right: 6px; pointer-events: none; }
+.search input:focus ~ kbd, .search input:not(:placeholder-shown) ~ kbd { display: none; }
+
+/* ---------- Issue list ---------- */
+.list { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 24px; scrollbar-gutter: stable; }
+.list:focus-visible { outline: none; }
+.group-h {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  height: 34px; padding: 0 20px; text-align: left;
+  background: color-mix(in oklch, var(--surface) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--line);
+  font-weight: 500; color: var(--text);
+}
+.group-h:hover { background: var(--hover); }
+.group-h .n { color: var(--text-3); font-weight: 400; font-variant-numeric: tabular-nums; }
+.group-h .chev { margin-left: auto; color: var(--text-3); transition: transform .15s ease; }
+.group-h[aria-expanded="false"] .chev { transform: rotate(-90deg); }
+.group-h:focus-visible { outline-offset: -2px; border-radius: 0; }
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 16px 60px 16px minmax(0, 1fr) auto 20px 42px;
+  align-items: center; column-gap: 10px;
+  height: 38px; padding: 0 16px 0 20px;
+  border-bottom: 1px solid color-mix(in oklch, var(--line) 55%, transparent);
+  cursor: default; user-select: none;
+}
+.row:hover { background: var(--hover); }
+.row[aria-selected="true"] { background: var(--sel); }
+.row[aria-selected="true"]:hover { background: var(--sel-hover); }
+.row[aria-selected="true"]::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--accent);
+}
+.row:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: 0; }
+.row .id { color: var(--text-3); }
+.row .t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+.row.is-done .t { color: var(--text-2); }
+.row.is-canceled .t { color: var(--text-3); text-decoration: line-through; text-decoration-color: color-mix(in oklch, var(--text-3) 60%, transparent); }
+.row .tags { display: flex; gap: 4px; align-items: center; justify-content: flex-end; min-width: 0; }
+.row .when { font-size: 12px; color: var(--text-3); text-align: right; font-variant-numeric: tabular-nums; }
+.row .sub { font-size: 11px; color: var(--text-3); display: inline-flex; align-items: center; gap: 3px; font-variant-numeric: tabular-nums; }
+.row mark { background: color-mix(in oklch, var(--st-progress) 30%, transparent); color: inherit; border-radius: 2px; }
+.empty { padding: 56px 24px; text-align: center; color: var(--text-3); }
+.empty b { display: block; color: var(--text-2); font-weight: 500; margin-bottom: 2px; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 20px; padding: 0 7px 0 6px; border-radius: 10px;
+  border: 1px solid var(--line); font-size: 12px; color: var(--text-2); white-space: nowrap;
+}
+.chip i { width: 7px; height: 7px; border-radius: 50%; background: oklch(var(--label-l) var(--label-c) var(--h)); flex: none; }
+
+.av {
+  width: 20px; height: 20px; border-radius: 50%; flex: none;
+  display: inline-grid; place-items: center;
+  background: oklch(var(--av-l) var(--av-c) var(--h));
+  color: var(--av-text); font-size: 9px; font-weight: 600; letter-spacing: 0.02em;
+}
+.av.lg { width: 24px; height: 24px; font-size: 10px; }
+.av.none { background: none; border: 1px dashed var(--line-2); color: var(--text-3); }
+
+.list-foot {
+  flex: none; height: 32px; display: flex; align-items: center; gap: 14px;
+  padding: 0 20px; border-top: 1px solid var(--line); color: var(--text-3); font-size: 12px;
+}
+.list-foot span { display: inline-flex; align-items: center; gap: 4px; }
+.list-foot kbd { background: transparent; }
+
+/* ---------- Detail ---------- */
+.detail-pane { min-width: 0; }
+.crumbs { display: flex; align-items: center; gap: 6px; color: var(--text-3); white-space: nowrap; }
+.crumbs .sep { color: var(--line-2); }
+.crumbs .cur { color: var(--text-2); }
+.copy { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 6px; border-radius: 6px; color: var(--text-2); }
+.copy:hover { background: var(--hover); color: var(--text); }
+.copy svg { color: var(--text-3); opacity: 0; transition: opacity .12s; }
+.copy:hover svg, .copy:focus-visible svg { opacity: 1; }
+.pager { margin-left: auto; display: flex; align-items: center; gap: 2px; color: var(--text-3); font-size: 12px; }
+.pager .pos { margin-right: 6px; font-variant-numeric: tabular-nums; }
+
+.detail { flex: 1; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.doc { max-width: 720px; margin: 0 auto; padding: 28px 40px 64px; }
+.title {
+  font-size: 22px; line-height: 30px; font-weight: 600; letter-spacing: -0.015em;
+  margin: 0 -6px 18px; padding: 2px 6px; border-radius: 6px; text-wrap: pretty;
+}
+.title:hover { background: var(--hover); }
+.title:focus { background: transparent; box-shadow: 0 0 0 1px var(--line-2) inset; outline: none; }
+.title:empty::before { content: "Issue title"; color: var(--text-3); }
+
+.props {
+  display: grid; grid-template-columns: 92px minmax(0, 1fr) 92px minmax(0, 1fr);
+  row-gap: 2px; column-gap: 8px; align-items: center;
+  padding-bottom: 22px; margin-bottom: 24px; border-bottom: 1px solid var(--line);
+}
+.props dt { color: var(--text-3); font-size: 12px; }
+.props dd { margin: 0; min-width: 0; }
+.pv {
+  display: inline-flex; align-items: center; gap: 8px; max-width: 100%;
+  height: 28px; padding: 0 8px; margin-left: -8px; border-radius: 6px; white-space: nowrap;
+}
+button.pv:hover { background: var(--hover); }
+button.pv:active { background: var(--press); }
+button.pv[aria-expanded="true"] { background: var(--press); }
+.pv .muted { color: var(--text-3); }
+.pv.static { color: var(--text-2); }
+.pv .chips { display: flex; gap: 4px; }
+.due-soon { color: var(--urgent); }
+
+.prose { font-size: 14px; line-height: 23px; color: var(--text); }
+.prose p { margin: 0 0 12px; max-width: 66ch; }
+.prose h3 { font-size: 13px; line-height: 20px; font-weight: 600; margin: 22px 0 6px; }
+.prose code {
+  font-family: var(--font-mono); font-size: 12.5px; padding: 1px 4px; border-radius: 4px;
+  background: var(--code-bg); border: 1px solid var(--line);
+}
+.prose pre {
+  margin: 14px 0 0; padding: 12px 14px; border-radius: 8px; overflow-x: auto;
+  background: var(--code-bg); border: 1px solid var(--line);
+  font-family: var(--font-mono); font-size: 12px; line-height: 19px; color: var(--text-2);
+}
+.prose pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+.prose pre .k { color: var(--accent-text); }
+.checks { list-style: none; padding: 0; margin: 0; }
+.checks li { display: flex; gap: 10px; align-items: flex-start; padding: 3px 0; }
+.checks input { appearance: none; margin: 4px 0 0; width: 15px; height: 15px; flex: none; border: 1.5px solid var(--line-2); border-radius: 4px; background: var(--surface); display: grid; place-items: center; cursor: pointer; transition: background .12s, border-color .12s; }
+.checks input:hover { border-color: var(--text-3); }
+.checks input:checked { background: var(--accent); border-color: var(--accent); }
+.checks input:checked::after { content: ""; width: 8px; height: 4px; border: 2px solid oklch(1 0 0); border-top: 0; border-right: 0; transform: translateY(-1px) rotate(-45deg); }
+.checks input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.checks li.on span { color: var(--text-3); text-decoration: line-through; text-decoration-color: color-mix(in oklch, var(--text-3) 50%, transparent); }
+.check-meta { font-size: 12px; color: var(--text-3); font-weight: 400; margin-left: 6px; font-variant-numeric: tabular-nums; }
+
+.section-h { display: flex; align-items: baseline; gap: 8px; font-size: 13px; font-weight: 600; margin: 34px 0 10px; }
+.section-h .n { font-weight: 400; color: var(--text-3); font-size: 12px; }
+.links { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.link {
+  display: grid; grid-template-columns: 16px minmax(0,1fr) auto; gap: 10px; align-items: center;
+  padding: 9px 12px; text-decoration: none; color: inherit;
+}
+.link + .link { border-top: 1px solid var(--line); }
+.link:hover { background: var(--hover); }
+.link:focus-visible { outline-offset: -2px; border-radius: 0; }
+.link .lt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.link .lt .mono { color: var(--text-3); margin-right: 6px; }
+.link .lm { font-size: 12px; color: var(--text-3); display: flex; gap: 10px; align-items: center; white-space: nowrap; }
+.link .add { color: var(--st-done); } .link .del { color: var(--urgent); }
+.pill-ok { display: inline-flex; align-items: center; gap: 4px; color: var(--st-done); }
+
+/* activity */
+.feed { list-style: none; margin: 0; padding: 0; position: relative; }
+.feed::before { content: ""; position: absolute; left: 11px; top: 8px; bottom: 8px; width: 1px; background: var(--line); }
+.ev { position: relative; display: flex; gap: 12px; align-items: flex-start; padding: 6px 0; color: var(--text-2); font-size: 12.5px; line-height: 20px; }
+.ev .dot { width: 24px; height: 20px; flex: none; display: grid; place-items: center; position: relative; z-index: 1; }
+.ev .dot > span { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); color: var(--text-3); }
+.ev b { color: var(--text); font-weight: 500; }
+.ev time { color: var(--text-3); white-space: nowrap; }
+.ev .sep { color: var(--text-3); margin: 0 2px; }
+.cmt { position: relative; display: flex; gap: 12px; padding: 8px 0; }
+.cmt .av { position: relative; z-index: 1; box-shadow: 0 0 0 3px var(--surface); }
+.cmt-card { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--raised); padding: 9px 14px 11px; }
+.cmt-h { display: flex; gap: 8px; align-items: baseline; font-size: 12.5px; }
+.cmt-h b { font-weight: 500; }
+.cmt-h time { color: var(--text-3); }
+.cmt-b { font-size: 14px; line-height: 22px; margin-top: 2px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.cmt.fresh .cmt-card { animation: arrive .45s ease-out; }
+@keyframes arrive { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+.composer { display: flex; gap: 12px; margin-top: 10px; }
+.composer .box {
+  flex: 1; border: 1px solid var(--line-2); border-radius: 8px; background: var(--raised);
+  transition: border-color .12s, box-shadow .12s;
+}
+.composer .box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.composer textarea {
+  display: block; width: 100%; min-height: 44px; max-height: 240px; resize: none;
+  border: 0; background: transparent; padding: 11px 14px 4px; font-size: 14px; line-height: 22px;
+}
+.composer textarea::placeholder { color: var(--text-3); }
+.composer .tools { display: flex; align-items: center; gap: 8px; padding: 6px 8px 8px 14px; font-size: 12px; color: var(--text-3); }
+.btn-primary {
+  margin-left: auto; height: 28px; padding: 0 12px; border-radius: 6px;
+  background: var(--accent); color: oklch(0.99 0 0); font-weight: 500;
+  transition: background .12s, opacity .12s;
+}
+.btn-primary:hover { background: color-mix(in oklch, var(--accent), black 10%); }
+.btn-primary:disabled { opacity: .4; cursor: default; background: var(--accent); }
+
+/* ---------- Menu & toast ---------- */
+.menu {
+  position: fixed; z-index: 50; min-width: 200px; padding: 4px;
+  background: var(--raised); border: 1px solid var(--line); border-radius: 8px;
+  box-shadow: var(--shadow-pop);
+  animation: pop .12s ease-out; transform-origin: top left;
+}
+@keyframes pop { from { opacity: 0; transform: scale(.97) translateY(-2px); } to { opacity: 1; transform: none; } }
+.menu button {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  height: 30px; padding: 0 8px; border-radius: 5px; text-align: left;
+}
+.menu button:hover, .menu button:focus-visible { background: var(--hover); outline: none; }
+.menu button .tick { margin-left: auto; color: var(--accent-text); visibility: hidden; }
+.menu button[aria-checked="true"] .tick { visibility: visible; }
+.menu button kbd { margin-left: auto; }
+.menu button[aria-checked="true"] kbd { margin-left: 8px; }
+.menu-h { font-size: 12px; color: var(--text-3); padding: 4px 8px 4px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 8px); opacity: 0;
+  background: var(--text); color: var(--surface); font-size: 12.5px;
+  padding: 7px 12px; border-radius: 6px; pointer-events: none;
+  transition: opacity .16s ease, transform .16s ease; z-index: 60;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Sidebar -->
+  <nav class="side" aria-label="Workspace">
+    <div class="ws">
+      <svg class="ws-mark" viewBox="0 0 20 20" aria-hidden="true">
+        <rect width="20" height="20" rx="5" fill="var(--text)"/>
+        <path d="M6.5 5v10h7" fill="none" stroke="var(--surface)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M10 8.5h3.5M10 11.5h3.5" stroke="var(--surface)" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+      </svg>
+      Ledgerline
+    </div>
+    <div class="side-actions">
+      <button class="btn-new" id="newBtn" type="button">
+        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 2.5v9M2.5 7h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        New issue <kbd>C</kbd>
+      </button>
+    </div>
+
+    <div class="nav" id="nav">
+      <button class="nav-i" data-view="mine" type="button">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6.6" r="2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M4.4 12.4c.9-1.4 2.1-2 3.6-2s2.7.6 3.6 2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+        My issues <span class="count" data-count="mine"></span>
+      </button>
+      <div class="nav-h"><span class="team-dot"></span>Billing</div>
+      <button class="nav-i" data-view="active" type="button">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5V8l2.4 1.6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Active cycle <span class="count" data-count="active"></span>
+      </button>
+      <button class="nav-i" data-view="backlog" type="button">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2.2 2.2"/></svg>
+        Backlog <span class="count" data-count="backlog"></span>
+      </button>
+      <button class="nav-i" data-view="all" type="button">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M3 8h10M3 11.5h10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        All issues <span class="count" data-count="all"></span>
+      </button>
+
+      <div class="nav-h">Projects</div>
+      <div class="proj" title="Payments v2 — 62% complete">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="var(--line-2)" stroke-width="2"/><circle cx="8" cy="8" r="6" fill="none" stroke="var(--st-progress)" stroke-width="2" stroke-dasharray="23.4 37.7" transform="rotate(-90 8 8)"/></svg>
+        Payments v2 <span class="pct">62%</span>
+      </div>
+      <div class="proj" title="Public API — 45% complete">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="var(--line-2)" stroke-width="2"/><circle cx="8" cy="8" r="6" fill="none" stroke="var(--st-review)" stroke-width="2" stroke-dasharray="17 37.7" transform="rotate(-90 8 8)"/></svg>
+        Public API <span class="pct">45%</span>
+      </div>
+      <div class="proj" title="EU VAT compliance — 30% complete">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="var(--line-2)" stroke-width="2"/><circle cx="8" cy="8" r="6" fill="none" stroke="var(--st-done)" stroke-width="2" stroke-dasharray="11.3 37.7" transform="rotate(-90 8 8)"/></svg>
+        EU VAT compliance <span class="pct">30%</span>
+      </div>
+    </div>
+
+    <div class="side-foot">
+      <span class="av lg" style="--h:262">PN</span>
+      <div class="who"><b>Priya Natarajan</b><span>Billing team</span></div>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Switch to dark theme" title="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M8 2.5a5.5 5.5 0 0 1 0 11z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Issue list -->
+  <section class="pane list-pane" aria-labelledby="viewTitle">
+    <header class="bar">
+      <h1 id="viewTitle">Active cycle</h1>
+      <span class="meta" id="viewMeta"></span>
+      <label class="search">
+        <span class="sr">Filter issues</span>
+        <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><circle cx="6" cy="6" r="4.25" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m9.2 9.2 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <input id="q" type="text" placeholder="Filter" autocomplete="off" spellcheck="false">
+        <kbd>/</kbd>
+      </label>
+    </header>
+    <div class="list" id="list" role="listbox" aria-label="Issues" tabindex="-1"></div>
+    <footer class="list-foot" aria-hidden="true">
+      <span><kbd>J</kbd><kbd>K</kbd> move</span>
+      <span><kbd>S</kbd> status</span>
+      <span><kbd>P</kbd> priority</span>
+      <span><kbd>A</kbd> assign</span>
+      <span><kbd>R</kbd> reply</span>
+    </footer>
+  </section>
+
+  <!-- Detail -->
+  <section class="pane detail-pane" aria-label="Issue detail" id="detailPane">
+    <header class="bar" id="detailBar"></header>
+    <div class="detail" id="detail"></div>
+  </section>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+/* ---------- Data ---------- */
+const people = {
+  PN: { name: 'Priya Natarajan', short: 'Priya', h: 262 },
+  TR: { name: 'Tomás Reyes',     short: 'Tomás', h: 40 },
+  MO: { name: 'Maya Okafor',     short: 'Maya',  h: 150 },
+  JW: { name: 'Jonas Weber',     short: 'Jonas', h: 205 },
+  SW: { name: 'Sam Whitfield',   short: 'Sam',   h: 330 },
+};
+const ME = 'PN';
+const STATUS = {
+  backlog:  'Backlog', todo: 'Todo', progress: 'In progress',
+  review: 'In review', done: 'Done', canceled: 'Canceled',
+};
+const STATUS_ORDER = ['backlog', 'todo', 'progress', 'review', 'done', 'canceled'];
+const GROUP_ORDER  = ['progress', 'review', 'todo', 'backlog', 'done', 'canceled'];
+const PRIORITY = ['No priority', 'Urgent', 'High', 'Medium', 'Low'];
+const LABELS = {
+  bug:     { name: 'Bug',         h: 25 },
+  feature: { name: 'Feature',     h: 264 },
+  perf:    { name: 'Performance', h: 70 },
+  infra:   { name: 'Infra',       h: 205 },
+  design:  { name: 'Design',      h: 330 },
+  api:     { name: 'API',         h: 160 },
+};
+
+const issues = [
+  { id: 'LED-482', title: 'Stripe webhook retries create duplicate payment records', status: 'progress', pri: 1, who: 'TR', labels: ['bug', 'api'], upd: '2h', est: 5, due: 'Nov 14', project: 'Payments v2',
+    desc: `<p>When Stripe retries a <code>payment_intent.succeeded</code> webhook after our handler times out (&gt;10&thinsp;s), we insert a second row in <code>payments</code>. The customer is only charged once, but the invoice shows as overpaid and reconciliation breaks.</p><p>Seen 37 times since Oct 28 — every case is an account with large invoices, where PDF generation still runs inline in the request.</p>`,
+    plan: [[true, 'Unique index on stripe_event_id, upsert in the handler'], [true, 'Move PDF generation to the job queue'], [false, 'Backfill: merge duplicate rows created since Oct 28'], [false, 'Alert when webhook handler p95 exceeds 5 s']],
+    after: `<pre><code><span class="k">CREATE UNIQUE INDEX CONCURRENTLY</span> payments_stripe_event_id_idx
+  <span class="k">ON</span> payments (stripe_event_id)
+  <span class="k">WHERE</span> stripe_event_id <span class="k">IS NOT NULL</span>;</code></pre>`,
+    links: [
+      { kind: 'pr', ref: '#1291', title: 'Dedupe Stripe webhook handling', meta: 'pr' },
+      { kind: 'err', ref: 'LEDGER-API-9F2', title: 'UniqueViolation: payments_stripe_event_id_idx', meta: 'err' },
+    ],
+    activity: [
+      { t: 'ev', who: 'MO', text: 'created the issue', when: 'Nov 4' },
+      { t: 'ev', who: 'MO', text: 'set priority to <b>Urgent</b>', when: 'Nov 4', icon: 'pri' },
+      { t: 'ev', who: 'TR', text: 'moved from <b>Todo</b> to <b>In progress</b>', when: 'Nov 6', icon: 'status' },
+      { t: 'c', who: 'SW', when: 'Nov 7', body: 'Finance flagged three more on Friday. Can we get the backfill done before month-end close on the 28th?' },
+      { t: 'c', who: 'TR', when: 'Nov 8', body: 'Yes. The index and upsert are in #1291. I’ll run the merge script against the read replica first and post the diff here before touching prod.' },
+      { t: 'ev', who: 'TR', text: 'linked pull request <b>#1291</b>', when: 'Nov 8', icon: 'link' },
+    ] },
+  { id: 'LED-479', title: 'Invoice PDF shows “Fr.” instead of “CHF” for Swiss customers', status: 'todo', pri: 2, who: 'MO', labels: ['bug'], upd: '5h', est: 2,
+    desc: `<p>Since the locale update, invoices for <code>de-CH</code> customers render the currency as <code>Fr.</code>. Two customers asked for re-issued invoices because their accounting software rejects it.</p><p>We should always print the ISO code on PDFs regardless of locale, and keep the symbol only in the web UI.</p>` },
+  { id: 'LED-477', title: 'Partial refunds in the payment detail drawer', status: 'review', pri: 3, who: 'PN', labels: ['feature'], upd: '1d', est: 3, project: 'Payments v2',
+    desc: `<p>Support currently issues partial refunds from the Stripe dashboard, which means our ledger never learns about them. Add an amount field to the existing refund action, capped at the remaining refundable balance.</p>`,
+    plan: [[true, 'Amount input with remaining balance hint'], [true, 'Ledger entry for partial refunds'], [true, 'Copy review with Sam']],
+    links: [{ kind: 'pr', ref: '#1284', title: 'Partial refund UI + ledger entry', meta: 'pr2' }] },
+  { id: 'LED-475', title: 'Move scheduled reminders off the legacy cron box', status: 'progress', pri: 3, who: 'JW', labels: ['infra'], upd: '1d', est: 5,
+    desc: `<p>The reminder emails still run from <code>cron-01</code>, which is the last thing keeping that VM alive. Port the three jobs to the worker scheduler and decommission the box.</p>` },
+  { id: 'LED-474', title: 'Customer list takes 4 s to load for accounts with 10k+ contacts', status: 'progress', pri: 2, who: 'SW', labels: ['perf'], upd: '3h', est: 3,
+    desc: `<p>The customer list fetches every contact and sorts client-side. Paginate on the server and add a <code>(account_id, name)</code> index. Target: under 400&thinsp;ms at p95 for the largest account.</p>` },
+  { id: 'LED-471', title: 'Tax rate dropdown loses its selection when switching tabs', status: 'todo', pri: 4, who: 'MO', labels: ['bug'], upd: '2d', est: 1,
+    desc: `<p>On the invoice editor, choosing a tax rate and then switching to the Notes tab and back resets the dropdown to “No tax”. The saved value is correct; only the UI state is lost.</p>` },
+  { id: 'LED-468', title: 'Soften the copy of the third dunning reminder', status: 'review', pri: 4, who: 'SW', labels: ['design'], upd: '2d', est: 1,
+    desc: `<p>Customers describe the final reminder as “threatening”. New draft drops the late-fee language from the subject line and leads with a pay link.</p>` },
+  { id: 'LED-466', title: 'Expose invoice.finalized event in the public API', status: 'todo', pri: 3, who: 'TR', labels: ['api', 'feature'], upd: '3d', est: 2, project: 'Public API',
+    desc: `<p>Three integration partners asked for this. The event already exists internally; we need a public payload schema, docs and a webhook subscription type.</p>` },
+  { id: 'LED-452', title: 'Rate-limit the public API per key instead of per IP', status: 'todo', pri: 3, who: 'JW', labels: ['api', 'infra'], upd: '4d', est: 3, project: 'Public API',
+    desc: `<p>Customers behind shared NAT hit each other’s limits. Move the limiter to the API key and keep a generous per-IP ceiling for unauthenticated requests.</p>` },
+  { id: 'LED-458', title: 'Flaky test: reconciliation_spec times out on CI', status: 'backlog', pri: 4, who: null, labels: ['infra'], upd: '6d', est: null,
+    desc: `<p>Fails about one run in fifteen, always on the “matches partial payouts” example. Likely the fixture clock, not the code under test.</p>` },
+  { id: 'LED-455', title: 'Empty state for first-time users on the Payments tab', status: 'backlog', pri: 0, who: 'MO', labels: ['design'], upd: '1w', est: null,
+    desc: `<p>New accounts see an empty table with column headers. Explain what will appear here and link to connecting a payment provider.</p>` },
+  { id: 'LED-450', title: 'VAT OSS quarterly report export', status: 'backlog', pri: 3, who: null, labels: ['feature'], upd: '1w', est: 5, project: 'EU VAT compliance',
+    desc: `<p>EU sellers need a per-country breakdown for the One-Stop-Shop return. Start with CSV in the format the German BZSt portal accepts.</p>` },
+  { id: 'LED-463', title: 'Recurring invoices skip February 29', status: 'done', pri: 2, who: 'JW', labels: ['bug'], upd: '2d', est: 2,
+    desc: `<p>Monthly schedules anchored on the 29th–31st jumped straight to March. Now clamped to the last day of the month.</p>` },
+  { id: 'LED-461', title: 'Bulk export invoices as CSV', status: 'done', pri: 3, who: 'PN', labels: ['feature'], upd: '4d', est: 3,
+    desc: `<p>Export from the invoice list respects the current filters. Large exports are emailed as a link instead of downloaded inline.</p>` },
+  { id: 'LED-447', title: 'Support Safari 15 in the invoice editor', status: 'canceled', pri: 4, who: null, labels: [], upd: '1w', est: null,
+    desc: `<p>Under 0.3% of sessions. Dropped in favour of a supported-browsers notice.</p>` },
+];
+
+const defaultActivity = (i) => {
+  const creator = i.who && i.who !== 'PN' ? 'PN' : 'MO';
+  const a = [{ t: 'ev', who: creator, text: 'created the issue', when: 'Nov ' + (1 + (parseInt(i.id.slice(4), 10) % 7)) }];
+  if (i.who) a.push({ t: 'ev', who: creator, text: `assigned to <b>${people[i.who].short}</b>`, when: a[0].when, icon: 'assign' });
+  if (i.status !== 'backlog' && i.status !== 'todo') a.push({ t: 'ev', who: i.who || creator, text: `moved to <b>${STATUS[i.status]}</b>`, when: i.upd === '1w' ? 'Nov 3' : i.upd + ' ago', icon: 'status' });
+  return a;
+};
+issues.forEach(i => { if (!i.activity) i.activity = defaultActivity(i); });
+
+/* ---------- Icons ---------- */
+const statusIcon = (s, size = 14) => {
+  const c = `var(--st-${s === 'backlog' ? 'todo' : s})`;
+  const ring = `<circle cx="7" cy="7" r="5.5" fill="none" stroke="${c}" stroke-width="1.5"`;
+  let inner = '';
+  if (s === 'backlog') inner = `${ring} stroke-dasharray="1.7 1.9"/>`;
+  else if (s === 'todo') inner = `${ring}/>`;
+  else if (s === 'progress') inner = `${ring}/><path d="M7 7V3.5A3.5 3.5 0 0 1 7 10.5Z" fill="${c}"/>`;
+  else if (s === 'review') inner = `${ring}/><path d="M7 7V3.5A3.5 3.5 0 1 1 3.5 7Z" fill="${c}"/>`;
+  else if (s === 'done') inner = `<circle cx="7" cy="7" r="6.25" fill="${c}"/><path d="m4.4 7.2 1.8 1.8 3.5-3.7" fill="none" stroke="var(--surface)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  else if (s === 'canceled') inner = `<circle cx="7" cy="7" r="6.25" fill="${c}"/><path d="m5 5 4 4m0-4-4 4" stroke="var(--surface)" stroke-width="1.5" stroke-linecap="round"/>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 14 14" aria-hidden="true">${inner}</svg>`;
+};
+const priIcon = (p) => {
+  if (p === 1) return `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect x="1" y="1" width="12" height="12" rx="3" fill="var(--urgent)"/><path d="M7 3.8v3.9" stroke="var(--surface)" stroke-width="1.7" stroke-linecap="round"/><circle cx="7" cy="10" r=".95" fill="var(--surface)"/></svg>`;
+  if (p === 0) return `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.5 7h1.5M6.25 7h1.5M10 7h1.5" stroke="var(--text-3)" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+  const on = 5 - p; // high 3, medium 2, low 1
+  const bar = (x, h, k) => `<rect x="${x}" y="${12 - h}" width="3" height="${h}" rx="1" fill="var(--text-2)" opacity="${k < on ? 1 : .25}"/>`;
+  return `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">${bar(1, 4, 0)}${bar(5.5, 7, 1)}${bar(10, 10, 2)}</svg>`;
+};
+const avatar = (k, cls = '') => k
+  ? `<span class="av ${cls}" style="--h:${people[k].h}" title="${people[k].name}">${k}</span>`
+  : `<span class="av none ${cls}" title="Unassigned"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><circle cx="5" cy="3.6" r="1.8" fill="none" stroke="currentColor" stroke-width="1.1"/><path d="M1.8 8.6c.7-1.3 1.8-1.9 3.2-1.9s2.5.6 3.2 1.9" fill="none" stroke="currentColor" stroke-width="1.1"/></svg></span>`;
+const chip = (l) => `<span class="chip" style="--h:${LABELS[l].h}"><i></i>${LABELS[l].name}</span>`;
+const ico = {
+  copy: `<svg width="13" height="13" viewBox="0 0 14 14" aria-hidden="true"><rect x="4.5" y="4.5" width="7.5" height="7.5" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9.5 2.5H3.5a1 1 0 0 0-1 1v6" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,
+  up: `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="m3.5 8.5 3.5-3.5 3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  down: `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="m3.5 5.5 3.5 3.5 3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  chev: `<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="m3 4.5 3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  tick: `<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="m3.5 7.3 2.4 2.4 4.6-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  pr: `<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="4.5" cy="3.5" r="1.6" fill="none" stroke="var(--st-done)" stroke-width="1.3"/><circle cx="4.5" cy="12.5" r="1.6" fill="none" stroke="var(--st-done)" stroke-width="1.3"/><circle cx="11.5" cy="12.5" r="1.6" fill="none" stroke="var(--st-done)" stroke-width="1.3"/><path d="M4.5 5.1v5.8M11.5 10.9V6.5a2 2 0 0 0-2-2H7.5m1.4-1.6L7.3 4.5l1.6 1.6" fill="none" stroke="var(--st-done)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  err: `<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.2 14 13H2Z" fill="none" stroke="var(--urgent)" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 6.5v3" stroke="var(--urgent)" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="11.1" r=".8" fill="var(--urgent)"/></svg>`,
+  sub: `<svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><rect x="1.5" y="1.5" width="9" height="9" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="m3.8 6.1 1.5 1.5 2.9-3" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  plus: `<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`,
+  person: `<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="4.2" r="2" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M2.4 10.3c.8-1.5 2-2.2 3.6-2.2s2.8.7 3.6 2.2" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>`,
+  linkI: `<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M5 7a2.2 2.2 0 0 0 3.2.1l1.6-1.6a2.2 2.2 0 0 0-3.1-3.1l-.6.6M7 5a2.2 2.2 0 0 0-3.2-.1L2.2 6.5a2.2 2.2 0 0 0 3.1 3.1l.6-.6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+};
+
+/* ---------- State ---------- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('ledgerline.' + k); return v == null ? d : v; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('ledgerline.' + k, v); } catch {} },
+};
+const VIEWS = {
+  mine:    { title: 'My issues',    meta: 'Assigned to you, not closed', test: i => i.who === ME && !['done', 'canceled'].includes(i.status) },
+  active:  { title: 'Active cycle', meta: 'Cycle 24 · Nov 3 – 16 · 6 days left', test: i => ['todo', 'progress', 'review', 'done'].includes(i.status) },
+  backlog: { title: 'Backlog',      meta: 'Not yet planned', test: i => i.status === 'backlog' },
+  all:     { title: 'All issues',   meta: 'Billing team', test: () => true },
+};
+const state = {
+  view: store.get('view', 'active'),
+  q: '',
+  sel: (location.hash || '').slice(1) || 'LED-482',
+  collapsed: new Set(['canceled']),
+};
+if (!VIEWS[state.view]) state.view = 'active';
+let nextId = 483;
+
+const byId = id => issues.find(i => i.id === id);
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function visible() {
+  const q = state.q.trim().toLowerCase();
+  return issues.filter(i => VIEWS[state.view].test(i) && (!q || i.title.toLowerCase().includes(q) || i.id.toLowerCase().includes(q)));
+}
+function ordered() {
+  const v = visible();
+  const out = [];
+  GROUP_ORDER.forEach(s => {
+    const g = v.filter(i => i.status === s).sort((a, b) => (a.pri || 9) - (b.pri || 9));
+    if (g.length) out.push({ s, items: g });
+  });
+  return out;
+}
+function navigable() {
+  return ordered().flatMap(g => state.collapsed.has(g.s) ? [] : g.items);
+}
+
+/* ---------- Render: list ---------- */
+function highlight(text) {
+  const q = state.q.trim();
+  const t = esc(text);
+  if (!q) return t;
+  const idx = text.toLowerCase().indexOf(q.toLowerCase());
+  if (idx < 0) return t;
+  return esc(text.slice(0, idx)) + '<mark>' + esc(text.slice(idx, idx + q.length)) + '</mark>' + esc(text.slice(idx + q.length));
+}
+function rowHTML(i) {
+  const sel = i.id === state.sel;
+  const doneCount = i.plan ? i.plan.filter(p => p[0]).length : 0;
+  const sub = i.plan && i.status !== 'done' ? `<span class="sub" title="${doneCount} of ${i.plan.length} plan items done">${ico.sub}${doneCount}/${i.plan.length}</span>` : '';
+  return `<div class="row is-${i.status}" role="option" id="row-${i.id}" data-id="${i.id}" aria-selected="${sel}" tabindex="${sel ? 0 : -1}">
+    <span title="${PRIORITY[i.pri]}">${priIcon(i.pri)}</span>
+    <span class="id mono">${i.id}</span>
+    <span title="${STATUS[i.status]}">${statusIcon(i.status)}</span>
+    <span class="t">${highlight(i.title)}</span>
+    <span class="tags">${sub}${i.labels.slice(0, 2).map(chip).join('')}</span>
+    ${avatar(i.who)}
+    <span class="when">${i.upd}</span>
+  </div>`;
+}
+function renderList() {
+  const groups = ordered();
+  const list = $('#list');
+  if (!groups.length) {
+    list.innerHTML = `<div class="empty"><b>No issues match “${esc(state.q)}”</b>Try an issue ID like LED-466, or clear the filter with Esc.</div>`;
+  } else {
+    list.innerHTML = groups.map(g => {
+      const open = !state.collapsed.has(g.s);
+      return `<div role="group" aria-label="${STATUS[g.s]}">
+        <button class="group-h" type="button" data-group="${g.s}" aria-expanded="${open}">${statusIcon(g.s)}<span>${STATUS[g.s]}</span><span class="n">${g.items.length}</span><span class="chev">${ico.chev}</span></button>
+        ${open ? g.items.map(rowHTML).join('') : ''}
+      </div>`;
+    }).join('');
+  }
+  const nav = navigable();
+  if (nav.length && !nav.some(i => i.id === state.sel) && !byId(state.sel)) state.sel = nav[0].id;
+  // counts
+  Object.keys(VIEWS).forEach(k => {
+    const el = document.querySelector(`[data-count="${k}"]`);
+    if (el) el.textContent = issues.filter(VIEWS[k].test).length;
+  });
+  document.querySelectorAll('.nav-i').forEach(b => b.dataset.view === state.view ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
+  $('#viewTitle').textContent = VIEWS[state.view].title;
+  $('#viewMeta').textContent = VIEWS[state.view].meta;
+  list.setAttribute('aria-activedescendant', 'row-' + state.sel);
+}
+
+/* ---------- Render: detail ---------- */
+function linkHTML(l) {
+  if (l.meta === 'pr') return `<a class="link" href="#${l.ref}" onclick="return false"><span>${ico.pr}</span><span class="lt"><span class="mono">${l.ref}</span>${esc(l.title)}</span><span class="lm"><span class="pill-ok">${ico.tick}Checks passing</span><span class="num"><span class="add">+184</span> <span class="del">−42</span></span><span>Open</span></span></a>`;
+  if (l.meta === 'pr2') return `<a class="link" href="#${l.ref}" onclick="return false"><span>${ico.pr}</span><span class="lt"><span class="mono">${l.ref}</span>${esc(l.title)}</span><span class="lm"><span>1 approval</span><span class="num"><span class="add">+312</span> <span class="del">−18</span></span><span>Open</span></span></a>`;
+  return `<a class="link" href="#${l.ref}" onclick="return false"><span>${ico.err}</span><span class="lt"><span class="mono">${l.ref}</span>${esc(l.title)}</span><span class="lm"><span class="num">37 events</span><span>Last seen Oct 31</span></span></a>`;
+}
+function activityHTML(a, fresh) {
+  if (a.t === 'c') {
+    return `<li class="cmt${fresh ? ' fresh' : ''}">${avatar(a.who, 'lg')}<div class="cmt-card"><div class="cmt-h"><b>${people[a.who].name}</b><time>${a.when}</time></div><div class="cmt-b">${esc(a.body)}</div></div></li>`;
+  }
+  const icon = a.icon === 'status' ? ico.chev.replace('m3 4.5 3 3 3-3', 'M3 6h6M6.5 3.5 9 6 6.5 8.5')
+    : a.icon === 'pri' ? priIcon(1).replace(/width="14" height="14"/, 'width="12" height="12"')
+    : a.icon === 'assign' ? ico.person
+    : a.icon === 'link' ? ico.linkI : ico.plus;
+  return `<li class="ev"><span class="dot"><span>${icon}</span></span><span><b>${people[a.who].short}</b> ${a.text}<span class="sep">·</span><time>${a.when}</time></span></li>`;
+}
+function renderDetail(opts = {}) {
+  const i = byId(state.sel);
+  const bar = $('#detailBar'), d = $('#detail');
+  if (!i) { bar.innerHTML = ''; d.innerHTML = `<div class="empty"><b>No issue selected</b>Pick one from the list.</div>`; return; }
+  const nav = navigable();
+  const pos = nav.findIndex(x => x.id === i.id);
+  bar.innerHTML = `
+    <div class="crumbs"><span>Billing</span><span class="sep">/</span>
+      <button class="copy mono cur" type="button" id="copyId" title="Copy issue ID">${i.id}${ico.copy}</button></div>
+    <div class="pager"><span class="pos">${pos >= 0 ? `${pos + 1} of ${nav.length}` : ''}</span>
+      <button class="icon-btn" type="button" id="prevBtn" aria-label="Previous issue (K)" title="Previous  K" ${pos <= 0 ? 'disabled' : ''}>${ico.up}</button>
+      <button class="icon-btn" type="button" id="nextBtn" aria-label="Next issue (J)" title="Next  J" ${pos < 0 || pos >= nav.length - 1 ? 'disabled' : ''}>${ico.down}</button>
+    </div>`;
+  const done = i.plan ? i.plan.filter(p => p[0]).length : 0;
+  const comments = i.activity.filter(a => a.t === 'c').length;
+  d.innerHTML = `<article class="doc">
+    <h2 class="title" id="title" contenteditable="plaintext-only" spellcheck="false" role="textbox" aria-label="Issue title">${esc(i.title)}</h2>
+    <dl class="props">
+      <dt>Status</dt><dd><button class="pv" type="button" data-menu="status" aria-haspopup="menu" aria-expanded="false">${statusIcon(i.status)}${STATUS[i.status]}</button></dd>
+      <dt>Assignee</dt><dd><button class="pv" type="button" data-menu="assignee" aria-haspopup="menu" aria-expanded="false">${avatar(i.who)}${i.who ? people[i.who].name : '<span class="muted">Unassigned</span>'}</button></dd>
+      <dt>Priority</dt><dd><button class="pv" type="button" data-menu="priority" aria-haspopup="menu" aria-expanded="false">${priIcon(i.pri)}${i.pri ? PRIORITY[i.pri] : '<span class="muted">No priority</span>'}</button></dd>
+      <dt>Estimate</dt><dd><span class="pv static num">${i.est ? i.est + (i.est === 1 ? ' point' : ' points') : '<span class="muted">—</span>'}</span></dd>
+      <dt>Labels</dt><dd><span class="pv static"><span class="chips">${i.labels.length ? i.labels.map(chip).join('') : '<span class="muted">None</span>'}</span></span></dd>
+      <dt>${i.due ? 'Due' : 'Project'}</dt><dd><span class="pv static">${i.due ? `<span class="due-soon num">${i.due}</span><span class="muted">· 4 days</span>` : (i.project || '<span class="muted">None</span>')}</span></dd>
+    </dl>
+    <div class="prose">
+      ${i.desc}
+      ${i.plan ? `<h3>Plan<span class="check-meta" id="planMeta">${done} of ${i.plan.length}</span></h3><ul class="checks">${i.plan.map((p, k) => `<li class="${p[0] ? 'on' : ''}"><input type="checkbox" id="pl${k}" data-k="${k}" ${p[0] ? 'checked' : ''}><label for="pl${k}"><span>${esc(p[1])}</span></label></li>`).join('')}</ul>` : ''}
+      ${i.after || ''}
+    </div>
+    ${i.links ? `<div class="section-h">Linked<span class="n">${i.links.length}</span></div><div class="links">${i.links.map(linkHTML).join('')}</div>` : ''}
+    <div class="section-h">Activity${comments ? `<span class="n">${comments} comment${comments > 1 ? 's' : ''}</span>` : ''}</div>
+    <ol class="feed" id="feed">${i.activity.map((a, k) => activityHTML(a, opts.freshLast && k === i.activity.length - 1)).join('')}</ol>
+    <form class="composer" id="composer">
+      ${avatar(ME, 'lg')}
+      <div class="box">
+        <label class="sr" for="reply">Leave a comment</label>
+        <textarea id="reply" rows="1" placeholder="Leave a comment…"></textarea>
+        <div class="tools"><span><kbd>Ctrl</kbd> <kbd>Enter</kbd> to send</span><button class="btn-primary" type="submit" disabled>Comment</button></div>
+      </div>
+    </form>
+  </article>`;
+  document.title = `${i.id} · ${i.title} — Ledgerline`;
+  if (opts.scrollBottom) d.scrollTop = d.scrollHeight;
+  else if (!opts.keepScroll) d.scrollTop = 0;
+}
+
+/* ---------- Selection ---------- */
+function select(id, { focus = false } = {}) {
+  if (!byId(id)) return;
+  state.sel = id;
+  document.querySelectorAll('.row').forEach(r => {
+    const on = r.dataset.id === id;
+    r.setAttribute('aria-selected', on);
+    r.tabIndex = on ? 0 : -1;
+  });
+  const row = document.getElementById('row-' + id);
+  if (row) { row.scrollIntoView({ block: 'nearest' }); if (focus) row.focus({ preventScroll: true }); }
+  $('#list').setAttribute('aria-activedescendant', 'row-' + id);
+  history.replaceState(null, '', '#' + id);
+  renderDetail();
+}
+function step(dir) {
+  const nav = navigable();
+  if (!nav.length) return;
+  let k = nav.findIndex(i => i.id === state.sel);
+  k = k < 0 ? 0 : Math.max(0, Math.min(nav.length - 1, k + dir));
+  const rowFocused = document.activeElement && document.activeElement.classList.contains('row');
+  select(nav[k].id, { focus: rowFocused });
+}
+
+/* ---------- Menus ---------- */
+let menuEl = null, menuAnchor = null;
+function closeMenu(refocus = true) {
+  if (!menuEl) return;
+  menuEl.remove(); menuEl = null;
+  if (menuAnchor) { menuAnchor.setAttribute('aria-expanded', 'false'); if (refocus) menuAnchor.focus(); }
+  menuAnchor = null;
+}
+function openMenu(anchor, kind) {
+  closeMenu(false);
+  const i = byId(state.sel);
+  let items;
+  if (kind === 'status') items = STATUS_ORDER.map((s, k) => ({ v: s, html: statusIcon(s) + STATUS[s], key: k + 1, on: i.status === s }));
+  if (kind === 'priority') items = [1, 2, 3, 4, 0].map((p, k) => ({ v: p, html: priIcon(p) + PRIORITY[p], key: k + 1, on: i.pri === p }));
+  if (kind === 'assignee') items = [null, ...Object.keys(people)].map((p, k) => ({ v: p, html: avatar(p) + (p ? people[p].name + (p === ME ? ' <span style="color:var(--text-3)">(you)</span>' : '') : 'Unassigned'), key: k, on: i.who === p }));
+  const m = document.createElement('div');
+  m.className = 'menu'; m.setAttribute('role', 'menu');
+  m.setAttribute('aria-label', 'Change ' + kind);
+  m.innerHTML = `<div class="menu-h">Change ${kind}</div>` + items.map((it, k) => `<button type="button" role="menuitemradio" aria-checked="${it.on}" data-k="${k}">${it.html}<span class="tick">${ico.tick}</span><kbd>${it.key}</kbd></button>`).join('');
+  document.body.appendChild(m);
+  const r = anchor.getBoundingClientRect();
+  const mh = m.offsetHeight;
+  const top = r.bottom + 4 + mh > innerHeight ? Math.max(8, r.top - mh - 4) : r.bottom + 4;
+  m.style.top = top + 'px'; m.style.left = Math.min(r.left, innerWidth - m.offsetWidth - 8) + 'px';
+  menuEl = m; menuAnchor = anchor; anchor.setAttribute('aria-expanded', 'true');
+  const btns = [...m.querySelectorAll('button')];
+  (btns.find(b => b.getAttribute('aria-checked') === 'true') || btns[0]).focus();
+  const pick = k => { closeMenu(false); apply(kind, items[k].v); };
+  m.addEventListener('click', e => { const b = e.target.closest('button'); if (b) pick(+b.dataset.k); });
+  m.addEventListener('keydown', e => {
+    const k = btns.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown' || e.key === 'j') { e.preventDefault(); btns[(k + 1) % btns.length].focus(); }
+    else if (e.key === 'ArrowUp' || e.key === 'k') { e.preventDefault(); btns[(k - 1 + btns.length) % btns.length].focus(); }
+    else if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); closeMenu(); }
+    else if (/^[0-9]$/.test(e.key)) { const n = items.findIndex(it => String(it.key) === e.key); if (n >= 0) { e.preventDefault(); pick(n); } }
+    e.stopPropagation();
+  });
+}
+function apply(kind, v) {
+  const i = byId(state.sel);
+  let text = null, icon = 'status';
+  if (kind === 'status' && i.status !== v) { text = `moved from <b>${STATUS[i.status]}</b> to <b>${STATUS[v]}</b>`; i.status = v; }
+  if (kind === 'priority' && i.pri !== v) { text = `set priority to <b>${PRIORITY[v]}</b>`; i.pri = v; icon = 'pri'; }
+  if (kind === 'assignee' && i.who !== v) { text = v ? (v === ME ? 'self-assigned the issue' : `assigned to <b>${people[v].short}</b>`) : 'removed the assignee'; i.who = v; icon = 'assign'; }
+  if (!text) { focusSelectedRow(); return; }
+  i.activity.push({ t: 'ev', who: ME, text, when: 'just now', icon });
+  i.upd = 'now';
+  renderList();
+  // keep selection even if the issue left the current view
+  if (!navigable().some(x => x.id === i.id)) toast(`${i.id} moved out of ${VIEWS[state.view].title}`);
+  renderDetail({ keepScroll: true });
+  const btn = document.querySelector(`[data-menu="${kind}"]`);
+  if (btn) btn.focus();
+}
+function focusSelectedRow() {
+  const row = document.getElementById('row-' + state.sel);
+  if (row) row.focus();
+}
+
+/* ---------- Toast ---------- */
+let toastT;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* ---------- Events ---------- */
+$('#list').addEventListener('click', e => {
+  const g = e.target.closest('.group-h');
+  if (g) {
+    const s = g.dataset.group;
+    state.collapsed.has(s) ? state.collapsed.delete(s) : state.collapsed.add(s);
+    renderList();
+    const again = document.querySelector(`[data-group="${s}"]`); if (again) again.focus();
+    renderDetail({ keepScroll: true });
+    return;
+  }
+  const r = e.target.closest('.row');
+  if (r) select(r.dataset.id, { focus: true });
+});
+
+document.querySelectorAll('.nav-i').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+function setView(v) {
+  state.view = v; store.set('view', v);
+  renderList();
+  const nav = navigable();
+  if (!nav.some(i => i.id === state.sel) && nav.length) select(nav[0].id);
+  else renderDetail({ keepScroll: true });
+}
+
+const q = $('#q');
+q.addEventListener('input', () => {
+  state.q = q.value;
+  renderList();
+  const nav = navigable();
+  if (nav.length && !nav.some(i => i.id === state.sel)) select(nav[0].id);
+});
+q.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (q.value) { q.value = ''; q.dispatchEvent(new Event('input')); } else focusSelectedRow(); e.stopPropagation(); }
+  if (e.key === 'ArrowDown' || e.key === 'Enter') { e.preventDefault(); focusSelectedRow(); }
+});
+
+$('#detail').addEventListener('click', e => {
+  const b = e.target.closest('[data-menu]');
+  if (b) { menuEl && menuAnchor === b ? closeMenu() : openMenu(b, b.dataset.menu); }
+});
+$('#detail').addEventListener('change', e => {
+  if (!e.target.matches('.checks input')) return;
+  const i = byId(state.sel);
+  i.plan[+e.target.dataset.k][0] = e.target.checked;
+  e.target.closest('li').classList.toggle('on', e.target.checked);
+  const done = i.plan.filter(p => p[0]).length;
+  $('#planMeta').textContent = `${done} of ${i.plan.length}`;
+  const row = document.getElementById('row-' + i.id);
+  if (row) { const s = row.querySelector('.sub'); if (s) s.innerHTML = ico.sub + `${done}/${i.plan.length}`; }
+});
+$('#detail').addEventListener('input', e => {
+  if (e.target.id === 'reply') {
+    const t = e.target; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px';
+    t.form.querySelector('.btn-primary').disabled = !t.value.trim();
+  }
+});
+$('#detail').addEventListener('keydown', e => {
+  if (e.target.id === 'reply' && e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); e.target.form.requestSubmit(); }
+  if (e.target.id === 'title') {
+    if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+    if (e.key === 'Escape') { e.target.textContent = byId(state.sel).title; e.target.blur(); }
+  }
+});
+$('#detail').addEventListener('focusout', e => {
+  if (e.target.id !== 'title') return;
+  const i = byId(state.sel), v = e.target.textContent.replace(/\s+/g, ' ').trim();
+  if (v && v !== i.title) {
+    i.title = v; i.upd = 'now';
+    const row = document.getElementById('row-' + i.id);
+    if (row) row.querySelector('.t').innerHTML = highlight(v);
+    document.title = `${i.id} · ${v} — Ledgerline`;
+  } else if (!v) e.target.textContent = i.title;
+});
+$('#detail').addEventListener('submit', e => {
+  e.preventDefault();
+  const t = $('#reply'); const body = t.value.trim();
+  if (!body) return;
+  const i = byId(state.sel);
+  i.activity.push({ t: 'c', who: ME, when: 'just now', body });
+  i.upd = 'now';
+  renderDetail({ scrollBottom: true, freshLast: true });
+  const row = document.getElementById('row-' + i.id); if (row) row.querySelector('.when').textContent = 'now';
+  $('#reply').focus();
+});
+$('#detailBar').addEventListener('click', e => {
+  if (e.target.closest('#prevBtn')) step(-1);
+  if (e.target.closest('#nextBtn')) step(1);
+  if (e.target.closest('#copyId')) {
+    const id = state.sel;
+    (navigator.clipboard ? navigator.clipboard.writeText(id) : Promise.reject()).then(() => toast(`Copied ${id}`), () => toast(id));
+  }
+});
+
+$('#newBtn').addEventListener('click', newIssue);
+function newIssue() {
+  const id = 'LED-' + nextId++;
+  issues.unshift({ id, title: '', status: 'todo', pri: 0, who: ME, labels: [], upd: 'now', est: null,
+    desc: `<p style="color:var(--text-3)">Add a description…</p>`, activity: [{ t: 'ev', who: ME, text: 'created the issue', when: 'just now' }] });
+  if (!VIEWS[state.view].test(byId(id))) { state.view = 'active'; store.set('view', 'active'); }
+  state.q = ''; q.value = '';
+  renderList(); select(id);
+  const t = $('#title'); t.focus();
+}
+
+// theme
+const themeBtn = $('#themeBtn');
+const mq = matchMedia('(prefers-color-scheme: dark)');
+function currentTheme() { return document.documentElement.dataset.theme || (mq.matches ? 'dark' : 'light'); }
+function syncThemeBtn() { themeBtn.setAttribute('aria-label', `Switch to ${currentTheme() === 'dark' ? 'light' : 'dark'} theme`); }
+const savedTheme = store.get('theme', '');
+if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+syncThemeBtn();
+themeBtn.addEventListener('click', () => {
+  const next = currentTheme() === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next; store.set('theme', next); syncThemeBtn();
+});
+mq.addEventListener && mq.addEventListener('change', syncThemeBtn);
+
+document.addEventListener('mousedown', e => { if (menuEl && !menuEl.contains(e.target) && !e.target.closest('[data-menu]')) closeMenu(false); });
+window.addEventListener('resize', () => closeMenu(false));
+$('#detail').addEventListener('scroll', () => closeMenu(false));
+
+document.addEventListener('keydown', e => {
+  const tag = e.target.tagName;
+  const typing = tag === 'INPUT' && e.target.type === 'text' || tag === 'TEXTAREA' || e.target.isContentEditable;
+  if (e.key === 'Escape') {
+    if (menuEl) return closeMenu();
+    if (typing) { e.target.blur(); focusSelectedRow(); }
+    return;
+  }
+  if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === 'j' || e.key === 'ArrowDown') { e.preventDefault(); step(1); }
+  else if (k === 'k' || e.key === 'ArrowUp') { e.preventDefault(); step(-1); }
+  else if (e.key === '/') { e.preventDefault(); q.focus(); q.select(); }
+  else if (k === 's' || k === 'p' || k === 'a') {
+    const b = document.querySelector(`[data-menu="${{ s: 'status', p: 'priority', a: 'assignee' }[k]}"]`);
+    if (b) { e.preventDefault(); openMenu(b, b.dataset.menu); }
+  }
+  else if (k === 'r') { const t = $('#reply'); if (t) { e.preventDefault(); t.focus(); t.scrollIntoView({ block: 'center' }); } }
+  else if (k === 'c') { e.preventDefault(); newIssue(); }
+  else if (e.key === 'Enter' && e.target.classList.contains('row')) { e.preventDefault(); const t = $('#title'); if (t) t.focus(); }
+});
+
+/* ---------- Boot ---------- */
+if (!byId(state.sel)) state.sel = 'LED-482';
+if (!VIEWS[state.view].test(byId(state.sel))) state.view = 'all';
+renderList();
+select(state.sel);
+})();
+</script>
+</body>
+</html>

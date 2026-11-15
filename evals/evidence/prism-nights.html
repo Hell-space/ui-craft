@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#191626">
+<title>折光夜场 · 露天光艺节节目单</title>
+<style>
+:root{color-scheme:dark;--ground:#191626;--panel:#252033;--cream:#f7e8d7;--secondary:#c6bbca;--soft:#a598aa;--line:#514657;--coral:#ffb08d;--serif:"Noto Serif SC","Source Han Serif SC","Songti SC","SimSun",serif;--sans:"Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;--digits:"Bahnschrift","Arial Narrow",Arial,sans-serif}
+*{box-sizing:border-box}
+html{scroll-padding-block:90px 20px;scrollbar-gutter:stable}
+html:has(dialog:modal){overflow:hidden}
+body{margin:0;background:var(--ground);color:var(--cream);font-family:var(--sans)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible+label{outline:3px solid #ffceab;outline-offset:4px}
+h1,h2,h3,p,fieldset,figure{margin:0}
+svg{display:block}
+.sr{position:absolute!important;clip:rect(0,0,0,0);width:1px;height:1px;margin:-1px;overflow:hidden;white-space:nowrap;border:0;padding:0}
+.frame{width:min(1220px,calc(100% - clamp(42px,9vw,148px)));margin-inline:auto}
+.poster{background:#201936;position:relative;isolation:isolate;overflow:hidden;border-bottom:1px solid #745968}
+.poster::before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(ellipse at 77% 57%,#493053 0%,#302140 34%,transparent 64%),linear-gradient(109deg,#30213b 0%,#251c35 50%,#242038 100%)}
+.poster-frame{position:relative;min-height:clamp(303px,26vw,363px);display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding-block:25px 24px}
+.edition{display:flex;align-items:center;gap:10px;color:#ffbc9e;font-size:13px;letter-spacing:.15em;font-weight:600;z-index:2}
+.edition svg{width:30px;height:25px}
+h1{position:relative;z-index:2;display:flex;align-items:center;margin:12px 0 17px;font-family:var(--serif);font-size:clamp(68px,7.3vw,111px);line-height:1.12;font-weight:750;letter-spacing:-.058em;color:#ffead8;text-shadow:0 2px 18px #26162d50}
+.notes{display:flex;align-items:baseline;gap:19px;color:#f3dacd;z-index:2}
+.poster-date{font:500 clamp(21px,2.25vw,34px)/1 var(--digits);letter-spacing:.015em;white-space:nowrap}
+.location{font:550 16px/1.4 var(--serif);letter-spacing:.1em;white-space:nowrap}
+.location::before{display:inline-block;content:"";height:.85em;border-left:1px solid #ac8795;vertical-align:-.02em;margin-right:18px}
+.poster-art{position:absolute;z-index:0;right:-3.8%;top:0;width:59%;height:100%;overflow:visible;pointer-events:none}
+.program{padding-bottom:clamp(25px,5vw,75px)}
+.program-nav{position:sticky;top:0;z-index:3;background:var(--ground);display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:clamp(18px,3vw,50px);min-height:84px;border-bottom:1px solid var(--line)}
+.program-nav h2{font:650 clamp(23px,2.25vw,32px)/1.2 var(--serif);letter-spacing:-.045em;white-space:nowrap}
+.nights{border:0;padding:0;display:flex;gap:clamp(15px,2.6vw,34px);height:100%;align-items:stretch}
+.night{position:absolute;clip-path:inset(50%);width:1px;height:1px;opacity:0}
+.date{position:relative;display:flex;align-items:baseline;align-self:stretch;align-content:center;flex-wrap:wrap;gap:7px;padding-inline:3px;cursor:pointer;color:#b9adbe;white-space:nowrap}
+.date b{font:550 22px/1 var(--digits);letter-spacing:.01em}
+.date small{font-size:12px;line-height:1}
+.date:hover{color:#ffe2ce}
+.night:checked+.date{color:var(--coral)}
+.night:checked+.date::after{position:absolute;bottom:-1px;left:0;right:0;height:3px;content:"";background:var(--coral)}
+.night:focus-visible+.date{outline-offset:-5px}
+.agenda-button,.join,.sheet-button{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.agenda-button{border:1px solid #756377;background:transparent;color:#f4dfdc;border-radius:99px;min-height:44px;padding:8px 14px;font-size:13px;font-weight:600;white-space:nowrap}
+.agenda-button svg{width:17px;height:17px}
+.agenda-button:hover,.join:hover,.sheet-button.secondary:hover{background:#453247}
+.count{background:#4b394f;color:#fce5da;border-radius:1em;min-width:20px;padding:2px 5px;font:600 13px/1.15 var(--digits);font-variant-numeric:tabular-nums}
+.agenda-button.has-items{border-color:#bf8f89}
+.agenda-button.has-items .count{background:#ffa982;color:#2c1b2b}
+.entry{display:grid;grid-template-columns:100px minmax(0,1fr) auto;gap:clamp(18px,2.6vw,37px);align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}
+.when{font-family:var(--digits);font-variant-numeric:tabular-nums}
+.start{display:block;font-size:clamp(26px,2.6vw,41px);line-height:1.05;letter-spacing:-.045em;color:#f6dfcf}
+.end{display:block;font-size:16px;margin-top:4px;color:#c1aebe}
+.end::before{content:"–";margin-right:3px;color:#9c899d}
+.work{width:100%;padding:0;min-width:0;display:grid;grid-template-columns:clamp(105px,12.6vw,173px) minmax(0,1fr);gap:clamp(15px,2.1vw,33px);align-items:center;border:0;background:transparent;color:var(--cream);text-align:left}
+.work-art{width:100%;overflow:hidden;aspect-ratio:1.86;background:#2d2339;outline:1px solid #f6e4ff14;outline-offset:-1px}
+.work-art svg,.detail-art svg{width:100%;height:100%}
+.work-text{min-width:0;display:grid;gap:8px}
+.work-name{display:flex;gap:12px;align-items:center;font:640 clamp(24px,2.3vw,35px)/1.28 var(--serif);letter-spacing:-.055em}
+.work-name .go{width:15px;height:15px;color:#ba96ac;flex:none;transition:transform .16s}
+.work:hover .work-name{color:#ffd6bc}
+.work:hover .go{transform:translate(2px,-2px)}
+.work-meta{display:flex;align-items:center;gap:10px;color:var(--secondary);font-size:13px}
+.medium{color:#c4a5b5}
+.medium::before{content:"·";margin-right:10px}
+.join{min-height:44px;white-space:nowrap;padding:7px 12px;border:1px solid #705c70;border-radius:30px;background:transparent;color:#f3cdcd;font-size:13px}
+.join svg{width:15px;height:15px}
+.join.saved{border-color:#a47c77;background:#3e2b39;color:#ffbf9f}
+.join.saved:hover{background:#513440}
+.toast{position:fixed;z-index:4;bottom:max(18px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);max-width:calc(100% - 28px);width:max-content;padding:11px 17px;color:#271d2b;background:#ffe0c5;border-radius:5px;font-size:13px;box-shadow:0 10px 30px #0006}
+.toast:empty{display:none}
+dialog{background:var(--panel);color:var(--cream);border:1px solid #7c6378;border-radius:7px;width:min(545px,calc(100% - 32px));max-height:calc(100dvh - 50px);padding:0;overflow:auto;box-shadow:0 22px 100px #0805129c}
+dialog:modal{overscroll-behavior:contain}
+dialog::backdrop{background:rgb(11 8 19/.72)}
+.sheet{min-width:0;position:relative}
+.sheet-main{padding:28px 30px 26px}
+.sheet-top{display:flex;justify-content:flex-end;position:absolute;top:13px;right:13px;z-index:2}
+.close{width:44px;height:44px;border-radius:50%;border:1px solid #b3a0b481;display:grid;place-content:center;background:#251c2fe3;color:#ffede7}
+.close svg{width:18px;height:18px}
+.close:hover{background:#604959}
+.sheet h2{font:650 34px/1.25 var(--serif);letter-spacing:-.045em;margin:0 34px 10px 0}
+.sheet h3{font:610 20px/1.3 var(--serif)}
+.detail-art{width:100%;height:160px;overflow:hidden}
+.detail-category,.sheet-day{color:#ffc5ab;font-size:12px;font-weight:600;letter-spacing:.06em}
+.detail-category{margin-bottom:6px}
+.detail-by{color:var(--secondary);font-size:13px;margin-bottom:13px}
+.detail-desc{color:#f2e0dc;line-height:1.8;font-size:15px}
+.where{margin:18px 0 0;border-block:1px solid #5a4a5e;padding:13px 0;display:grid;grid-template-columns:46px minmax(0,1fr);gap:9px 10px;font-size:14px;line-height:1.6}
+.where dt{margin:0;color:#b9aabb}
+.where dd{margin:0;color:#f5e4dc}
+.spot{display:block;font-size:13px;color:#ccbed0}
+.actions{display:flex;gap:10px;align-items:center;margin-top:21px}
+.sheet-button{font-weight:650;font-size:14px;min-height:44px;padding:9px 17px;border-radius:28px}
+.sheet-button.primary{border:1px solid #ffaf90;color:#2b1c2a;background:#ffb18d}
+.sheet-button.primary:hover{background:#ffd1ac}
+.sheet-button.secondary{border:1px solid #8c748a;color:#f4dadd;background:transparent}
+.sheet-button svg{width:17px;height:17px}
+.agenda-main,.conflict-main{padding-top:29px}
+.agenda-main h2,.conflict-main h2{margin-bottom:20px}
+.agenda-group+.agenda-group{margin-top:22px}
+.sheet-day{margin-bottom:7px}
+.agenda-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;border-top:1px solid #5a4a5e;padding:9px 0}
+.agenda-work{border:0;background:transparent;text-align:left;display:grid;gap:4px;padding:4px 0}
+.agenda-work:hover strong{color:#ffd1a8}
+.agenda-work strong{font:600 20px/1.3 var(--serif);display:flex;align-items:center;gap:8px}
+.agenda-work .go{width:13px;height:13px;color:#c6aabc}
+.agenda-sub{color:#cbbcd0;font-size:12px;line-height:1.55}
+.agenda-item .join{min-height:44px;padding:8px 10px}
+.empty{font-size:15px;line-height:1.8;color:#d5c8d7;margin:8px 0 19px}
+.conflict-intro{font-size:14px;color:#dbcedc;line-height:1.7;margin-bottom:17px}
+.conflict-item{display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;border-top:1px solid #5a4a5e;padding:11px 0;align-items:baseline}
+.conflict-role{color:var(--secondary);font-size:12px}
+.conflict-item.new .conflict-role{color:#ffc4a7}
+.conflict-item strong{font:600 20px/1.3 var(--serif)}
+.conflict-item .agenda-sub{display:block;margin-top:3px}
+.sheet-feedback{margin-top:12px;color:#ffcfad;font-size:13px;line-height:1.5}
+.sheet-feedback:empty{display:none}
+@media (min-width:1550px){.poster-art{right:0}.poster-frame{min-height:370px}.program-nav{min-height:92px}.entry{padding-block:21px}}
+@media (max-width:850px){.frame{width:calc(100% - 50px)}.poster-frame{min-height:265px}.poster-art{width:58%;right:-4%}.edition{font-size:12px}.entry{grid-template-columns:77px minmax(0,1fr) auto;gap:15px}.program-nav{min-height:72px}.work{grid-template-columns:104px minmax(0,1fr);gap:19px}.work-meta{font-size:12px;gap:6px}.medium::before{margin-right:6px}}
+@media (max-width:640px){.frame{width:calc(100% - 32px)}.poster-frame{min-height:228px;padding-block:17px}.edition{gap:7px;font-size:11px;letter-spacing:.1em}.edition svg{width:23px;height:21px}.poster-art{right:-11%;width:69%;height:100%}h1{display:block;font-size:clamp(47px,10vw,61px);line-height:.99;margin:11px 0 12px;letter-spacing:-.07em}h1 span{display:block}.notes{gap:9px}.poster-date{font-size:18px;letter-spacing:0}.location{font-size:12px;letter-spacing:.05em}.location::before{margin-right:8px}.program{padding-bottom:22px}.program-nav{grid-template-columns:1fr auto;row-gap:0;column-gap:10px;min-height:0;padding-top:9px}.program-nav h2{font-size:24px}.nights{grid-row:2;grid-column:1/-1;height:46px;gap:24px}.date{gap:5px;padding-inline:1px}.date b{font-size:19px}.date small{font-size:11px}.agenda-button{min-height:40px;padding:8px 10px;font-size:12px;grid-row:1;grid-column:2}.entry{grid-template-columns:51px minmax(0,1fr) auto;gap:10px;padding:16px 0}.start{font-size:25px}.end{font-size:15px}.work{grid-template-columns:clamp(52px,14vw,78px) minmax(0,1fr);gap:11px}.work-art{aspect-ratio:.96}.work-text{gap:5px}.work-name{font-size:20px;gap:4px;line-height:1.24}.work-name .go{width:11px;height:11px}.work-meta{font-size:11px;display:block}.medium{display:none}.join{gap:3px;min-height:42px;padding:7px 9px;font-size:12px}.join svg{width:13px;height:13px}.long-suffix{display:none}dialog{width:min(100%,520px);max-height:calc(100dvh - 12px);margin:auto auto 0;border-radius:12px 12px 0 0;border-bottom:0}.sheet-main{padding:20px 20px max(21px,env(safe-area-inset-bottom))}.agenda-main,.conflict-main{padding-top:27px}.sheet h2{font-size:29px}.detail-art{height:145px}.sheet-top{top:10px;right:10px}}
+@media (max-width:370px){.frame{width:calc(100% - 24px)}.poster-art{right:-15%;width:72%}.entry{grid-template-columns:50px minmax(0,1fr) auto;gap:7px}.work{grid-template-columns:45px minmax(0,1fr);gap:7px}.work-name{font-size:18px;gap:3px}.work-name .go{display:none}.join{padding-inline:7px}.start{font-size:22px}.end{font-size:14px}.work-art{aspect-ratio:.84}.date b{font-size:17px}.poster-date{font-size:16px}.where{grid-template-columns:38px 1fr}.actions{gap:7px;flex-wrap:wrap}}
+@media (max-height:570px) and (min-width:510px){dialog{max-height:calc(100dvh - 14px)}.detail-art{height:85px}}
+@media (max-width:640px){.agenda-button,.join{min-height:44px}.work-meta{font-size:13px}dialog{inset:auto 0 0;width:100%;max-width:none;margin:0 auto}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="poster">
+  <div class="frame poster-frame">
+    <p class="edition"><svg viewBox="0 0 36 28" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8" aria-hidden="true"><path d="M1 22h8l10-17 4 20 8-13h4M2 17h6l8-13M3 12h4l5-8"/></svg>露天光艺节</p>
+    <h1><span>折光</span><span>夜场</span></h1>
+    <p class="notes"><span class="poster-date">2026.11.20–21</span><span class="location">汀洲旧港</span></p>
+    <svg class="poster-art" id="poster-art" viewBox="0 0 640 310" aria-hidden="true" focusable="false"></svg>
+  </div>
+</header>
+<main class="frame program" aria-labelledby="program-title">
+  <div class="program-nav">
+    <h2 id="program-title">节目单</h2>
+    <fieldset class="nights"><legend class="sr">选择演出日期</legend>
+      <input class="night" type="radio" name="night" id="night-0" value="0" checked><label class="date" for="night-0"><b>11.20</b><small>周五</small></label>
+      <input class="night" type="radio" name="night" id="night-1" value="1"><label class="date" for="night-1"><b>11.21</b><small>周六</small></label>
+    </fieldset>
+    <button class="agenda-button" id="agenda" type="button" aria-haspopup="dialog"><span id="bookicon"></span><span>我的日程</span><span class="count" id="count">0</span></button>
+  </div>
+  <div id="lineup"></div>
+</main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<dialog id="sheet" aria-labelledby="sheet-title"><div class="sheet">
+  <div class="sheet-top"><button class="close" id="close" type="button" aria-label="关闭"></button></div>
+  <div id="sheet-body"></div>
+  </div></dialog>
+<script>
+'use strict';
+const nights=['11 月 20 日 · 周五','11 月 21 日 · 周六'];
+const works=[
+ {id:'tide',night:0,start:'18:40',end:'19:15',name:'潮汐谱',site:'潮尺阶台',medium:'水面投影',artist:'陈溯 × 流线工作室',work:'旧潮尺上的刻痕变成光谱。岸边的拾音器把拍岸声送到水幕上，每一道亮线都从观众脚下那一级台阶起伏。',where:'从南门入场后沿河向东，第二组石阶近水一侧。'},
+ {id:'mirror',night:0,start:'19:05',end:'19:45',name:'烟里的镜子',site:'装卸棚',medium:'烟幕与镜面',artist:'林浅、陶牧',work:'六面悬挂的薄镜在装卸棚里缓慢转动。窄光束从镜面反射到雾中，观众沿着棚下通道，可以看见光路一段段接上。',where:'从潮尺阶台回到主路，向西经过一排红色立柱即到棚口。'},
+ {id:'garden',night:0,start:'19:45',end:'20:25',name:'逆光花园',site:'北堤草坡',medium:'光纤装置',artist:'原野小组',work:'数百束光纤埋在顺风倒伏的草叶间。沿坡慢慢上行，近处的微光会与远处的岸灯交换轮廓。',where:'沿北堤缓坡向上，入口在堤顶护栏的西侧。'},
+ {id:'echo',night:1,start:'18:50',end:'19:25',name:'低空回声',site:'卸砂台',medium:'声光装置',artist:'许循 × 耳场',work:'三圈发光管悬在旧卸砂架下，低频脉冲从外圈滑向内圈。站在圆心和台边，会听见两种不同的回声。',where:'西门直行至灰色吊架，沿地面白线进入卸砂台。'},
+ {id:'radio',night:1,start:'19:10',end:'19:50',name:'盐岸电台',site:'信号塔下',medium:'现场声光',artist:'梁岑、频外小组',work:'演奏者将收录的船舶呼号切成短句。塔身上的灯带逐段亮起，把声音的间隔写在夜空中。',where:'从卸砂台沿岸向东，旧信号塔底部的环形空地。'},
+ {id:'mist',night:1,start:'19:35',end:'20:15',name:'雾港慢闪',site:'旧引桥',medium:'薄雾与光栅',artist:'沈涯',work:'一列光栅从桥头向河心依次打开。灯光在薄雾和水面间留下不同长度的余影，走到桥侧可以同时看到两列光。',where:'南门沿木栈道走到尽头，观演区设在引桥西侧平台。'}
+];
+const byId=new Map(works.map(w=>[w.id,w]));
+const $=s=>document.querySelector(s);
+const icons={
+ agenda:'<path d="M6 3.5h12a1 1 0 0 1 1 1v16l-7-4-7 4v-16a1 1 0 0 1 1-1Z"/><path d="M9 8h6m-6 3.5h6"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',remove:'<path d="M5 12h14"/>',
+ go:'<path d="M5 18 18 5M7 5h11v11"/>',close:'<path d="m5 5 14 14M19 5 5 19"/>',
+ check:'<path d="m4.5 12 5 5 10-10"/>'
+};
+function icon(id){return '<svg class="'+id+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+icons[id]+'</svg>'}
+$('#bookicon').innerHTML=icon('agenda');$('#close').innerHTML=icon('close');
+const f=n=>Number(n.toFixed(2));
+const pts=points=>points.map(([x,y])=>f(x)+','+f(y)).join(' ');
+function polygon(coords,fill,extra=''){return '<polygon points="'+pts(coords)+'" fill="'+fill+'" '+extra+'/>'}
+function drawPoster(){
+  const tau=2*Math.PI,folds=140,lanes=5,parts=[];
+  function project(t,u){
+    const twist=1.5*t-.23;
+    const radius=1.5+u*.62*Math.cos(twist)+.075*Math.sin(t*3+.3);
+    const x=radius*Math.cos(t),y=radius*Math.sin(t),z=u*.68*Math.sin(twist);
+    const a=.84, b=-.21;
+    const vertical=y*Math.cos(a)+z*Math.sin(a),depth=-y*Math.sin(a)+z*Math.cos(a);
+    const sx=x*Math.cos(b)-vertical*Math.sin(b),sy=x*Math.sin(b)+vertical*Math.cos(b);
+    return [342+sx*129,154-sy*108,depth];
+  }
+  const palette=[[255,163,118],[255,188,149],[246,121,167],[194,149,247],[178,213,245],[230,225,191],[255,159,108]];
+  function tint(t,u,light){
+    const v=((t/tau+1.01+u*.072)%1)*(palette.length-1),j=Math.floor(v),k=v-j;
+    return 'rgb('+palette[j].map((channel,index)=>Math.round(Math.min(255,(channel*(1-k)+palette[j+1][index]*k)*light))).join(',')+')';
+  }
+  for(let i=0;i<folds;i++){
+    const t=i/folds*tau,t2=(i+1)/folds*tau,mid=(t+t2)/2;
+    for(let j=0;j<lanes;j++){
+      const u=j/lanes*2-1,v=(j+1)/lanes*2-1;
+      const points=[project(t,u),project(t2,u),project(t2,v),project(t,v)];
+      const folded=.64+.23*Math.sin(mid*3.0-.9)+.085*Math.cos(mid*2.2+(u+v)*1.3);
+      const glint=.21*Math.pow(Math.max(0,Math.cos(mid*5.5-(u+v)*1.25)),9);
+      const rib=i%3===0?.075:i%3===1?-.055:.025;
+      const light=Math.min(1.13,Math.max(.25,folded+glint+rib+(j===0||j===lanes-1?.12:0)));
+      const color=tint(mid,(u+v)/2,light);
+      let drawing=polygon(points,color,'stroke="'+color+'" stroke-width=".7" stroke-linejoin="round"');
+      if(i%2===0){drawing+='<path d="M'+pts([points[0],points[3]]).replace(' ',' L')+'" fill="none" stroke="'+tint(mid,u,Math.min(1.18,light+.18))+'" stroke-width=".65"/>'}
+      if(j===0||j===lanes-1){const a=j===0?points[0]:points[2],b=j===0?points[1]:points[3];drawing+='<path d="M'+pts([a,b]).replace(' ',' L')+'" fill="none" stroke="'+tint(mid,u,Math.min(1.23,light+.3))+'" stroke-width="1.3"/>';}
+      parts.push({z:points.reduce((s,p)=>s+p[2],0)/4,svg:drawing});
+    }
+  }
+  parts.sort((a,b)=>a.z-b.z);
+  let study='<defs><radialGradient id="halo"><stop stop-color="#aa738f" stop-opacity=".51"/><stop offset=".47" stop-color="#724772" stop-opacity=".29"/><stop offset="1" stop-color="#5c345e" stop-opacity="0"/></radialGradient><linearGradient id="ray"><stop stop-color="#dcb4ee" stop-opacity="0"/><stop offset=".74" stop-color="#d2a5cd" stop-opacity=".5"/><stop offset="1" stop-color="#ffceae" stop-opacity="0"/></linearGradient></defs><ellipse cx="338" cy="155" rx="300" ry="165" fill="url(#halo)"/>';
+  for(let i=0;i<9;i++){const dy=i*2.3;study+='<path d="M-50 '+f(239+dy*.3)+' L232 '+f(183+dy*.45)+' L646 '+f(45+dy*1.1)+'" fill="none" stroke="url(#ray)" stroke-width="'+(i===4?1.25:.5)+'" opacity="'+(i===4?.7:.3)+'"/>'}
+  $('#poster-art').innerHTML=study+parts.map(p=>p.svg).join('');
+}
+drawPoster();
+let artIndex=0;
+function picture(id){
+  const uid='art'+(++artIndex), gradient=(n)=>'url(#'+uid+n+')';
+  const blue=id==='echo'||id==='mist',amber=id==='radio'||id==='garden';
+  const bg=blue?['#11283c','#293751','#423048']:amber?['#302036','#482f3f','#644347']:['#201c3d','#362344','#5b3552'];
+  const glow=blue?'#9bdce6':amber?'#ffae76':'#f0a3d9';
+  let a='<defs><linearGradient id="'+uid+'b" x2=".9" y2="1"><stop stop-color="'+bg[0]+'"/><stop offset=".6" stop-color="'+bg[1]+'"/><stop offset="1" stop-color="'+bg[2]+'"/></linearGradient><radialGradient id="'+uid+'g"><stop stop-color="'+glow+'" stop-opacity=".68"/><stop offset="1" stop-color="'+glow+'" stop-opacity="0"/></radialGradient><linearGradient id="'+uid+'r" x1=".05" y1=".1" x2=".8" y2="1"><stop stop-color="#aaa6ff"/><stop offset=".36" stop-color="#fac1d7"/><stop offset=".63" stop-color="#ffd3a7"/><stop offset="1" stop-color="#ad84c9"/></linearGradient></defs><rect width="220" height="124" fill="'+gradient('b')+'"/>';
+  const line=(d,color,width=1,opacity=1)=>'<path d="'+d+'" fill="none" stroke="'+color+'" stroke-linecap="round" stroke-width="'+width+'" opacity="'+opacity+'"/>';
+  const oval=(x,y,rx,ry,fill,more='')=>'<ellipse cx="'+x+'" cy="'+y+'" rx="'+rx+'" ry="'+ry+'" fill="'+fill+'" '+more+'/>';
+  if(id==='tide'){
+    a+=oval(127,68,105,54,gradient('g'),'opacity=".43"');
+    for(let l=0;l<22;l++){
+      let d='';for(let x=-4;x<=224;x+=4){const n=x/220,y=27+l*3.55+(Math.sin(n*7.0+l*.29)*7.8+Math.sin(n*13.8-l*.12)*2.5)*Math.sin(Math.PI*n)+Math.sin(n*3.5+l*.09)*3;d+=(x===-4?'M':' L')+f(x)+' '+f(y)}
+      a+=line(d,l%6===0?'#ffe2c4':l%3===0?'#f7a5ba':'#b59cdd',l%6===0?1.7:.76,.65+(l%3)*.1);
+    }
+    a+=line('M36 93V59m3 29V63m128-27v45','#151c35',2.7,.76);
+  }else if(id==='mirror'){
+    a+=oval(123,68,108,44,gradient('g'),'opacity=".53"');
+    for(let i=0;i<5;i++){const x=24+32*i,y=27-(i%3)*6;
+      a+=polygon([[x,y+13],[x+23,y],[x+36,y+55],[x+9,y+73]],i%2?'#ac8eb1':'#77648f','fill-opacity=".36" stroke="#d2badb" stroke-width=".8"');
+      a+=polygon([[x,y+13],[x+23,y],[x+12,y+40]],gradient('r'),'opacity=".72"');
+      a+=line('M'+x+' '+(y+13)+'l11 58','#f8d7dc',1.3,.93);
+    }
+    a+=line('M-2 90 47 72 80 78 109 51 146 57 224 32','#ffc9ce',2.3,.87)+line('M-2 88 46 70 79 76 109 49 146 55 224 30','#d387fb',1.5,.55);
+  }else if(id==='garden'){
+    a+=oval(125,62,113,61,gradient('g'),'opacity=".32"')+polygon([[0,99],[76,86],[143,96],[220,74],[220,124],[0,124]],'#302235');
+    for(let i=0;i<55;i++){const x=(i*37)%227,h=11+(i*47)%66,y=102+((i*13)%24)-x*.05,k=(i*7)%19-11;const endx=x+k,endy=y-h,c=i%4===0?'#ffc58c':i%3===0?'#e78ac1':'#dc997e';
+      a+=line('M'+f(x)+' '+f(y)+' Q'+f(x-3)+' '+f(y-h*.66)+' '+f(endx)+' '+f(endy),c,i%7===0?1.2:.72,i%4===0?.92:.72);
+      if(i%3!==0)a+=oval(f(endx),f(endy),i%5===0?2.0:1.0,i%5===0?2.0:1.0,c,'opacity=".95"');
+    }
+  }else if(id==='echo'){
+    a+=oval(110,68,98,55,gradient('g'),'opacity=".45"')+line('M14 7h191M35 7v56m145-56v63','#282337',2.5);
+    for(let i=0;i<8;i++){const rx=85-i*8.6,ry=27-i*2.7,y=54+i*3;
+      a+=oval(112,y,rx,ry,'none','stroke="'+(i%3===0?'#ffe3c1':i%3===1?'#a7dedc':'#b7a9f0')+'" stroke-width="'+(i%3===0?1.95:.95)+'" transform="rotate(-13 112 '+y+')" opacity=".94"');
+    }
+    a+=line('M57 9v42m54-45v20m43-19v24','#d5c4dc',.6,.8);
+  }else if(id==='radio'){
+    a+=oval(106,53,95,60,gradient('g'),'opacity=".38"');
+    for(let r=15;r<105;r+=12){a+=line('M'+(110-r)+' 56A'+r+' '+r+' 0 0 1 '+(110+r)+' 56',r%3===0?'#ffbe83':'#ec94a3',r%3===0?1.4:.9,.83)}
+    a+=polygon([[0,106],[46,100],[80,102],[140,95],[190,100],[220,91],[220,124],[0,124]],'#302434')+line('M91 109 108 41 110 19 113 41 132 110m-36-25 27-11-23-9 17-9m-15-7 12-4m-11 45 24 11m-26-24 21 18','#fbc6a0',1.25,.94)+oval(110,29,2.7,2.7,'#ffe8c3');
+  }else{
+    a+=oval(129,62,102,56,gradient('g'),'opacity=".3"');
+    for(let i=0;i<6;i++){const x=10+i*34,h=45-4*i,y=39+3*i;
+      a+=polygon([[x,y],[x+12,y+1],[x+43,y+h],[x+8,y+h-2]],i%2?'#a9d8e0':'#d1bddf','opacity="'+(.18+(i%3)*.06)+'"');
+      a+=line('M'+x+' '+y+'v'+h+'m0-'+h+'h12',i%2?'#dff6e9':'#e4ddfb',2,.85);
+      a+=line('M'+(x+2)+' '+(y+h+4)+'l8 15m-3-13 5 10','#a2c3d3',1,.65);
+    }a+=line('M0 84 220 78','#b8ced8',.75,.6);
+  }
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 124" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">'+a+'</svg>';
+}
+const storageKey='refract-night-at-wharf-itinerary-v1';
+let saved=new Set(),activeNight=0,stack=[],returnTo=null,toastTimer;
+const overlap=(a,b)=>a.night===b.night && a.start<b.end && b.start<a.end;
+function load(){
+  try{const stored=JSON.parse(localStorage.getItem(storageKey));if(!stored||!Array.isArray(stored.ids))return;
+    const next=new Set();for(const id of stored.ids){const w=byId.get(id);if(w&&![...next].some(k=>overlap(byId.get(k),w)))next.add(id)}saved=next;
+    if(stored.night===0||stored.night===1)activeNight=stored.night;
+  }catch{}
+}
+function write(){try{localStorage.setItem(storageKey,JSON.stringify({ids:[...saved],night:activeNight}));return true}catch{return false}}
+function conflicts(w){return works.filter(other=>saved.has(other.id)&&other.id!==w.id&&overlap(w,other))}
+function joinText(on){return icon(on?'remove':'plus')+'<span>'+(on?'移除':'加入')+'<span class="long-suffix">日程</span></span>'}
+function program(){
+  $('#lineup').innerHTML=nights.map((label,n)=>'<section data-night="'+n+'" aria-label="'+label+'">'+works.filter(w=>w.night===n).map(w=>
+    '<article class="entry"><div class="when" aria-label="'+w.start+' 至 '+w.end+'"><time class="start">'+w.start+'</time><time class="end">'+w.end+'</time></div>'+
+    '<button type="button" class="work" data-open="'+w.id+'" aria-haspopup="dialog" aria-label="查看'+w.name+'的作品与场地"><span class="work-art">'+picture(w.id)+'</span><span class="work-text"><span class="work-name">'+w.name+icon('go')+'</span><span class="work-meta"><span>'+w.site+'</span><span class="medium">'+w.medium+'</span></span></span></button>'+
+    '<button type="button" class="join" data-toggle="'+w.id+'"></button></article>').join('')+'</section>').join('');
+}
+function sync(){
+  document.querySelectorAll('[data-night]').forEach(el=>el.hidden=Number(el.dataset.night)!==activeNight);
+  $('#night-'+activeNight).checked=true;$('#count').textContent=saved.size;$('#agenda').classList.toggle('has-items',saved.size>0);
+  $('#agenda').setAttribute('aria-label','我的日程，已加入 '+saved.size+' 场');
+  document.querySelectorAll('#lineup [data-toggle]').forEach(btn=>{const w=byId.get(btn.dataset.toggle),on=saved.has(w.id);
+    btn.innerHTML=joinText(on);btn.classList.toggle('saved',on);btn.setAttribute('aria-label',on?'从日程移除'+w.name:'将'+w.name+'加入日程');
+  });
+}
+function notify(message){
+  clearTimeout(toastTimer);const inDialog=$('#sheet').open;
+  if(inDialog&&$('#sheet-feedback')){$('#sheet-feedback').textContent=message;$('#toast').textContent='';return}
+  $('#toast').textContent=message;toastTimer=setTimeout(()=>{$('#toast').textContent=''},3000);
+}
+function feedback(){return '<p class="sheet-feedback" id="sheet-feedback" role="status"></p>'}
+function detail(w){
+  const on=saved.has(w.id);
+  return '<figure class="detail-art">'+picture(w.id)+'</figure><div class="sheet-main"><p class="detail-category">'+w.medium+'</p><h2 id="sheet-title" tabindex="-1">'+w.name+'</h2><p class="detail-by">'+w.artist+'</p><p class="detail-desc">'+w.work+'</p><dl class="where"><dt>场次</dt><dd>'+nights[w.night]+'　'+w.start+'–'+w.end+'</dd><dt>场地</dt><dd>'+w.site+'<span class="spot">'+w.where+'</span></dd></dl>'+
+   '<div class="actions"><button type="button" class="sheet-button '+(on?'secondary':'primary')+'" data-toggle="'+w.id+'" data-focus="toggle">'+icon(on?'remove':'plus')+(on?'从我的日程移除':'加入我的日程')+'</button></div>'+feedback()+'</div>';
+}
+function agenda(){
+  const groups=nights.map((label,i)=>{const list=works.filter(w=>w.night===i&&saved.has(w.id));if(!list.length)return '';
+    return '<section class="agenda-group"><p class="sheet-day">'+label+'</p>'+list.map(w=>
+      '<div class="agenda-item"><button class="agenda-work" type="button" data-open="'+w.id+'" data-focus="detail-'+w.id+'" aria-haspopup="dialog"><strong>'+w.name+icon('go')+'</strong><span class="agenda-sub">'+w.start+'–'+w.end+'　'+w.site+'</span></button><button type="button" class="join saved" data-toggle="'+w.id+'" data-focus="remove-'+w.id+'" aria-label="从日程移除'+w.name+'">'+icon('remove')+'移除</button></div>').join('')+'</section>'}).join('');
+  return '<div class="sheet-main agenda-main"><h2 id="sheet-title" tabindex="-1">我的日程</h2>'+(groups||'<p class="empty">还没有加入场次。去节目单挑一场想看的作品。</p><button type="button" class="sheet-button secondary" data-back data-focus="empty">回到节目单</button>')+feedback()+'</div>';
+}
+function conflictView(id){
+  const w=byId.get(id),old=conflicts(w);
+  function item(record,role,fresh){return '<div class="conflict-item'+(fresh?' new':'')+'"><span class="conflict-role">'+role+'</span><div><strong>'+record.name+'</strong><span class="agenda-sub">'+record.start+'–'+record.end+'　'+record.site+'</span></div></div>'}
+  return '<div class="sheet-main conflict-main"><h2 id="sheet-title" tabindex="-1">场次撞时</h2><p class="conflict-intro">'+nights[w.night]+'，这场作品与我的日程中 '+old.length+' 场时间重叠。</p>'+item(w,'想加入',true)+old.map(r=>item(r,'原日程',false)).join('')+
+   '<div class="actions"><button type="button" class="sheet-button secondary" data-keep data-focus="keep">保留原日程</button><button type="button" class="sheet-button primary" data-replace="'+w.id+'">替换这 '+old.length+' 场并加入</button></div>'+feedback()+'</div>';
+}
+const dialog=$('#sheet');
+function focusSheet(target){
+  const selected=target?$('#sheet [data-focus="'+target+'"]'):null;
+  (selected||$('#sheet-title')||$('#close')).focus({preventScroll:true});
+}
+function paintDialog(target){
+  const view=stack.at(-1);if(!view)return;
+  $('#sheet-body').innerHTML=view.type==='detail'?detail(byId.get(view.id)):view.type==='conflict'?conflictView(view.id):agenda();
+  if(dialog.open)focusSheet(target);
+}
+function openView(view,trigger){
+  if(dialog.open){
+    const parent=stack.at(-1);
+    parent.scrollTop=dialog.scrollTop;
+    parent.focus=trigger.dataset.focus;
+    stack.push(view);paintDialog();dialog.scrollTop=0;
+  }
+  else{
+    clearTimeout(toastTimer);$('#toast').textContent='';returnTo=trigger;
+    stack=[view];paintDialog();dialog.showModal();focusSheet();dialog.scrollTop=0;
+  }
+  $('#close').setAttribute('aria-label',stack.length>1?'返回上一层':'关闭');
+}
+function goBack(){
+  stack.pop();
+  if(stack.length){
+    const parent=stack.at(-1);
+    paintDialog(parent.focus);
+    dialog.scrollTop=parent.scrollTop;
+  }
+  else if(dialog.open){dialog.close();if(returnTo&&returnTo.isConnected)returnTo.focus({preventScroll:true});returnTo=null}
+  $('#close').setAttribute('aria-label',stack.length>1?'返回上一层':'关闭');
+}
+function changeSchedule(id,trigger){
+  const w=byId.get(id),on=saved.has(id);
+  if(!on&&conflicts(w).length){openView({type:'conflict',id},trigger);return}
+  if(on)saved.delete(id);else saved.add(id);
+  const written=write();sync();
+  if(dialog.open){const view=stack.at(-1);
+    const target=view.type==='detail'?'toggle':saved.size?'detail-'+works.find(r=>saved.has(r.id)).id:'empty';paintDialog(target);
+  }
+  notify((on?'已移除「':'已加入「')+w.name+'」'+(written?'':'，当前浏览器未能保存日程'));
+}
+function replace(id){
+  const old=conflicts(byId.get(id));
+  old.forEach(w=>saved.delete(w.id));saved.add(id);
+  const written=write();sync();goBack();
+  notify('已加入「'+byId.get(id).name+'」，替换 '+old.length+' 场'+(written?'':'，当前浏览器未能保存日程'));
+}
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('button');
+  if(!btn)return;
+  if(btn.id==='agenda'){openView({type:'agenda'},btn);return}
+  if(btn.dataset.open){openView({type:'detail',id:btn.dataset.open},btn);return}
+  if(btn.dataset.toggle){changeSchedule(btn.dataset.toggle,btn);return}
+  if(btn.dataset.replace){replace(btn.dataset.replace);return}
+  if(btn.hasAttribute('data-keep')){goBack();notify('已保留原日程');return}
+  if(btn.id==='close'||btn.hasAttribute('data-back'))goBack();
+});
+document.querySelectorAll('.night').forEach(r=>r.addEventListener('change',()=>{activeNight=Number(r.value);const ok=write();sync();if(!ok)notify('当前浏览器未能保存日期选择')}));
+dialog.addEventListener('cancel',e=>{e.preventDefault();goBack()});
+dialog.addEventListener('click',e=>{if(e.target!==dialog)return;const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)goBack()});
+load();program();sync();
+</script>
+</body>
+</html>

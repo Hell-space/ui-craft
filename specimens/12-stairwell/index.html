@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>回层 · 封面</title>
+<style>
+  /*
+    回层 —— 三张封面
+    画面：站在楼梯井底、朝正上方看。四跑楼梯的扶手在透视里收成一圈圈方螺旋，即一个层层套叠的「回」。
+    不变：同一口楼梯井、同一个机位（灭点）、纸色、墨色、字的位置与字号。
+    可变：井里发生的声音事件，以及井顶那一方是开着还是合上。
+    脚步的大小只按 1/距离 缩小：透视尺寸与声压都随距离按 1/r 衰减，看见的远近即听见的远近。
+  */
+  :root {
+    --paper: #ebe6db;   /* 纸：偏暖的灰白，近刷白的楼道墙 */
+    --ink:   #8c3123;   /* 墨：铁红，老楼道扶手与楼层号用的防锈漆 */
+    --desk:  #c8c3b8;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--desk); }
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    padding: 40px 16px 56px;
+  }
+  .sleeve {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(16px, 2.2vw, 36px);
+    width: min(100%, 1680px);
+  }
+  .cover {
+    margin: 0;
+    aspect-ratio: 1 / 1;
+    background: var(--paper);
+    overflow: hidden;
+  }
+  .cover svg, .thumb svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  .thumbs { display: flex; flex-direction: column; }
+  .strip { display: flex; gap: 16px; padding: 16px; }
+  .strip.dark  { background: #1b1a19; }
+  .strip.light { background: #f6f5f2; }
+  .thumb { width: 80px; height: 80px; flex: none; background: var(--paper); }
+  @media (max-width: 720px) {
+    .sleeve { grid-template-columns: 1fr; width: min(100%, 520px); }
+  }
+</style>
+</head>
+<body>
+
+<section class="sleeve" aria-label="内页并排">
+  <figure class="cover" id="cover-shangxing" data-cover="up"></figure>
+  <figure class="cover" id="cover-zhefan"    data-cover="turn"></figure>
+  <figure class="cover" id="cover-menhe"     data-cover="door"></figure>
+</section>
+
+<section class="thumbs" aria-label="80 像素缩略图，顺序打乱">
+  <div class="strip dark">
+    <div class="thumb" data-cover="turn"></div>
+    <div class="thumb" data-cover="door"></div>
+    <div class="thumb" data-cover="up"></div>
+  </div>
+  <div class="strip light">
+    <div class="thumb" data-cover="door"></div>
+    <div class="thumb" data-cover="up"></div>
+    <div class="thumb" data-cover="turn"></div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const PAPER = '#ebe6db';
+  const INK   = '#8c3123';
+  const FONT  = "'Noto Serif SC','Source Han Serif SC','Source Han Serif CN','Songti SC','STSong','SimSun',serif";
+
+  // ── 楼梯井几何（三张完全相同）──────────────────────────────
+  // 平面坐标以井心为原点，A = 井口半宽；高度以「层」为单位。
+  // 投影：仰视，P = 灭点 + (x, y) · F / h
+  const VP    = { x: 590, y: 410 };   // 灭点落在画幅左下—右上对角线上
+  const F     = 400;
+  const A     = 1;
+  const RAIL  = 0.30;                 // 扶手高
+  const Q     = 0.25;                 // 每跑升高（四跑一层）
+  const H0    = 0.75;                 // 第一个转角的高度
+  const STEPS = 8;                    // 每跑踏步数
+  const LAST  = 11;                   // 画到第 11 个转角（井顶前的最后平台）
+  const HC    = 4.6;                  // 井顶那一方的高度
+  const C = [[1, -1], [1, 1], [-1, 1], [-1, -1]];   // 右上 → 右下 → 左下 → 左上
+
+  const r     = n => Math.round(n * 100) / 100;
+  const hv    = i => H0 + i * Q;
+  const P     = (x, y, h) => [VP.x + x * F / h, VP.y + y * F / h];
+  const wt    = h => Math.sqrt(1 / h);                       // 线宽随距离变细
+  const horiz = k => C[k % 4][0] !== C[(k + 1) % 4][0];
+  const sidePt = (k, s, lane) => {
+    const a = C[k % 4], b = C[(k + 1) % 4];
+    return horiz(k)
+      ? [(a[0] + (b[0] - a[0]) * s) * A, a[1] * lane]
+      : [a[0] * lane, (a[1] + (b[1] - a[1]) * s) * A];
+  };
+  const seg = (p, q, w) =>
+    `<line x1="${r(p[0])}" y1="${r(p[1])}" x2="${r(q[0])}" y2="${r(q[1])}" stroke-width="${r(w)}"/>`;
+
+  // 井边梁 + 扶手 + 栏杆（竖直线在仰视里全部指向灭点）
+  function structure() {
+    let s = '';
+    for (let k = 0; k < LAST; k++) {
+      const a = C[k % 4], b = C[(k + 1) % 4];
+      const h1 = hv(k), h2 = hv(k + 1), hm = (h1 + h2) / 2;
+      s += seg(P(a[0] * A, a[1] * A, h1), P(b[0] * A, b[1] * A, h2), 2.8 * wt(hm));
+      s += seg(P(a[0] * A, a[1] * A, h1 + RAIL), P(b[0] * A, b[1] * A, h2 + RAIL), 1.6 * wt(hm + RAIL));
+      for (let j = 0; j < STEPS; j++) {
+        const t = (j + 0.5) / STEPS, [x, y] = sidePt(k, t, A), h = h1 + t * Q;
+        s += seg(P(x, y, h), P(x, y, h + RAIL), 1.2 * wt(h));
+      }
+    }
+    for (let i = 0; i <= LAST; i++) {
+      const c = C[i % 4], h = hv(i);
+      s += seg(P(c[0] * A, c[1] * A, h), P(c[0] * A, c[1] * A, h + RAIL), 1.2 * wt(h));
+    }
+    return `<g stroke="${INK}" stroke-linecap="round" fill="none">${s}</g>`;
+  }
+
+  // 《门合》：井还在响——边梁向近处叠出几道逐渐变细的余响
+  function echo() {
+    const scales = [1.045, 1.095, 1.15, 1.21];
+    const widths = [1.5, 1.1, 0.8, 0.55];
+    let s = '';
+    scales.forEach((m, i) => {
+      const S = v => [VP.x + (v[0] - VP.x) * m, VP.y + (v[1] - VP.y) * m];
+      for (let k = 0; k < LAST; k++) {
+        const a = C[k % 4], b = C[(k + 1) % 4], h1 = hv(k), h2 = hv(k + 1);
+        s += seg(S(P(a[0] * A, a[1] * A, h1)), S(P(b[0] * A, b[1] * A, h2)), widths[i] * wt((h1 + h2) / 2));
+      }
+    });
+    return `<g stroke="${INK}" stroke-linecap="round" fill="none">${s}</g>`;
+  }
+
+  // 一步 = 踏面上一块与行进方向垂直的短条（像踏步，也像波形里的一次瞬态）
+  // 左右脚交替：落点略内外错开，响度 1 : 0.86
+  function place(st, lane, n) {
+    if (st.v !== undefined) {
+      const c = C[st.v % 4], L = lane + (n % 2 ? 0.022 : -0.022);
+      return { x: c[0] * L, y: c[1] * L, h: hv(st.v), o: 'c' };
+    }
+    if (st.x !== undefined) return { ...st };
+    const L = lane + (n % 2 ? 0.022 : -0.022);
+    const [x, y] = sidePt(st.k, st.s, L);
+    return { x, y, h: hv(st.k) + st.s * Q, o: horiz(st.k) ? 'v' : 'h' };
+  }
+
+  function mark(p, n, hollow) {
+    const amp = n % 2 ? 0.86 : 1, k = F / p.h;
+    let w, l;
+    if (p.o === 'v')      { w = 0.072;      l = 0.2 * amp; }
+    else if (p.o === 'h') { w = 0.2 * amp;  l = 0.072; }
+    else                  { w = l = 0.105 * (n % 2 ? 0.9 : 1); }
+    const rw = w * k, rh = l * k, cx = VP.x + p.x * k, cy = VP.y + p.y * k;
+    if (hollow) {
+      const sw = Math.max(0.8, Math.min(rw, rh) * 0.11);
+      return `<rect x="${r(cx - rw / 2 + sw / 2)}" y="${r(cy - rh / 2 + sw / 2)}" width="${r(rw - sw)}" height="${r(rh - sw)}" fill="none" stroke="${INK}" stroke-width="${r(sw)}"/>`;
+    }
+    return `<rect x="${r(cx - rw / 2)}" y="${r(cy - rh / 2)}" width="${r(rw)}" height="${r(rh)}" fill="${INK}"/>`;
+  }
+
+  // 《上行》：贴着扶手一路往上；高过约两层半后只剩回声（空心），随后听不见
+  function ascend() {
+    const steps = [];
+    for (let k = 0; k <= 8; k++) {
+      for (let j = 0; j < STEPS; j++) {
+        if (k === 8 && j > 2) break;
+        steps.push({ k, s: (j + 0.5) / STEPS });
+      }
+      if (k < 8) steps.push({ v: k + 1 });
+    }
+    return steps.map((st, n) => {
+      const p = place(st, 1.15, n);
+      return mark(p, n, p.h >= 2.5);
+    }).join('');
+  }
+
+  // 《折返》：上两跑到休息平台，原地转身，靠外侧走回来
+  function turnback() {
+    const UP = 1.15, DN = 1.45, out = [];
+    let n = 0;
+    const push = (st, lane) => { out.push(mark(place(st, lane, n), n, false)); n++; };
+    for (let k = 0; k <= 2; k++) {
+      for (let j = 0; j < STEPS; j++) push({ k, s: (j + 0.5) / STEPS }, UP);
+      if (k < 2) push({ v: k + 1 }, UP);
+    }
+    const ht = hv(3);
+    [[-1.15, -1.13], [-1.30, -1.27], [-1.45, -1.13]]
+      .forEach(([x, y]) => push({ x, y, h: ht, o: 'c' }, 0));
+    for (let k = 2; k >= 0; k--) {
+      for (let j = STEPS - 1; j >= 0; j--) push({ k, s: (j + 0.5) / STEPS }, DN);
+      if (k > 0) push({ v: k }, DN);
+    }
+    return out.join('');
+  }
+
+  // 井顶一方：字只放在这里。开着是纸底墨字；《门合》合上，成为墨底纸字
+  function top(closed, title) {
+    const half = A * F / HC, x = VP.x - half, y = VP.y - half, s = half * 2, pad = 15;
+    const fg = closed ? PAPER : INK;
+    let g = closed
+      ? `<rect x="${r(x)}" y="${r(y)}" width="${r(s)}" height="${r(s)}" fill="${INK}"/>`
+      : `<rect x="${r(x)}" y="${r(y)}" width="${r(s)}" height="${r(s)}" fill="${PAPER}" stroke="${INK}" stroke-width="1.8"/>`;
+    g += `<text x="${r(x + pad)}" y="${r(y + pad + 0.88 * 24)}" font-size="24" font-weight="500" letter-spacing="5" fill="${fg}">回层</text>`;
+    g += `<text x="${r(x + pad - 2)}" y="${r(y + s - pad - 0.12 * 60)}" font-size="60" font-weight="600" letter-spacing="2" fill="${fg}">${title}</text>`;
+    return `<g font-family="${FONT}">${g}</g>`;
+  }
+
+  function cover(kind) {
+    const title = { up: '上行', turn: '折返', door: '门合' }[kind];
+    let body = `<rect width="1000" height="1000" fill="${PAPER}"/>`;
+    if (kind === 'door') body += echo();
+    body += structure();
+    if (kind === 'up')   body += `<g>${ascend()}</g>`;
+    if (kind === 'turn') body += `<g>${turnback()}</g>`;
+    body += top(kind === 'door', title);
+    return `<svg viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="回层 · ${title}" shape-rendering="geometricPrecision">${body}</svg>`;
+  }
+
+  document.querySelectorAll('[data-cover]').forEach(el => {
+    el.innerHTML = cover(el.dataset.cover);
+  });
+})();
+</script>
+</body>
+</html>

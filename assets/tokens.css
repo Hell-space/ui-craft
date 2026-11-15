@@ -1,0 +1,312 @@
+/* ==========================================================================
+   Design tokens · 基线（工具语域）
+   --------------------------------------------------------------------------
+   数值来自 Opus 5.5 的样本与它对本文件的逐项修订（见 references/opus-taste.md、
+   references/calibration.md）。这是一套"拿来就是 7 分"的校准值：
+   先原样套用把结构和层级做对，再只改【旋钮】里的两三个值让它属于这个题目。
+
+   - 后台、工具、设置页、表单：直接用本文件，只选强调色与密度。
+   - 内容、品牌、消费类、"每天读一次"的数据页：在本文件之后再引入
+     assets/tokens-paper.css（纸墨语域）。
+
+   明暗：默认跟随系统；<html data-theme="light|dark"> 手动覆盖。
+   改完颜色后运行：python scripts/contrast.py --tokens <本文件>
+   ========================================================================== */
+
+:root {
+  color-scheme: light dark;
+
+  /* ---------- 旋钮：一次最多改三个 ---------- */
+  --hue-neutral: 80;        /* 中性色色温。暖纸灰 70–85（默认）；精密/夜间可用冷 260–280 */
+  --chroma-neutral: 0.005;  /* 浅色端 0.002–0.006；超过 0.02 灰就会被读成"有颜色" */
+
+  /* 强调色：默认就是墨色——主按钮是墨黑的。
+     Opus 在"品牌色属于内容"时就这么做；这也逼你为题目做一次选择，而不是继承一个"能用的蓝"。
+     选定之后，把下面四行换成配方（H 从题材里取：一种材料、一个标识、一种光）：
+       --accent:        light-dark(oklch(0.50 0.15 H), oklch(0.73 0.12 H));
+       --accent-fg:     light-dark(oklch(0.985 0.004 H), oklch(0.17 0.03 H));
+       --accent-text:   light-dark(oklch(0.45 0.15 H), oklch(0.79 0.105 H));
+       --accent-subtle: light-dark(oklch(0.945 0.025 H), oklch(0.285 0.05 H));
+     工具类常用：钴蓝/蓝紫 H 262–272，C 0.15–0.19。
+     土色与蓝色（铜 45、琥珀 60、深海蓝 227）：C 降到 0.06–0.12，L 0.41–0.53。
+     半透明层和深色渐变取 --accent-layer，亮绿色的配套值可由 palette.py --css 生成。
+     黄、黄绿（H 90–130）：浅色下 L 取 0.80–0.88 并配深色文字，否则发脏。 */
+  --accent:        var(--text);
+  --accent-fg:     var(--bg);
+  --accent-text:   var(--text);
+  --accent-subtle: var(--surface-sunken);
+
+  /* 圆角：整套平移，不单改一个。常用三级，外加一级给舞台、弹窗这类大容器（全圆、正圆、设备画框、数据小色块不计）。
+     印刷感 2/2/4/6/8 · 默认 4/6/8/12/16 · 柔和 6/10/14/20/24 */
+  --radius-xs: 4px;    /* 键帽、内联 code、小标签 */
+  --radius-sm: 6px;    /* 徽标、紧凑控件、菜单项 */
+  --radius-md: 8px;    /* 按钮、输入框 */
+  --radius-lg: 12px;   /* 卡片、面板 */
+  --radius-xl: 16px;   /* 弹窗、大截图容器 */
+  --radius-full: 999px;
+
+  /* ---------- 字体 ---------- */
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system,
+               "Segoe UI Variable Text", "Segoe UI",
+               "PingFang SC", "HarmonyOS Sans SC", "Noto Sans SC", "Source Han Sans SC",
+               "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+  --font-serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+                "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, "SF Mono", "Cascadia Mono",
+               Consolas, Menlo, monospace;
+  --font-display: var(--font-sans);   /* 工具语域：标题与正文同族。纸墨语域改为 var(--font-serif) */
+  --font-body: var(--font-sans);
+  --font-features: "cv11", "ss01";    /* Inter：单层 a、更开阔的数字。其他字体下无害 */
+
+  /* 字号。工具界面以 13–14 为锚；阅读型 16–19；中文后台 15 是甜区 */
+  --text-2xs: 0.6875rem;   /* 11  键帽、图表坐标 */
+  --text-xs: 0.75rem;      /* 12 */
+  --text-sm: 0.8125rem;    /* 13 */
+  --text-md: 0.875rem;     /* 14 */
+  --text-base: 1rem;       /* 16 */
+  --text-lg: 1.125rem;     /* 18 */
+  --text-xl: 1.25rem;      /* 20 */
+  --text-2xl: 1.5rem;      /* 24 */
+  --text-3xl: 1.875rem;    /* 30 */
+  --text-4xl: 2.25rem;     /* 36 */
+  --text-5xl: 3rem;        /* 48 */
+  --text-display: clamp(2.5rem, 1rem + 5vw, 4.5rem);   /* 40 → 72 */
+
+  --leading-tight: 1.08;    /* h1 / display（中文 1.25–1.3） */
+  --leading-heading: 1.2;   /* h2 */
+  --leading-snug: 1.3;      /* h3、h4、小字 */
+  --leading-normal: 1.5;    /* UI 正文；阅读型西文用 1.6–1.65 */
+  --leading-relaxed: 1.75;  /* 中文正文；长文可到 1.85–1.95 */
+
+  /* 字距随字号连续变化（西文）。中文一律归零，标题可给 +0.02~0.1em */
+  --tracking-display: -0.03em;   /* ≥48px */
+  --tracking-tight: -0.02em;     /* 24–36px */
+  --tracking-snug: -0.01em;      /* 18–20px */
+  --tracking-body: 0em;          /* Inter 14–16px 可用 -0.006em */
+  --tracking-wide: 0.06em;       /* 全大写小标签，可到 0.08em */
+
+  --weight-regular: 400;
+  --weight-medium: 500;     /* 按钮、标签、数字的主力。微软雅黑无此字重，中文会显示为 400 */
+  --weight-semibold: 600;   /* 标题 */
+
+  /* ---------- 色彩角色 ---------- */
+  --bg:             light-dark(oklch(0.974 var(--chroma-neutral) var(--hue-neutral)),
+                               oklch(0.170 calc(var(--chroma-neutral) * 1.4) var(--hue-neutral)));
+  --surface:        light-dark(oklch(0.995 calc(var(--chroma-neutral) * 0.4) var(--hue-neutral)),
+                               oklch(0.205 calc(var(--chroma-neutral) * 1.6) var(--hue-neutral)));
+  --surface-raised: light-dark(oklch(1 0 0),
+                               oklch(0.240 calc(var(--chroma-neutral) * 1.8) var(--hue-neutral)));
+  --surface-sunken: light-dark(oklch(0.952 calc(var(--chroma-neutral) * 1.5) var(--hue-neutral)),
+                               oklch(0.150 calc(var(--chroma-neutral) * 1.4) var(--hue-neutral)));
+
+  /* 边框：--border 给卡片与分隔；--border-strong 给输入框、次按钮，以及卡片 hover 的落点。
+     暗色用半透明白，放在任何一层表面上都协调。 */
+  --border:         light-dark(oklch(0.905 calc(var(--chroma-neutral) * 1.6) var(--hue-neutral)),
+                               oklch(1 0 0 / 0.08));
+  --border-strong:  light-dark(oklch(0.830 calc(var(--chroma-neutral) * 2) var(--hue-neutral)),
+                               oklch(1 0 0 / 0.14));
+  /* 需要严格满足 3:1 非文本对比的项目，输入框边界改用这个 */
+  --border-control: light-dark(oklch(0.640 calc(var(--chroma-neutral) * 2) var(--hue-neutral)),
+                               oklch(0.540 calc(var(--chroma-neutral) * 2) var(--hue-neutral)));
+
+  /* 文字：前三级承载信息，均过 4.5:1；--text-faint 只给坐标刻度、分隔符这类不读也行的东西 */
+  --text:           light-dark(oklch(0.235 calc(var(--chroma-neutral) * 2.4) var(--hue-neutral)),
+                               oklch(0.935 calc(var(--chroma-neutral) * 1.4) var(--hue-neutral)));
+  --text-muted:     light-dark(oklch(0.435 calc(var(--chroma-neutral) * 2.6) var(--hue-neutral)),
+                               oklch(0.750 calc(var(--chroma-neutral) * 2) var(--hue-neutral)));
+  --text-subtle:    light-dark(oklch(0.530 calc(var(--chroma-neutral) * 2.4) var(--hue-neutral)),
+                               oklch(0.640 calc(var(--chroma-neutral) * 2) var(--hue-neutral)));
+  --text-faint:     light-dark(oklch(0.700 calc(var(--chroma-neutral) * 2.4) var(--hue-neutral)),
+                               oklch(0.480 calc(var(--chroma-neutral) * 2) var(--hue-neutral)));
+  --text-disabled:  var(--text-faint);
+
+  --accent-hover:   color-mix(in oklch, var(--accent-layer, var(--accent)) 88%, var(--bg));
+  --accent-active:  color-mix(in oklch, var(--accent-layer, var(--accent)) 78%, var(--bg));
+  --focus-ring:     var(--accent);   /* 强调色同时表示"紧急"时，把它换成一个独立的蓝 */
+
+  /* 状态叠层：hover 与 selected 必须不同。
+     侧栏选中 = selected 叠层 + 主文字色 + 500 字重；筛选胶囊/分段控件选中 = accent-subtle 底 + accent-text */
+  --hover-overlay:    color-mix(in srgb, var(--text) 4%, transparent);
+  --active-overlay:   color-mix(in srgb, var(--text) 7%, transparent);
+  --selected-overlay: color-mix(in srgb, var(--text) 7%, transparent);
+
+  /* 语义色：文字版与当前背景配合，分别校验可读性。只出现在小面积元素上。
+     颜色表达好坏，符号（▲▼ + −）表达方向。 */
+  --success-text:   light-dark(oklch(0.45 0.10 241), oklch(0.79 0.095 241));
+  --success-subtle: light-dark(oklch(0.945 0.03 241), oklch(0.265 0.035 245));
+  --warning-text:   light-dark(oklch(0.52 0.11 72), oklch(0.815 0.12 80));
+  --warning-fill:   light-dark(oklch(0.78 0.14 78), oklch(0.80 0.13 80));   /* 黄做填充要更亮才像黄 */
+  --warning-subtle: light-dark(oklch(0.955 0.045 85), oklch(0.295 0.045 80));
+  --danger-text:    light-dark(oklch(0.52 0.185 27), oklch(0.72 0.15 27));
+  --danger-subtle:  light-dark(oklch(0.95 0.03 25), oklch(0.29 0.06 27));
+  --danger:         light-dark(oklch(0.53 0.185 27), oklch(0.70 0.155 27));
+  --danger-fg:      light-dark(oklch(0.99 0.005 25), oklch(0.18 0.03 27));
+  --info-text:      light-dark(oklch(0.49 0.11 245), oklch(0.78 0.09 245));
+  --info-subtle:    light-dark(oklch(0.95 0.025 245), oklch(0.28 0.045 245));
+
+  /* ---------- 间距（4 的倍数） ---------- */
+  --space-0-5: 0.125rem;  /*  2 */
+  --space-1: 0.25rem;     /*  4 */
+  --space-2: 0.5rem;      /*  8 */
+  --space-3: 0.75rem;     /* 12 */
+  --space-4: 1rem;        /* 16 */
+  --space-5: 1.25rem;     /* 20 */
+  --space-6: 1.5rem;      /* 24 */
+  --space-8: 2rem;        /* 32 */
+  --space-10: 2.5rem;     /* 40 */
+  --space-12: 3rem;       /* 48 */
+  --space-16: 4rem;       /* 64 */
+  --space-24: 6rem;       /* 96 */
+  --space-32: 8rem;       /* 128 */
+
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --section-gap: clamp(5.5rem, 11vw, 9rem);   /* 营销页区块间距；后台用 24–32px */
+  --measure: 65ch;                            /* 中文用 36em */
+  --content-width: 75rem;                     /* 1200px */
+
+  /* 控件高度：按钮与输入框同高 */
+  --control-xs: 1.75rem;   /* 28  工具栏 */
+  --control-sm: 2rem;      /* 32  后台默认 */
+  --control-md: 2.25rem;   /* 36  表单、一般产品 */
+  --control-lg: 2.75rem;   /* 44  触屏、营销 hero */
+
+  /* ---------- 阴影 ----------
+     卡片：不用，或只用 --shadow-1。真正的投影只给浮层，写成"环 + 多层负扩散"。
+     颜色带底色的色相，单层不透明度不超过 0.22。 */
+  --shadow-tint:   light-dark(oklch(0.25 0.02 var(--hue-neutral) / 0.06), oklch(0 0 0 / 0.35));
+  --shadow-tint-2: light-dark(oklch(0.25 0.02 var(--hue-neutral) / 0.14), oklch(0 0 0 / 0.50));
+  --shadow-tint-3: light-dark(oklch(0.25 0.02 var(--hue-neutral) / 0.20), oklch(0 0 0 / 0.65));
+  --shadow-ring:   light-dark(oklch(0.25 0.02 var(--hue-neutral) / 0.08), oklch(1 0 0 / 0.10));
+
+  --shadow-1: 0 1px 2px var(--shadow-tint);                                   /* 静止的卡片 */
+  --shadow-2: 0 0 0 1px var(--shadow-ring), 0 2px 4px -1px var(--shadow-tint),
+              0 12px 24px -6px var(--shadow-tint-2);                         /* 下拉、popover、toast */
+  --shadow-3: 0 0 0 1px var(--shadow-ring), 0 4px 8px -2px var(--shadow-tint),
+              0 24px 48px -12px var(--shadow-tint-3);                        /* 弹窗 */
+  --shadow-button: 0 1px 2px var(--shadow-tint-2), inset 0 1px 0 oklch(1 0 0 / 0.14);   /* 主按钮的"可按"感 */
+  --shadow-card-ring: 0 0 0 1px var(--border), 0 1px 2px var(--shadow-tint); /* "影子线"：代替描边，不占布局 */
+
+  /* ---------- 动效 ---------- */
+  --dur-1: 120ms;   /* 颜色、边框、hover */
+  --dur-2: 160ms;   /* 下拉、tooltip */
+  --dur-3: 200ms;   /* 弹窗、开关 */
+  --dur-4: 300ms;   /* 抽屉、大面板。营销页滚动显现另用 600–800ms，只触发一次 */
+
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);       /* 进入、状态变化的默认 */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);       /* 更锐的进入；配 ≤200ms */
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);            /* 退出 */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);    /* 屏内移动，如 tab 指示条 240ms */
+  /* 约 8% 过冲。默认不用；只允许开关落位、拖放落位、点赞类即时反馈 */
+  --ease-spring: linear(0, 0.071, 0.234, 0.433, 0.626, 0.791, 0.917, 1.004, 1.055, 1.079, 1.083,
+                        1.075, 1.06, 1.043, 1.027, 1.015, 1.005, 0.998, 0.995, 0.993, 0.993, 0.994,
+                        0.995, 0.997, 1);
+
+  /* ---------- 层叠 ---------- */
+  --z-sticky: 100;
+  --z-dropdown: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+}
+
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"]  { color-scheme: dark; }
+
+/* ==========================================================================
+   基础样式
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-body);
+  font-feature-settings: var(--font-features);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  text-wrap: balance;
+}
+h1 { line-height: var(--leading-tight);   letter-spacing: var(--tracking-display); }
+h2 { line-height: var(--leading-heading); letter-spacing: var(--tracking-tight); }
+h3, h4 { line-height: var(--leading-snug); letter-spacing: var(--tracking-snug); }
+
+/* 中文：行高放宽、负字距归零、中西之间自动留隙 */
+:lang(zh) body, body:lang(zh) {
+  line-height: var(--leading-relaxed);
+  letter-spacing: 0;
+  text-autospace: normal;
+  line-break: strict;
+}
+:lang(zh) :is(h1, h2, h3, h4) { letter-spacing: 0; line-height: 1.35; }
+
+p { margin: 0; text-wrap: pretty; }
+
+a {
+  color: var(--accent-text);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  transition: text-decoration-color var(--dur-1) ease, color var(--dur-1) ease;
+}
+a:hover { text-decoration-color: currentColor; }
+
+img, svg, video { display: block; max-width: 100%; height: auto; }
+/* 防止白底图片融进背景 */
+img { outline: 1px solid oklch(0 0 0 / 0.06); outline-offset: -1px; }
+
+button, input, select, textarea { font: inherit; color: inherit; letter-spacing: inherit; }
+
+/* 数字：会变化或需要对齐的一律等宽 */
+table, .tabular, time, output { font-variant-numeric: tabular-nums; }
+
+kbd {
+  display: inline-block;
+  min-width: 18px;
+  padding: 3px 5px;
+  font: 500 11px/1 var(--font-mono);
+  text-align: center;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: var(--radius-xs);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent-layer, var(--accent)) 20%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-respect-reduced-motion] *, :root[data-respect-reduced-motion] *::before, :root[data-respect-reduced-motion] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

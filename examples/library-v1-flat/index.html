@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>周六前还 1 本 · 青梧路社区图书馆</title>
+<!--
+  这一屏只回答：接下来我要去图书馆做什么，最晚哪天。
+  立场：一张夹在书后的期限表，而不是一个账户后台。
+  否掉的方向：
+    · 封面墙式的阅读 App —— 好看，但回答的是"我读了什么"，不是"我该哪天去还"
+    · 电商订单列表（缩略图 + 彩色状态胶囊）—— 把借书做成了购物，四种状态四种颜色，真正要紧的那本反而不显眼
+    · 图书馆系统原样的表格后台 —— 信息全，但要自己心算哪本先到期、哪本还能续
+    · 阅读徽章与连续打卡 —— 社区图书馆不需要让人焦虑
+  贯穿装置：期限表。每本书一条从"借出"到"应还"的线，一根"今天"贯穿所有行；
+    日期盖成章。颜色只有两种印油：蓝紫（日期章）与红（三天内到期），都来自图书馆的日期戳。
+  语域：纸墨。圆角 2/4。动效只有一处：续借时期限线向后延伸 14 天。
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400..600&family=Noto+Serif+SC:wght@600&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light dark;
+
+  /* 纸：借书卡的米黄卡纸。墨：带暖的近黑 */
+  --bg:             light-dark(#F3EEE2, #171512);
+  --surface:        light-dark(#FBF8F0, #1E1B17);
+  --surface-sunken: light-dark(#EAE4D6, #12100D);
+  --border:         light-dark(#DED6C5, #312C25);
+  --border-strong:  light-dark(#C9BFAB, #463F35);
+  --text:           light-dark(#1E1B17, #ECE5D8);
+  --text-muted:     light-dark(#524C44, #B8AE9C);
+  --text-subtle:    light-dark(#6A6357, #988F7F);
+  --text-faint:     light-dark(#8E8575, #6C6457);
+  /* 两种印油 */
+  --stamp:          light-dark(#3F4C8C, #AEB8EA);
+  --stamp-subtle:   light-dark(#E3E5F0, #262A40);
+  --due:            light-dark(#B0362C, #E8857A);
+  --hover:          color-mix(in srgb, var(--text) 5%, transparent);
+
+  --font-sans: -apple-system, "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "HarmonyOS Sans SC",
+               "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --font-num: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --t-axis: 0.6875rem;  /* 11 */
+  --t-xs: 0.75rem;      /* 12 */
+  --t-sm: 0.8125rem;    /* 13 */
+  --t-md: 0.9375rem;    /* 15 */
+  --t-lg: 1.25rem;      /* 20 */
+  --t-h1: clamp(1.875rem, 1.3rem + 2.4vw, 2.75rem);
+  --t-date: clamp(4.5rem, 2.2rem + 9.5vw, 8.5rem);
+
+  --r-1: 2px; --r-2: 4px;
+  --gutter: clamp(1.25rem, 5vw, 3.5rem);
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --today: 48.05;   /* 11.11 在 10.05–12.21 这 77 天里的位置（%） */
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"]  { color-scheme: dark; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 400 var(--t-md)/1.75 var(--font-sans);
+  -webkit-font-smoothing: antialiased; text-autospace: normal; line-break: strict;
+}
+h1, h2, p, ol, ul, dl, dd { margin: 0; padding: 0; }
+ol, ul { list-style: none; }
+button { font: inherit; color: inherit; }
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); transition: text-decoration-color 120ms ease; }
+a:hover { text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--stamp); outline-offset: 2px; border-radius: var(--r-1); }
+::selection { background: color-mix(in srgb, var(--stamp) 22%, transparent); }
+
+.wrap { max-width: 76rem; margin-inline: auto; padding-inline: var(--gutter); }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.label { font-size: var(--t-xs); line-height: 1.4; letter-spacing: 0.14em; color: var(--text-subtle); }
+
+/* 日期章 */
+.stamp {
+  display: inline-block; padding: 3px 6px 2px;
+  font: 500 var(--t-sm)/1 var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: 0.04em;
+  color: var(--stamp); border: 1.5px solid currentColor; border-radius: var(--r-1);
+  transition: color 200ms ease;
+}
+.stamp.soon { color: var(--due); }
+
+/* ---------- 顶栏 ---------- */
+.top { position: sticky; top: 0; z-index: 10; border-bottom: 1px solid transparent;
+       transition: border-color 200ms ease, background-color 200ms ease; }
+.top.scrolled { background: color-mix(in srgb, var(--bg) 84%, transparent); backdrop-filter: blur(12px); border-bottom-color: var(--border); }
+.top .wrap { display: flex; align-items: center; gap: 1.5rem; height: 3.5rem; }
+.brand { margin-right: auto; font: 600 1.0625rem/1 var(--font-serif); letter-spacing: 0.1em; text-decoration: none; }
+.nav { display: flex; gap: 0.25rem; }
+.nav a { padding: 0 0.75rem; line-height: 2rem; border-radius: var(--r-2); font-size: var(--t-sm); color: var(--text-muted); text-decoration: none; transition: background-color 120ms ease, color 120ms ease; }
+.nav a:hover { background: var(--hover); color: var(--text); }
+.nav a[aria-current] { color: var(--text); font-weight: 600; }
+.card-no { font-size: var(--t-xs); color: var(--text-subtle); white-space: nowrap; }
+
+/* ---------- 结论 ---------- */
+.lead { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 2rem clamp(2rem, 6vw, 5rem);
+        align-items: end; padding-block: clamp(2.5rem, 1.5rem + 5vw, 5rem) clamp(2.5rem, 2rem + 3vw, 4rem); }
+h1 { margin-top: 0.75rem; font: 600 var(--t-h1)/1.3 var(--font-serif); letter-spacing: 0.04em; text-wrap: balance; }
+.when { display: flex; align-items: flex-end; gap: 1rem; margin-top: 1.25rem; }
+.when .date { font: 500 var(--t-date)/0.82 var(--font-num); font-variant-numeric: lining-nums tabular-nums; letter-spacing: -0.035em; margin-left: -0.04em; }
+.when .side { display: grid; gap: 0.25rem; padding-bottom: 0.35rem; }
+.when .dow { font: 600 var(--t-lg)/1.2 var(--font-serif); letter-spacing: 0.06em; }
+.when .left { font-size: var(--t-sm); font-weight: 600; line-height: 1.4; color: var(--due); }
+.say { max-width: 31em; }
+.say p + p { margin-top: 0.75rem; color: var(--text-muted); }
+.say b { font-weight: 600; }
+.acts { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; margin-top: 1.5rem; min-height: 2.5rem; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; height: 2.25rem; padding: 0 1rem;
+  border: 1px solid var(--border-strong); border-radius: var(--r-2); background: transparent;
+  font-size: var(--t-sm); font-weight: 600; white-space: nowrap; cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, transform 120ms var(--ease);
+}
+.btn:hover { background: var(--hover); border-color: var(--text-subtle); }
+.btn:active { transform: translateY(1px); }
+.btn.ink { height: 2.5rem; padding: 0 1.25rem; background: var(--text); color: var(--bg); border-color: transparent; font-size: var(--t-md); }
+.btn.ink:hover { background: color-mix(in oklch, var(--text) 86%, var(--bg)); }
+.acts .hint { font-size: var(--t-sm); color: var(--text-subtle); }
+
+/* ---------- 版心 ---------- */
+.page { display: grid; grid-template-columns: minmax(0, 1fr) 16.5rem; gap: 3rem clamp(2rem, 4vw, 4rem); align-items: start; padding-bottom: 5rem; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--text); }
+h2 { font: 600 var(--t-lg)/1.3 var(--font-serif); letter-spacing: 0.06em; }
+.sec-head span { font-size: var(--t-sm); color: var(--text-subtle); }
+
+/* ---------- 期限表 ---------- */
+.loans { --cols: minmax(0, 12.5rem) minmax(0, 1fr) 6.25rem 7.25rem; }
+.axis, .loan { display: grid; grid-template-columns: var(--cols); column-gap: 1rem; }
+.axis { border-bottom: 1px solid var(--border); }
+.axis > * { padding-block: 0.625rem; }
+.axis .label { letter-spacing: 0.14em; }
+.scale, .line { position: relative; }
+.scale span { position: absolute; top: 0.625rem; left: calc(var(--at) * 1%);
+              font-size: var(--t-xs); line-height: 1.4; color: var(--text-faint); white-space: nowrap; }
+.scale .now { left: calc(var(--today) * 1% + 0.375rem); font-family: var(--font-mono); font-size: var(--t-axis); line-height: 1.55; font-weight: 500; color: var(--text); }
+.loan { border-bottom: 1px solid var(--border); }
+.loan > * { padding-block: 1.125rem; }
+.book .t { font-weight: 600; line-height: 1.45; text-wrap: pretty; }
+.book .a { font-size: var(--t-sm); color: var(--text-muted); line-height: 1.5; margin-top: 0.125rem; }
+.book .c { font-size: var(--t-xs); color: var(--text-subtle); line-height: 1.5; margin-top: 0.25rem; letter-spacing: 0.02em; }
+
+/* 一条线：借出 → 应还；一根"今天"贯穿所有行。两条淡线是 11 月 1 日与 12 月 1 日 */
+.line { background: linear-gradient(var(--border), var(--border)) 35.06% 0 / 1px 100% no-repeat,
+                    linear-gradient(var(--border), var(--border)) 74.03% 0 / 1px 100% no-repeat; }
+.line::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--today) * 1%); width: 1px; background: var(--text); }
+.line i { position: absolute; top: 50%; height: 6px; margin-top: -3px; border-radius: 1px; }
+.line .span { left: calc(var(--s) * 1%); width: calc((var(--d) - var(--s)) * 1%); background: var(--border-strong);
+              transition: width 600ms var(--ease); }
+.line .gone { left: calc(var(--s) * 1%); width: calc((min(var(--today), var(--d)) - var(--s)) * 1%); background: var(--text-muted); }
+/* 续借出来的那一段：斜纹 */
+.line .ext { left: calc(var(--o, var(--d)) * 1%); width: calc((var(--d) - var(--o, var(--d))) * 1%);
+             background: repeating-linear-gradient(135deg, var(--stamp) 0 1.5px, transparent 1.5px 4.5px);
+             transition: width 600ms var(--ease); }
+.line .end { left: calc(var(--d) * 1%); width: 2px; height: 18px; margin-top: -9px; margin-left: -1px; border-radius: 0;
+             background: var(--stamp); transition: left 600ms var(--ease), background-color 200ms ease; }
+.loan.soon .line .end { background: var(--due); }
+
+.duecol .rest { display: block; margin-top: 0.375rem; font-size: var(--t-xs); color: var(--text-muted); line-height: 1.4; white-space: nowrap; }
+.loan.soon .duecol .rest { color: var(--due); font-weight: 600; }
+.act { display: flex; align-items: flex-start; justify-content: flex-end; }
+.act .why { font-size: var(--t-xs); line-height: 1.5; color: var(--text-subtle); text-align: right; text-wrap: balance; }
+.loan .act .btn { height: 2rem; }
+.foot-note { margin-top: 0.875rem; font-size: var(--t-xs); color: var(--text-subtle); }
+.stamps { display: none; }
+
+/* ---------- 侧栏 ---------- */
+aside { display: grid; gap: 2.5rem; }
+.hold { padding-block: 0.875rem; border-bottom: 1px solid var(--border); }
+.hold .t { font-weight: 600; line-height: 1.45; }
+.hold .a { font-size: var(--t-sm); color: var(--text-muted); line-height: 1.5; }
+.hold .s { display: flex; align-items: center; flex-wrap: wrap; gap: 0.375rem 0.5rem; margin-top: 0.5rem; font-size: var(--t-xs); line-height: 1.4; color: var(--text-muted); }
+.hours { width: 100%; border-collapse: collapse; font-size: var(--t-sm); font-variant-numeric: tabular-nums; }
+.hours th, .hours td { padding: 0.5rem 0; border-bottom: 1px solid var(--border); text-align: left; font-weight: 400; line-height: 1.5; }
+.hours td { text-align: right; font-family: var(--font-mono); font-size: var(--t-xs); color: var(--text-muted); }
+.hours .go th { font-weight: 600; }
+.hours .go td { color: var(--text); font-weight: 500; }
+.hours .go th::after { content: "你要去的那天"; margin-left: 0.5rem; font-size: var(--t-xs); font-weight: 400; color: var(--stamp); }
+.hours .off td { font-family: var(--font-sans); color: var(--text-subtle); }
+.addr { margin-top: 0.75rem; font-size: var(--t-xs); color: var(--text-subtle); line-height: 1.6; }
+.rules li { padding-block: 0.5rem; border-bottom: 1px solid var(--border); font-size: var(--t-sm); line-height: 1.6; color: var(--text-muted); }
+.rules b { font-weight: 600; color: var(--text); font-family: var(--font-mono); font-size: var(--t-xs); }
+
+footer { border-top: 1px solid var(--border); padding-block: 1.5rem 3rem; }
+footer p { font-size: var(--t-xs); color: var(--text-subtle); max-width: 44em; }
+
+/* ---------- 窄屏：线留在每本书下面，日期改成一排章 ---------- */
+@media (max-width: 1080px) {
+  .page { grid-template-columns: minmax(0, 1fr); }
+  aside { grid-template-columns: repeat(auto-fit, minmax(min(17rem, 100%), 1fr)); gap: 2.5rem 3rem; align-items: start; }
+}
+@media (max-width: 820px) {
+  .lead { grid-template-columns: minmax(0, 1fr); }
+  .nav { display: none; }
+  .axis { display: none; }
+  .loan { grid-template-columns: minmax(0, 1fr) auto; column-gap: 1rem; padding-block: 1.125rem; }
+  .loan > * { padding-block: 0; }
+  .book { grid-column: 1; }
+  .act { grid-column: 2; grid-row: 1; }
+  .stamps { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; grid-column: 1 / -1; margin-top: 0.875rem; }
+  .stamps div { display: grid; gap: 0.25rem; min-width: 4.25rem; align-content: start; }
+  .stamps dt { font-size: var(--t-xs); color: var(--text-subtle); line-height: 1.3; letter-spacing: 0.1em; }
+  .stamps .none { font-family: var(--font-mono); font-size: var(--t-sm); color: var(--text-faint); line-height: 1.6; }
+  .line { grid-column: 1 / -1; height: 2.5rem; margin-top: 0.25rem; }
+  .book .lent { display: none; }
+  .duecol { grid-column: 1 / -1; }
+  .duecol .stamp { display: none; }
+  .duecol .rest { margin-top: 0; }
+  .act .why { max-width: 8.5em; }
+  .loan .act .btn, .btn.ink { height: 2.75rem; }   /* 触屏目标 44px */
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="top" id="top">
+  <div class="wrap">
+    <a class="brand" href="#">青梧路社区图书馆</a>
+    <nav class="nav" aria-label="主导航">
+      <a href="#" aria-current="page">我的借阅</a>
+      <a href="#">找书</a>
+      <a href="#">活动</a>
+    </nav>
+    <span class="card-no mono" title="读者证号">证 0027 4416</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="lead" aria-labelledby="h">
+    <div>
+      <p class="label">11 月 11 日 周三 · 在借 4 本，可借 8 本</p>
+      <h1 id="h">周六前，去一趟图书馆</h1>
+      <div class="when">
+        <span class="date" aria-label="11 月 14 日">11.14</span>
+        <span class="side"><span class="dow">周六</span><span class="left">还有 3 天</span></span>
+      </div>
+    </div>
+    <div class="say" aria-live="polite">
+      <p>还<b>《长安的荔枝》</b>——有 2 位读者在等它，所以不能续借。顺便取走已经到馆的<b>《克拉拉与太阳》</b>，它只留到周日。周六开到 17:00。</p>
+      <p id="rest">《置身事内》下周二到期，已经续借过一次；周六读不完，也可以一起带去还。另外 2 本还能续借 14 天。</p>
+      <div class="acts" id="acts">
+        <button class="btn ink" id="renewAll" type="button">续借这 2 本</button>
+        <span class="hint">每本书可以续借一次</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="page">
+    <section aria-labelledby="h-loans">
+      <div class="sec-head"><h2 id="h-loans">在借</h2><span>按到期先后</span></div>
+      <div class="loans">
+        <div class="axis" aria-hidden="true">
+          <span class="label">书</span>
+          <div class="scale">
+            <span style="--at:0">10 月</span><span style="--at:35.06">11 月</span><span style="--at:74.03">12 月</span>
+            <span class="now">今天 11.11</span>
+          </div>
+          <span class="label">应还</span>
+          <span></span>
+        </div>
+        <ol>
+          <li class="loan soon" data-id="a" style="--s:15.58;--d:51.95">
+            <div class="book"><p class="t">长安的荔枝</p><p class="a">马伯庸</p><p class="c mono">I247.53/M118<span class="lent"> · 10.17 借出</span></p></div>
+            <dl class="stamps"><div><dt>借出</dt><dd><span class="stamp">10.17</span></dd></div><div><dt>续借</dt><dd class="none">—</dd></div><div><dt>应还</dt><dd><span class="stamp soon">11.14</span></dd></div></dl>
+            <div class="line" aria-hidden="true"><i class="span"></i><i class="ext"></i><i class="gone"></i><i class="end"></i></div>
+            <div class="duecol"><span class="stamp soon">11.14</span><span class="rest">周六 · 还有 3 天</span></div>
+            <div class="act"><p class="why">有 2 人在等，不能续借</p></div>
+          </li>
+          <li class="loan" data-id="b" style="--s:1.30;--o:37.66;--d:55.84">
+            <div class="book"><p class="t">置身事内：中国政府与经济发展</p><p class="a">兰小欢</p><p class="c mono">F124/L215<span class="lent"> · 10.06 借出</span></p></div>
+            <dl class="stamps"><div><dt>借出</dt><dd><span class="stamp">10.06</span></dd></div><div><dt>续借</dt><dd><span class="stamp">11.03</span></dd></div><div><dt>应还</dt><dd><span class="stamp">11.17</span></dd></div></dl>
+            <div class="line" aria-hidden="true"><i class="span"></i><i class="ext"></i><i class="gone"></i><i class="end"></i></div>
+            <div class="duecol"><span class="stamp">11.17</span><span class="rest">周二 · 还有 6 天</span></div>
+            <div class="act"><p class="why">已续借过一次</p></div>
+          </li>
+          <li class="loan" data-id="c" data-renew="79.22" data-date="12.05" data-rest="周六 · 还有 24 天" style="--s:24.68;--d:61.04">
+            <div class="book"><p class="t">额尔古纳河右岸</p><p class="a">迟子建</p><p class="c mono">I247.57/C552<span class="lent"> · 10.24 借出</span></p></div>
+            <dl class="stamps"><div><dt>借出</dt><dd><span class="stamp">10.24</span></dd></div><div><dt>续借</dt><dd class="none">—</dd></div><div><dt>应还</dt><dd><span class="stamp" data-due>11.21</span></dd></div></dl>
+            <div class="line" aria-hidden="true"><i class="span"></i><i class="ext"></i><i class="gone"></i><i class="end"></i></div>
+            <div class="duecol"><span class="stamp" data-due>11.21</span><span class="rest">周六 · 还有 10 天</span></div>
+            <div class="act"><button class="btn" type="button" data-renew-btn aria-label="续借《额尔古纳河右岸》，应还日延到 12 月 5 日">续借到 12.05</button></div>
+          </li>
+          <li class="loan" data-id="d" data-renew="97.40" data-date="12.19" data-rest="周六 · 还有 38 天" style="--s:42.86;--d:79.22">
+            <div class="book"><p class="t">杂草的故事</p><p class="a">理查德·梅比</p><p class="c mono">Q949.4/M451<span class="lent"> · 11.07 借出</span></p></div>
+            <dl class="stamps"><div><dt>借出</dt><dd><span class="stamp">11.07</span></dd></div><div><dt>续借</dt><dd class="none">—</dd></div><div><dt>应还</dt><dd><span class="stamp" data-due>12.05</span></dd></div></dl>
+            <div class="line" aria-hidden="true"><i class="span"></i><i class="ext"></i><i class="gone"></i><i class="end"></i></div>
+            <div class="duecol"><span class="stamp" data-due>12.05</span><span class="rest">周六 · 还有 24 天</span></div>
+            <div class="act"><button class="btn" type="button" data-renew-btn aria-label="续借《杂草的故事》，应还日延到 12 月 19 日">续借到 12.19</button></div>
+          </li>
+        </ol>
+      </div>
+      <p class="foot-note">每条线从借出画到应还，深色是已经过去的日子，斜纹是续借出来的那 14 天。</p>
+    </section>
+
+    <aside>
+      <section aria-labelledby="h-holds">
+        <div class="sec-head"><h2 id="h-holds">预约</h2><span>2 本</span></div>
+        <ul>
+          <li class="hold"><p class="t">克拉拉与太阳</p><p class="a">石黑一雄</p>
+            <p class="s"><span class="stamp">11.10</span>到馆 · 留到 11.15 周日</p></li>
+          <li class="hold"><p class="t">我的阿勒泰</p><p class="a">李娟</p>
+            <p class="s">排第 2 位，馆里有 3 本 · 预计 11 月下旬</p></li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="h-hours">
+        <div class="sec-head"><h2 id="h-hours">开放时间</h2></div>
+        <table class="hours">
+          <tr class="off"><th scope="row">周一</th><td>闭馆</td></tr>
+          <tr><th scope="row">周二至周五</th><td>9:00 – 20:00</td></tr>
+          <tr class="go"><th scope="row">周六</th><td>9:00 – 17:00</td></tr>
+          <tr><th scope="row">周日</th><td>9:00 – 17:00</td></tr>
+        </table>
+        <p class="addr">青梧路 27 号 2 层。门口的还书箱全天可投，次日上午入账。</p>
+      </section>
+
+      <section aria-labelledby="h-rules">
+        <div class="sec-head"><h2 id="h-rules">规则</h2></div>
+        <ul class="rules">
+          <li>借期 <b>28</b> 天，可续借一次，延 <b>14</b> 天。</li>
+          <li>有人预约的书不能续借。</li>
+          <li>过期不收钱，但还清之前不能再借。</li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap"><p>到期日以馆内系统为准。本页是界面演示，书目真实，借阅记录与日期均为示例。</p></div>
+</footer>
+
+<script>
+(function () {
+  var top = document.getElementById('top');
+  addEventListener('scroll', function () { top.classList.toggle('scrolled', scrollY > 8); }, { passive: true });
+
+  var rest = document.getElementById('rest'), acts = document.getElementById('acts'), all = document.getElementById('renewAll');
+
+  function renew(li) {
+    if (!li || !li.dataset.renew) return;
+    var old = getComputedStyle(li).getPropertyValue('--d').trim();
+    li.style.setProperty('--o', old);
+    li.style.setProperty('--d', li.dataset.renew);
+    li.querySelectorAll('[data-due]').forEach(function (s) { s.textContent = li.dataset.date; });
+    li.querySelector('.rest').textContent = li.dataset.rest;
+    // 期限表上盖一枚今天的续借章
+    var cell = li.querySelector('.stamps .none');
+    if (cell) { cell.className = ''; cell.innerHTML = '<span class="stamp">11.11</span>'; }
+    li.querySelector('.act').innerHTML = '<p class="why">今天续借了，到 ' + li.dataset.date + '</p>';
+    delete li.dataset.renew;
+    sync();
+  }
+
+  function sync() {
+    var left = document.querySelectorAll('.loan[data-renew]').length;
+    if (left === 0) {
+      rest.textContent = '《置身事内》下周二到期，已经续借过一次；周六读不完，也可以一起带去还。另外 2 本今天续借好了，最早的要到 12 月 5 日。';
+      acts.innerHTML = '<span class="hint">续借都用完了，这几本不能再延。</span>';
+    } else if (left === 1) {
+      rest.textContent = '《置身事内》下周二到期，已经续借过一次；周六读不完，也可以一起带去还。还有 1 本能续借 14 天。';
+      all.textContent = '续借这 1 本';
+    }
+  }
+
+  document.querySelectorAll('[data-renew-btn]').forEach(function (b) {
+    b.addEventListener('click', function () { renew(b.closest('.loan')); });
+  });
+  all.addEventListener('click', function () {
+    document.querySelectorAll('.loan[data-renew]').forEach(renew);
+  });
+})();
+</script>
+</body>
+</html>

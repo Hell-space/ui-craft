@@ -1,0 +1,618 @@
+[
+  {
+    "id": 1,
+    "query": "帮我写个番茄钟，python的，要有窗口，能最小化到托盘",
+    "should_trigger": true,
+    "why": "没提设计，但产出是一个带窗口的桌面工具"
+  },
+  {
+    "id": 2,
+    "query": "我有个 flask 后端已经写好了（app.py），现在需要一个上传文件然后显示处理进度的页面，随便弄一个就行",
+    "should_trigger": true,
+    "why": "“随便弄一个”仍然是新界面"
+  },
+  {
+    "id": 3,
+    "query": "把 src/pages/Settings.tsx 里的通知设置拆成一个单独的 tab，再加个免打扰时间段的选择",
+    "should_trigger": true,
+    "why": "已有代码库里新增看得见的界面"
+  },
+  {
+    "id": 4,
+    "query": "老板明天要看 demo，把我们这个库存管理的原型做出来，数据先写死，主要是进销存三个页面",
+    "should_trigger": true,
+    "why": "原型 / demo"
+  },
+  {
+    "id": 5,
+    "query": "做个贪吃蛇，网页版，能手机玩",
+    "should_trigger": true,
+    "why": "小游戏必然带界面与反馈"
+  },
+  {
+    "id": 6,
+    "query": "（附一张截图）这是我们 app 的下单页，转化率很低，你看看哪里有问题",
+    "should_trigger": true,
+    "why": "看截图评审界面"
+  },
+  {
+    "id": 7,
+    "query": "用 uni-app 写个校园二手交易小程序的商品详情页",
+    "should_trigger": true,
+    "why": "小程序页面"
+  },
+  {
+    "id": 8,
+    "query": "这个 dashboard 的图表太多太乱了，帮我重新排一下，重点突出本周 GMV",
+    "should_trigger": true,
+    "why": "版面与层级问题（可与 dataviz 并用）"
+  },
+  {
+    "id": 9,
+    "query": "给我的 Unity 项目写个暂停菜单，UGUI，要有继续、设置、退出，手柄能选",
+    "should_trigger": true,
+    "why": "游戏 UI"
+  },
+  {
+    "id": 10,
+    "query": "WPF 写一个串口调试助手的主界面，左边参数右边收发区",
+    "should_trigger": true,
+    "why": "桌面 GUI"
+  },
+  {
+    "id": 11,
+    "query": "我们的登录页被用户吐槽像十年前的，改一下，品牌色是 #0E7C66",
+    "should_trigger": true,
+    "why": "改版"
+  },
+  {
+    "id": 12,
+    "query": "写个 chrome 插件，popup 里显示今天各个网站的使用时长",
+    "should_trigger": true,
+    "why": "插件 popup 是界面"
+  },
+  {
+    "id": 13,
+    "query": "SwiftUI 做个喝水提醒的 widget 和主界面",
+    "should_trigger": true,
+    "why": "原生移动端界面"
+  },
+  {
+    "id": 14,
+    "query": "给这个 CLI 工具加个 TUI，用 textual，显示任务队列和日志",
+    "should_trigger": true,
+    "why": "终端界面：层级、配色、状态的判断同样适用（轻量档）"
+  },
+  {
+    "id": 15,
+    "query": "做一个个人作品集网站，我是做插画的",
+    "should_trigger": true,
+    "why": "品牌 / 作品集"
+  },
+  {
+    "id": 16,
+    "query": "邮件模板：订单发货通知，html 的",
+    "should_trigger": true,
+    "why": "邮件模板"
+  },
+  {
+    "id": 17,
+    "query": "Settings.tsx 里点保存没反应，控制台报 Cannot read properties of undefined (reading 'id')，帮我查一下",
+    "should_trigger": false,
+    "why": "逻辑 bug，没有可见界面变化"
+  },
+  {
+    "id": 18,
+    "query": "给 Button 组件补单元测试，覆盖 disabled 和 loading 两种状态",
+    "should_trigger": false,
+    "why": "写测试"
+  },
+  {
+    "id": 19,
+    "query": "把销售数据.xlsx 按月汇总，画个折线图发我",
+    "should_trigger": false,
+    "why": "表格与图表：xlsx / dataviz"
+  },
+  {
+    "id": 20,
+    "query": "写个周报 PPT，10 页以内，讲 Q3 增长",
+    "should_trigger": false,
+    "why": "幻灯片"
+  },
+  {
+    "id": 21,
+    "query": "这个接口返回太慢了，/api/orders 要 3 秒，看看 SQL 能不能优化",
+    "should_trigger": false,
+    "why": "后端性能"
+  },
+  {
+    "id": 22,
+    "query": "把项目从 webpack 迁到 vite",
+    "should_trigger": false,
+    "why": "构建工具迁移"
+  },
+  {
+    "id": 23,
+    "query": "解释一下 CSS 里 flex 和 grid 的区别",
+    "should_trigger": false,
+    "why": "概念问答，不产出界面"
+  },
+  {
+    "id": 24,
+    "query": "帮我把这份需求文档整理成 Word，加上目录",
+    "should_trigger": false,
+    "why": "文档"
+  },
+  {
+    "id": 25,
+    "query": "用 matplotlib 画一下这组实验数据的箱线图，论文要用",
+    "should_trigger": false,
+    "why": "纯数据图表：dataviz"
+  },
+  {
+    "id": 26,
+    "query": "Unity 里角色跳跃手感不对，落地有点飘，帮我调一下物理参数",
+    "should_trigger": false,
+    "why": "游戏，但不是界面"
+  },
+  {
+    "id": 27,
+    "query": "给这个 React 项目加上 i18n，把所有硬编码的中文抽成 key",
+    "should_trigger": false,
+    "why": "碰界面文件但没有设计决定"
+  },
+  {
+    "id": 28,
+    "query": "写个爬虫抓豆瓣 top250 存成 csv",
+    "should_trigger": false,
+    "why": "没有界面"
+  },
+  {
+    "id": 101,
+    "query": "（会话中途，刚写完一个筛选接口）接着把刚才那个接口接到前端，在订单列表上加个筛选栏",
+    "should_trigger": true,
+    "why": "会话中途的界面新增",
+    "set": "hard"
+  },
+  {
+    "id": 102,
+    "query": "这个页面在手机上右边被截掉了，修一下",
+    "should_trigger": true,
+    "why": "看得见的布局 bug",
+    "set": "hard"
+  },
+  {
+    "id": 103,
+    "query": "加个 loading",
+    "should_trigger": true,
+    "why": "一句话的小改动",
+    "set": "hard"
+  },
+  {
+    "id": 104,
+    "query": "用 Streamlit 做个内部看板，看每天的工单量和处理时长",
+    "should_trigger": true,
+    "why": "看板（与 dataviz 并用）",
+    "set": "hard"
+  },
+  {
+    "id": 105,
+    "query": "（附一张图）照着这张 Figma 导出的图把登录页还原出来",
+    "should_trigger": true,
+    "why": "照设计稿还原",
+    "set": "hard"
+  },
+  {
+    "id": 106,
+    "query": "做一个完整的博客系统：FastAPI + SQLite，前端你看着办",
+    "should_trigger": true,
+    "why": "混合任务里的界面部分",
+    "set": "hard"
+  },
+  {
+    "id": 107,
+    "query": "build a settings screen for our Flutter app, dark mode too",
+    "should_trigger": true,
+    "why": "英文请求",
+    "set": "hard"
+  },
+  {
+    "id": 108,
+    "query": "把后台所有表格的操作列统一一下，现在有的是文字有的是图标",
+    "should_trigger": true,
+    "why": "统一样式",
+    "set": "hard"
+  },
+  {
+    "id": 109,
+    "query": "做个可视化大屏，展厅用的，显示全国门店实时销量",
+    "should_trigger": true,
+    "why": "大屏（与 dataviz 并用）",
+    "set": "hard"
+  },
+  {
+    "id": 110,
+    "query": "我们的 404 页太敷衍了",
+    "should_trigger": true,
+    "why": "美化",
+    "set": "hard"
+  },
+  {
+    "id": 111,
+    "query": "tkinter 写的这个工具界面能不能弄得不那么像 Windows 98",
+    "should_trigger": true,
+    "why": "桌面 GUI 美化",
+    "set": "hard"
+  },
+  {
+    "id": 112,
+    "query": "（Unity 项目）给游戏加个伤害飘字",
+    "should_trigger": true,
+    "why": "游戏 UI 反馈",
+    "set": "hard"
+  },
+  {
+    "id": 113,
+    "query": "这个按钮点了没反馈，用户以为没点上",
+    "should_trigger": true,
+    "why": "交互反馈",
+    "set": "hard"
+  },
+  {
+    "id": 114,
+    "query": "帮我检查下这个表单的无障碍问题",
+    "should_trigger": true,
+    "why": "无障碍检查",
+    "set": "hard"
+  },
+  {
+    "id": 115,
+    "query": "这个弹窗点关闭没反应，onClose 好像没传进去",
+    "should_trigger": false,
+    "why": "逻辑 bug",
+    "set": "hard"
+  },
+  {
+    "id": 116,
+    "query": "优化一下首屏加载，LCP 现在 4 秒多",
+    "should_trigger": false,
+    "why": "性能",
+    "set": "hard"
+  },
+  {
+    "id": 117,
+    "query": "给项目写个 README，带安装步骤",
+    "should_trigger": false,
+    "why": "文档",
+    "set": "hard"
+  },
+  {
+    "id": 118,
+    "query": "画一张系统架构图，微服务之间怎么调用的",
+    "should_trigger": false,
+    "why": "架构图",
+    "set": "hard"
+  },
+  {
+    "id": 119,
+    "query": "把这页 PPT 的排版调好看点",
+    "should_trigger": false,
+    "why": "PPT",
+    "set": "hard"
+  },
+  {
+    "id": 120,
+    "query": "Jupyter 里把这几列的相关性画个热力图",
+    "should_trigger": false,
+    "why": "纯图表",
+    "set": "hard"
+  },
+  {
+    "id": 121,
+    "query": "写个 Discord 机器人，每天早上推送天气",
+    "should_trigger": false,
+    "why": "无界面",
+    "set": "hard"
+  },
+  {
+    "id": 122,
+    "query": "把导出的 Excel 报表做得好看点，表头加粗、冻结首行",
+    "should_trigger": false,
+    "why": "Excel",
+    "set": "hard"
+  },
+  {
+    "id": 123,
+    "query": "帮我设计一下这个订单系统的数据库表结构",
+    "should_trigger": false,
+    "why": "“设计”陷阱",
+    "set": "hard"
+  },
+  {
+    "id": 124,
+    "query": "游戏存档系统怎么设计比较好，要支持云同步",
+    "should_trigger": false,
+    "why": "“游戏+设计”陷阱",
+    "set": "hard"
+  },
+  {
+    "id": 125,
+    "query": "把 UserCard 组件从 class 改成 hooks 写法",
+    "should_trigger": false,
+    "why": "重构",
+    "set": "hard"
+  },
+  {
+    "id": 126,
+    "query": "简历帮我排个版，导出 PDF",
+    "should_trigger": false,
+    "why": "文档",
+    "set": "hard"
+  },
+  {
+    "id": 201,
+    "query": "给声音档案馆做一张竖版放映海报，在三米外要能认出片名。",
+    "should_trigger": true,
+    "why": "静态视觉的载体、远读层级与排印属于美术指导。",
+    "set": "transfer"
+  },
+  {
+    "id": 202,
+    "query": "我按住鼠标拖 A 时用触屏移动 B，松鼠标又改了一次顺序，帮我把这套交互理顺。",
+    "should_trigger": true,
+    "why": "同一界面的多输入接管、取消与提交语义。",
+    "set": "transfer"
+  },
+  {
+    "id": 203,
+    "query": "Godot 的装备栏用方向键预览，再用手柄确认，关闭后第一发子弹也跟着打出去了。",
+    "should_trigger": true,
+    "why": "菜单和玩法之间的输入归属与恢复需要在引擎中验证。",
+    "set": "transfer"
+  },
+  {
+    "id": 204,
+    "query": "看这组六个图标，同一套里有两个缩小到 16 像素就不认得了。",
+    "should_trigger": true,
+    "why": "系列剪影、负形和实际显示尺度的视觉评审。",
+    "set": "transfer"
+  },
+  {
+    "id": 205,
+    "query": "给这份摄影集的封面比较两种不同的排字和留白方向。",
+    "should_trigger": true,
+    "why": "面向特定载体和内容的艺术方向比较。",
+    "set": "transfer"
+  },
+  {
+    "id": 206,
+    "query": "游戏里的潜艇转弯有点飘，只改阻力模型，HUD 别动。",
+    "should_trigger": false,
+    "why": "仅修改玩法物理，无界面或美术方向任务。",
+    "set": "transfer"
+  },
+  {
+    "id": "mod-01",
+    "query": "给我的 Fabric 1.21 mod 加一个配置界面，能开关自动拾取和调整范围",
+    "should_trigger": true,
+    "why": "mod 里新增了玩家看得见的界面",
+    "set": "mods"
+  },
+  {
+    "id": "mod-02",
+    "query": "tModLoader 里做一个显示 Boss 剩余血量和阶段的小面板",
+    "should_trigger": true,
+    "why": "mod 里新增了玩家看得见的界面",
+    "set": "mods"
+  },
+  {
+    "id": "mod-03",
+    "query": "写个星露谷 SMAPI mod：在商店里显示每件商品比上次便宜了多少",
+    "should_trigger": true,
+    "why": "mod 里新增了玩家看得见的界面",
+    "set": "mods"
+  },
+  {
+    "id": "mod-04",
+    "query": "WoW 插件：做一个副本里显示打断冷却的小框体",
+    "should_trigger": true,
+    "why": "mod 里新增了玩家看得见的界面",
+    "set": "mods"
+  },
+  {
+    "id": "mod-05",
+    "query": "这个 BepInEx 插件的 OnGUI 菜单太丑了，帮我弄好看点",
+    "should_trigger": true,
+    "why": "mod 里新增了玩家看得见的界面",
+    "set": "mods"
+  },
+  {
+    "id": "mod-06",
+    "query": "给游戏注入的 ImGui 调试覆盖层加一个性能曲线和开关列表",
+    "should_trigger": true,
+    "why": "mod 里新增了玩家看得见的界面",
+    "set": "mods"
+  },
+  {
+    "id": "mod-07",
+    "query": "Roblox 里做一个商店界面，手机和手柄都要能用",
+    "should_trigger": true,
+    "why": "mod 里新增了玩家看得见的界面",
+    "set": "mods"
+  },
+  {
+    "id": "mod-08",
+    "query": "RimWorld mod：给殖民者加一个心情详情的提示框",
+    "should_trigger": true,
+    "why": "mod 里新增了玩家看得见的界面",
+    "set": "mods"
+  },
+  {
+    "id": "mod-09",
+    "query": "写一个 Chrome 扩展，点图标弹出当前网页的字数和阅读时长",
+    "should_trigger": true,
+    "why": "mod 里新增了玩家看得见的界面",
+    "set": "mods"
+  },
+  {
+    "id": "mod-10",
+    "query": "用 Streamlit 把这份销售数据做成可以筛选的看板",
+    "should_trigger": true,
+    "why": "mod 里新增了玩家看得见的界面",
+    "set": "mods"
+  },
+  {
+    "id": "mod-11",
+    "query": "Minecraft mod：把钻石矿的生成概率调成原来的两倍",
+    "should_trigger": false,
+    "why": "mod 的纯玩法、数值或加载问题，没有可见界面变化",
+    "set": "mods"
+  },
+  {
+    "id": "mod-12",
+    "query": "tModLoader：让这把剑的伤害随月相变化",
+    "should_trigger": false,
+    "why": "mod 的纯玩法、数值或加载问题，没有可见界面变化",
+    "set": "mods"
+  },
+  {
+    "id": "mod-13",
+    "query": "帮我修 BepInEx 插件加载时报的 Harmony 补丁冲突",
+    "should_trigger": false,
+    "why": "mod 的纯玩法、数值或加载问题，没有可见界面变化",
+    "set": "mods"
+  },
+  {
+    "id": "mod-14",
+    "query": "Factorio mod 的配方平衡：把绿电路的制作时间改成 0.3 秒",
+    "should_trigger": false,
+    "why": "mod 的纯玩法、数值或加载问题，没有可见界面变化",
+    "set": "mods"
+  },
+  {
+    "id": "art-01",
+    "query": "把街港灰盒美化成黄昏渔市，保住跳跃能落脚的地方。",
+    "should_trigger": true,
+    "why": "环境画面的分层、材质、动线与装饰",
+    "set": "game-art"
+  },
+  {
+    "id": "art-02",
+    "query": "同品质的三把武器缩小后都认不出来，调整剪影和材质。",
+    "should_trigger": true,
+    "why": "道具小图与状态辨认",
+    "set": "game-art"
+  },
+  {
+    "id": "art-03",
+    "query": "团战里的命中、击杀和掉落挤在一帧，整理反馈层级，保持数值和操作窗口。",
+    "should_trigger": true,
+    "why": "战斗反馈的时间、层级和定位",
+    "set": "game-art"
+  },
+  {
+    "id": "art-04",
+    "query": "只把桥梁寻路的代价减半，别动画面、特效和操作。",
+    "should_trigger": false,
+    "why": "仅玩法逻辑",
+    "set": "game-art"
+  },
+  {
+    "id": "cross-01",
+    "query": "玻璃厂维修工单的手机页，筛选为空时能清除并查看很长的机器型号",
+    "should_trigger": true,
+    "why": "可见工作台的查找、移动版排版与筛选反馈",
+    "set": "cross-medium"
+  },
+  {
+    "id": "cross-02",
+    "query": "给现有像素游戏加物品比较 tooltip，换资源包和 GUI 倍率仍协调",
+    "should_trigger": true,
+    "why": "宿主插件的可视提示与输入",
+    "set": "cross-medium"
+  },
+  {
+    "id": "cross-03",
+    "query": "节奏游戏的庆祝和下一拍撞在一起，保留鲜艳演出，改一下可读性",
+    "should_trigger": true,
+    "why": "游戏信号、画面层级和交互",
+    "set": "cross-medium"
+  },
+  {
+    "id": "cross-04",
+    "query": "把首饰工作室的手机目录重做，全形、侧光细节和开合都要看到",
+    "should_trigger": true,
+    "why": "品牌与作品目录的构图、材质与操作",
+    "set": "cross-medium"
+  },
+  {
+    "id": "cross-05",
+    "query": "只调节拍判定容差和后端分数计算，画面保持现状",
+    "should_trigger": false,
+    "why": "纯玩法数值，无可见界面改动",
+    "set": "cross-medium"
+  },
+  {
+    "id": "scope-01",
+    "query": "一个支持 NO_COLOR 的 TUI，把序列号末位截断了。只改长设备名显示，反显选区照旧。",
+    "should_trigger": true,
+    "why": "局部可见修正，单色宿主的显示宽度与选区",
+    "set": "scope"
+  },
+  {
+    "id": "scope-02",
+    "query": "请只评这张节奏游戏截图挡没挡目标，不要改文件。",
+    "should_trigger": true,
+    "why": "只评截图中可见的布局",
+    "set": "scope"
+  },
+  {
+    "id": "scope-03",
+    "query": "这个短片静音后上一镜和下一镜接不上。帮我重新考虑目光落点和切口。",
+    "should_trigger": true,
+    "why": "短片的视觉叙事与剪辑判断",
+    "set": "scope"
+  },
+  {
+    "id": "scope-04",
+    "query": "把现成视频原样换容器，画面、剪辑和字幕都不动。",
+    "should_trigger": false,
+    "why": "仅转封装，沿用视频工具",
+    "set": "scope"
+  },
+  {
+    "id": "scope-05",
+    "query": "给终端工具增加一项机器可读的 JSON 字段，界面不变。",
+    "should_trigger": false,
+    "why": "输出协议，与可见界面无关",
+    "set": "scope"
+  },
+  {
+    "id": "frontend-01",
+    "query": "同一个筛选页，手机换了方案，数值在下一屏才看得见，帮我重新排一下。",
+    "should_trigger": true,
+    "why": "当前工况、对象选择和读数要在实际屏宽下重新编排",
+    "set": "frontend"
+  },
+  {
+    "id": "frontend-02",
+    "query": "详情读失败的时候不应丢掉这盘的草稿。保留工作台外观，改好重试、反馈和焦点。",
+    "should_trigger": true,
+    "why": "改动可操作的界面状态和输入后的反馈",
+    "set": "frontend"
+  },
+  {
+    "id": "frontend-03",
+    "query": "夜市节想做一份手机节目单。剧照很热闹，但摊位和开演时间也要一眼可辨。",
+    "should_trigger": true,
+    "why": "展演的视觉辨识与现场查阅",
+    "set": "frontend"
+  },
+  {
+    "id": "frontend-04",
+    "query": "只调整磁带查询服务的请求超时和服务器日志字段，本次不动任何界面。",
+    "should_trigger": false,
+    "why": "只改服务和日志，沿用项目开发流程",
+    "set": "frontend"
+  }
+]

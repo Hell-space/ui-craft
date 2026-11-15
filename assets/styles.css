@@ -1,0 +1,340 @@
+/* ==========================================================================
+   styles.css · 风格预设
+   --------------------------------------------------------------------------
+   每一套都是一组经过渲染校验、互相协调的决定：字体搭配、明暗配色、深色舞台、
+   圆角、阴影、默认弹簧。它们是"起点"，不是皮肤——选一套最接近题目气质的，
+   然后至少把强调色换成题材里的颜色（scripts/palette.py 可以从一个颜色生成整套）。
+
+   用法：把需要的那一块复制进项目（连同注释里的字体链接），把选择器改成 :root；
+         或保留类名，加在 <html class="style-graphite"> 上。
+   全部角色变量与 assets/tokens.css 同名，组件代码不用改。
+   每套的明暗两版都用 scripts/contrast.py 校验过：文字、强调色上的文字、舞台上的文字均 ≥ 4.5:1。
+   --text-faint 例外，它只给装饰性的刻度与分隔符，不承载信息。
+   舞台上的主按钮用 --stage-btn / --stage-btn-fg：强调色与舞台同色系时，按钮会融进背景，要反白。
+   中文标题：衬线预设用思源宋体，无衬线预设用 Noto Sans SC（都在字体链接里），中文标题统一 600 字重——
+   Windows 上若落到微软雅黑，600 会被渲染成粗笨的 Bold，这是中文页面显得廉价的头号原因。
+   --display-tracking 只给西文和数字。中文标题一律 0 到 +0.04em（宋体大字可到 +0.1em），不用斜体。
+   画廊：examples/style-gallery.html 并排渲染各套预设。
+
+   | 预设            | 气质                 | 档位  | 适合                                   |
+   |-----------------|----------------------|-------|----------------------------------------|
+   | paper-ink       | 印刷品、安静、有温度 | 2–4   | 内容、阅读、人文品牌、每天读一次的数据 |
+   | graphite        | 精密、冷静、高密度   | 1–3   | 开发者工具、后台、生产力               |
+   | midnight        | 发布会、高级、有光   | 3–5   | 产品官网、AI/硬件/金融的品牌首屏       |
+   | sunlit          | 明亮、友好、圆润     | 3–4   | 消费 App、教育、生活服务               |
+   | editorial       | 杂志、强对比、大字   | 3–5   | 媒体、作品集、长文、文化机构           |
+   | botanical       | 自然、柔和、可信     | 2–4   | 健康、食物、家居、可持续               |
+   | swiss           | 理性、锋利、网格     | 3–5   | 设计机构、活动、数据报告               |
+   | dusk            | 温暖的光、柔焦、浪漫 | 4–5   | 品牌页、生活方式、创意工具首页         |
+   | studio          | 摄影棚、鲜明、安静   | 3–5   | 产品展示、设计作品、影像导览           |
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1 · paper-ink 纸墨
+   字体：Newsreader（数字与西文标题）+ 思源宋体（中文标题）+ 系统黑体（功能文字）
+   <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..600&family=Noto+Serif+SC:wght@600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+   中文：标题思源宋体 600（已在栈里），正文系统黑体。
+   签名手法：1px 实墨线开栏；零阴影；日期与数字用衬线；一块印油色的深色舞台；物件带颗粒。
+   -------------------------------------------------------------------------- */
+.style-paper-ink {
+  --font-display: "Newsreader", "Noto Serif SC", "Songti SC", Georgia, serif;
+  --font-body: -apple-system, "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --display-weight: 450; --display-tracking: -0.025em;
+
+  --bg: light-dark(#F5F2EB, #171512);           --surface: light-dark(#FFFDF8, #1E1B17);
+  --surface-raised: light-dark(#FFFEFB, #26221C); --surface-sunken: light-dark(#EEEAE0, #12100D);
+  --border: light-dark(#E4DED3, #312C25);       --border-strong: light-dark(#D2C9B9, #463F35);
+  --text: light-dark(#1E1B17, #ECE5D8);         --text-muted: light-dark(#524C44, #B8AE9C);
+  --text-subtle: light-dark(#6E675B, #988F7F);  --text-faint: light-dark(#A69E90, #6C6457);
+  --accent: light-dark(#9E4A2F, #DC8B6C);       --accent-fg: light-dark(#FFFDF8, #1E1410);
+  --accent-text: light-dark(#8E3F26, #E39A7E);  --accent-subtle: light-dark(#F2E3D9, #3B241B);
+
+  --stage: #2A2620; --stage-ink: #F5EFE3; --stage-muted: #C9BFAE;
+  --stage-btn: var(--accent); --stage-btn-fg: var(--accent-fg);   /* 舞台上的主按钮：强调色与舞台同色系时，用纸色反白 */
+  --stage-bg: radial-gradient(70% 90% at 85% 10%, #4A3B2C, transparent 60%), linear-gradient(#2E2A23, #221F1A);
+
+  --r-sm: 2px; --r-md: 4px; --r-lg: 8px; --r-xl: 12px;
+  --shade: 42 29 13;
+  --shadow-card: 0 0 0 1px var(--border);
+  --shadow-pop: 0 0 0 1px rgb(var(--shade) / .08), 0 12px 28px -10px rgb(var(--shade) / .22);
+  --spring-ui: var(--spring-smooth);
+}
+
+/* --------------------------------------------------------------------------
+   2 · graphite 石墨
+   字体：Inter（开 cv11 ss01）+ JetBrains Mono
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@500;600;700&display=swap" rel="stylesheet">
+   中文：标题与正文都用系统黑体，标题 600。
+   签名手法：暗色是一等公民；1px 半透明白边 + 顶边高光；浮层"环 + 投影"；键帽；13px 基准；
+             钴蓝只给选中、焦点、主操作。
+   -------------------------------------------------------------------------- */
+.style-graphite {
+  --font-display: "Inter", ui-sans-serif, system-ui, "Segoe UI", "PingFang SC", "Noto Sans SC", "Microsoft YaHei UI", sans-serif;
+  --font-body: var(--font-display);
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --font-features: "cv11", "ss01";
+  --display-weight: 600; --display-tracking: -0.03em;
+
+  --bg: light-dark(oklch(0.985 0.002 260), oklch(0.155 0.006 265));
+  --surface: light-dark(oklch(1 0 0), oklch(0.19 0.007 265));
+  --surface-raised: light-dark(oklch(1 0 0), oklch(0.225 0.008 265));
+  --surface-sunken: light-dark(oklch(0.965 0.003 260), oklch(0.13 0.005 265));
+  --border: light-dark(oklch(0.92 0.004 260), oklch(1 0 0 / 0.08));
+  --border-strong: light-dark(oklch(0.86 0.005 260), oklch(1 0 0 / 0.14));
+  --text: light-dark(oklch(0.21 0.01 265), oklch(0.95 0.004 265));
+  --text-muted: light-dark(oklch(0.45 0.012 265), oklch(0.74 0.01 265));
+  --text-subtle: light-dark(oklch(0.53 0.012 265), oklch(0.63 0.012 265));
+  --text-faint: light-dark(oklch(0.70 0.01 265), oklch(0.46 0.01 265));
+  --accent: light-dark(oklch(0.55 0.2 258), oklch(0.70 0.16 258));
+  --accent-fg: light-dark(oklch(0.99 0 0), oklch(0.16 0.03 258));
+  --accent-text: light-dark(oklch(0.50 0.2 258), oklch(0.78 0.13 258));
+  --accent-subtle: light-dark(oklch(0.95 0.025 258), oklch(0.27 0.06 258));
+
+  --stage: oklch(0.17 0.012 265); --stage-ink: oklch(0.97 0.004 265); --stage-muted: oklch(0.74 0.012 265);
+  --stage-btn: var(--accent); --stage-btn-fg: var(--accent-fg);   /* 舞台上的主按钮：强调色与舞台同色系时，用纸色反白 */
+  --stage-bg: radial-gradient(60% 80% at 50% -10%, oklch(0.35 0.09 258 / .7), transparent 70%),
+              linear-gradient(oklch(0.19 0.01 265), oklch(0.14 0.008 265));
+
+  --r-sm: 5px; --r-md: 7px; --r-lg: 10px; --r-xl: 14px;
+  --shade: 15 20 35;
+  --shadow-card: 0 0 0 1px var(--border), 0 1px 2px rgb(var(--shade) / .05);
+  --shadow-pop: 0 0 0 1px rgb(var(--shade) / .08), 0 2px 4px -1px rgb(var(--shade) / .06), 0 14px 28px -8px rgb(var(--shade) / .2);
+  --spring-ui: var(--spring-snappy);
+}
+
+/* --------------------------------------------------------------------------
+   3 · midnight 午夜舞台
+   字体：Inter Tight（大标题，紧）+ Inter（正文）
+   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500..700&family=Inter:wght@400..600&family=Noto+Sans+SC:wght@500;600;700&display=swap" rel="stylesheet">
+   中文：系统黑体，标题 600–700、字距 0；不要给中文用 -0.045em。
+   签名手法：深靛底上一团暖光；超大紧排标题；物件放在光里、5 档投影；玻璃只给浮在上面的那层；
+             琥珀色强调与冷底互补；渐变描边。默认暗色——它的浅色版是"晨光"，更素。
+   -------------------------------------------------------------------------- */
+.style-midnight {
+  --font-display: "Inter Tight", "Inter", ui-sans-serif, system-ui, "PingFang SC", "Noto Sans SC", "Microsoft YaHei UI", sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, "PingFang SC", "Microsoft YaHei UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Consolas, monospace;
+  --display-weight: 600; --display-tracking: -0.045em;
+
+  --bg: light-dark(oklch(0.975 0.006 275), oklch(0.135 0.03 275));
+  --surface: light-dark(oklch(0.995 0.003 275), oklch(0.18 0.035 275));
+  --surface-raised: light-dark(oklch(1 0 0), oklch(0.22 0.04 275));
+  --surface-sunken: light-dark(oklch(0.95 0.01 275), oklch(0.115 0.025 275));
+  --border: light-dark(oklch(0.91 0.012 275), oklch(1 0 0 / 0.09));
+  --border-strong: light-dark(oklch(0.84 0.015 275), oklch(1 0 0 / 0.16));
+  --text: light-dark(oklch(0.2 0.03 275), oklch(0.96 0.01 275));
+  --text-muted: light-dark(oklch(0.44 0.03 275), oklch(0.77 0.03 275));
+  --text-subtle: light-dark(oklch(0.52 0.03 275), oklch(0.66 0.03 275));
+  --text-faint: light-dark(oklch(0.70 0.02 275), oklch(0.48 0.03 275));
+  --accent: light-dark(oklch(0.62 0.15 60), oklch(0.80 0.14 70));
+  --accent-fg: light-dark(oklch(0.18 0.04 60), oklch(0.18 0.04 60));
+  --accent-text: light-dark(oklch(0.50 0.13 55), oklch(0.84 0.12 72));
+  --accent-subtle: light-dark(oklch(0.95 0.035 70), oklch(0.27 0.06 70));
+
+  --stage: oklch(0.15 0.04 275); --stage-ink: oklch(0.97 0.01 275); --stage-muted: oklch(0.78 0.035 275);
+  --stage-btn: var(--accent); --stage-btn-fg: var(--accent-fg);   /* 舞台上的主按钮：强调色与舞台同色系时，用纸色反白 */
+  --stage-bg: radial-gradient(45% 60% at 70% 55%, oklch(0.55 0.13 60 / .45), transparent 70%),
+              radial-gradient(70% 70% at 20% 0%, oklch(0.40 0.14 280 / .6), transparent 65%),
+              linear-gradient(oklch(0.17 0.045 275), oklch(0.12 0.03 275));
+
+  --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-xl: 26px;
+  --shade: 8 6 30;
+  --shadow-card: inset 0 1px 0 oklch(1 0 0 / .06), 0 0 0 1px var(--border), 0 10px 30px -12px rgb(var(--shade) / .5);
+  --shadow-pop: inset 0 1px 0 oklch(1 0 0 / .08), 0 0 0 1px oklch(1 0 0 / .1), 0 30px 60px -20px rgb(var(--shade) / .7);
+  --spring-ui: var(--spring-smooth);
+}
+
+/* --------------------------------------------------------------------------
+   4 · sunlit 晴日
+   字体：Fraunces（标题，SOFT 轴调圆）+ Plus Jakarta Sans（正文）
+   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,500..700,100&family=Plus+Jakarta+Sans:wght@400..700&display=swap" rel="stylesheet">
+   中文：标题思源宋体 600 或系统黑体 700（更圆润的气质选后者），正文系统黑体。
+   签名手法：奶油底；大圆角；有色投影（影子带珊瑚色）；有色表面区分类别；贴纸般的徽标；
+             完成时刻用 bouncy 弹簧。圆润但不幼稚：字仍然收紧，颜色明度统一。
+   -------------------------------------------------------------------------- */
+.style-sunlit {
+  --font-display: "Fraunces", "Noto Serif SC", Georgia, serif;
+  --font-body: "Plus Jakarta Sans", ui-sans-serif, system-ui, "PingFang SC", "Microsoft YaHei UI", sans-serif;
+  --font-mono: ui-monospace, Consolas, monospace;
+  --display-weight: 600; --display-tracking: -0.025em; --display-variation: "SOFT" 100, "opsz" 144;
+
+  --bg: light-dark(#FFF8EF, #1C1612);              --surface: light-dark(#FFFFFF, #251E19);
+  --surface-raised: light-dark(#FFFFFF, #2D2520);  --surface-sunken: light-dark(#FBEEDD, #15100D);
+  --border: light-dark(#F0E2CF, #3A2F27);          --border-strong: light-dark(#E2CDB1, #4E4036);
+  --text: light-dark(#2B1D16, #F8ECE0);            --text-muted: light-dark(#5E4A3E, #CDB8A8);
+  --text-subtle: light-dark(#7A6455, #A8917F);     --text-faint: light-dark(#B9A595, #6E5C50);
+  --accent: light-dark(#C9472A, #FF8A68);          --accent-fg: light-dark(#FFFFFF, #2B120A);
+  --accent-text: light-dark(#B23F22, #FF9E80);     --accent-subtle: light-dark(#FFE6DB, #3D221A);
+  --accent-2: light-dark(#F2C14E, #F5CB66);        --accent-3: light-dark(#5BA48A, #79C2A6);   /* 类别色：明度对齐 */
+
+  --stage: #B83C20; --stage-ink: #FFF8EF; --stage-muted: #FFF1E6;
+  --stage-btn: #FFF8EF; --stage-btn-fg: #9C301A;   /* 舞台上的主按钮：强调色与舞台同色系时，用纸色反白 */
+  --stage-bg: radial-gradient(60% 80% at 85% 10%, #E8693E, transparent 65%), radial-gradient(50% 60% at 10% 100%, #9C301A, transparent 70%), #B83C20;
+
+  --r-sm: 10px; --r-md: 14px; --r-lg: 22px; --r-xl: 32px;
+  --shade: 120 50 20;
+  --shadow-card: 0 1px 0 rgb(var(--shade) / .04), 0 10px 30px -14px rgb(var(--shade) / .25);
+  --shadow-pop: 0 2px 6px rgb(var(--shade) / .08), 0 24px 50px -18px rgb(var(--shade) / .35);
+  --spring-ui: var(--spring-bouncy);
+}
+
+/* --------------------------------------------------------------------------
+   5 · editorial 刊物
+   字体：Instrument Serif（标题，常用斜体）+ Instrument Sans（正文）
+   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400..700&display=swap" rel="stylesheet">
+   中文：标题思源宋体 600–900（大字号加 +0.04em），正文系统黑体或宋体。
+   签名手法：极大的衬线标题（正文 8–12 倍），斜体做重音；直角；粗黑栏线；
+             图文出格；钴蓝油墨作局部强调；栏目编号。
+   -------------------------------------------------------------------------- */
+.style-editorial {
+  --font-display: "Instrument Serif", "Noto Serif SC", "Songti SC", Georgia, serif;
+  --font-body: "Instrument Sans", ui-sans-serif, system-ui, "PingFang SC", "Microsoft YaHei UI", sans-serif;
+  --font-mono: ui-monospace, Consolas, monospace;
+  --display-weight: 400; --display-tracking: -0.02em;
+
+  --bg: light-dark(#F7F5EF, #121311);           --surface: light-dark(#FFFFFF, #1A1B18);
+  --surface-raised: light-dark(#FFFFFF, #20211E); --surface-sunken: light-dark(#ECE9E0, #0D0E0C);
+  --border: light-dark(#DAD6CB, #2E2F2B);       --border-strong: light-dark(#111111, #E9E6DD);
+  --text: light-dark(#111111, #EDEAE2);         --text-muted: light-dark(#45443F, #B7B4AA);
+  --text-subtle: light-dark(#5F5E57, #96938A);  --text-faint: light-dark(#9C9A92, #5E5C56);
+  --accent: light-dark(#343E74, #ABBDF5);       --accent-fg: light-dark(#F7F5EF, #171C31);
+  --accent-text: light-dark(#343E74, #BDCBFA);  --accent-subtle: light-dark(#E4E7F3, #252B45);
+
+  --stage: #343E74; --stage-ink: #F7F5EF; --stage-muted: #CDD3EB;
+  --stage-btn: #F7F5EF; --stage-btn-fg: #343E74;   /* 舞台上的主按钮：强调色与舞台同色系时，用纸色反白 */
+  --stage-bg: linear-gradient(#343E74, #29315A);
+
+  --r-sm: 0px; --r-md: 0px; --r-lg: 2px; --r-xl: 2px;
+  --shade: 20 20 15;
+  --shadow-card: 0 0 0 1px var(--border);
+  --shadow-pop: 0 0 0 1px var(--text), 6px 6px 0 rgb(var(--shade) / .12);
+  --spring-ui: var(--spring-smooth);
+}
+
+/* --------------------------------------------------------------------------
+   6 · botanical 植物
+   字体：Young Serif（标题）+ Figtree（正文）
+   <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400..700&display=swap" rel="stylesheet">
+   中文：标题思源宋体 600，正文系统黑体。
+   签名手法：亚麻纸底；陶土与花瓣色并用（一个管操作，一个管点缀）；柔和大圆角；
+             有机形状（大圆、拱形）做容器与图像遮罩；阴影淡而暖。
+   -------------------------------------------------------------------------- */
+.style-botanical {
+  --font-display: "Young Serif", "Noto Serif SC", Georgia, serif;
+  --font-body: "Figtree", ui-sans-serif, system-ui, "PingFang SC", "Microsoft YaHei UI", sans-serif;
+  --font-mono: ui-monospace, Consolas, monospace;
+  --display-weight: 400; --display-tracking: -0.015em;
+
+  --bg: light-dark(#F5F0E8, #191719);           --surface: light-dark(#FDFBF8, #242022);
+  --surface-raised: light-dark(#FFFFFF, #2D282B); --surface-sunken: light-dark(#EDE6DB, #151316);
+  --border: light-dark(#DDD5CC, #373134);       --border-strong: light-dark(#C8BCB1, #53484B);
+  --text: light-dark(#30272B, #F0E9E4);         --text-muted: light-dark(#594C4F, #C3B5B4);
+  --text-subtle: light-dark(#6B5D60, #A8999B);  --text-faint: light-dark(#A99799, #77686D);
+  --accent: light-dark(#875137, #E9B492);       --accent-fg: light-dark(#FFFBF7, #261B16);
+  --accent-text: light-dark(#76402C, #F0C0A2);  --accent-subtle: light-dark(#F5E5DA, #382922);
+  --accent-2: light-dark(#8D526F, #DF9BBB);
+
+  --stage: #392D39; --stage-ink: #F5F0E8; --stage-muted: #D9C8CE;
+  --stage-btn: #F5F0E8; --stage-btn-fg: #392D39;   /* 舞台上的主按钮：强调色与舞台同色系时，用纸色反白 */
+  --stage-bg: radial-gradient(60% 70% at 85% 15%, #654C60, transparent 65%), radial-gradient(40% 50% at 5% 100%, #755645, transparent 70%), #392D39;
+
+  --r-sm: 8px; --r-md: 12px; --r-lg: 20px; --r-xl: 28px;
+  --shade: 52 39 46;
+  --shadow-card: 0 1px 2px rgb(var(--shade) / .05), 0 8px 24px -12px rgb(var(--shade) / .18);
+  --shadow-pop: 0 2px 4px rgb(var(--shade) / .06), 0 20px 40px -16px rgb(var(--shade) / .28);
+  --spring-ui: var(--spring-gentle);
+}
+
+/* --------------------------------------------------------------------------
+   7 · swiss 瑞士信号
+   字体：Schibsted Grotesk（重、紧）+ 同族正文
+   <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Noto+Sans+SC:wght@500;600;700&display=swap" rel="stylesheet">
+   中文：系统黑体 700–900，字距 0；粗黑体是这一套在中文里的"声音"。
+   签名手法：纯白与近黑；一个信号红；直角；严格的 12 栏；超大粗体（800）紧排；
+             大号编号；粗黑线；信息图代替插画。这是少数可以接近纯黑纯白的方向。
+   -------------------------------------------------------------------------- */
+.style-swiss {
+  --font-display: "Schibsted Grotesk", "Helvetica Neue", Arial, "PingFang SC", "Noto Sans SC", "Microsoft YaHei UI", sans-serif;
+  --font-body: var(--font-display);
+  --font-mono: ui-monospace, Consolas, monospace;
+  --display-weight: 800; --display-tracking: -0.05em;
+
+  --bg: light-dark(#FFFFFF, #0B0B0B);           --surface: light-dark(#FFFFFF, #111111);
+  --surface-raised: light-dark(#FFFFFF, #161616); --surface-sunken: light-dark(#F2F2F0, #050505);
+  --border: light-dark(#E2E2DF, #262626);       --border-strong: light-dark(#0B0B0B, #F2F2F0);
+  --text: light-dark(#0B0B0B, #F2F2F0);         --text-muted: light-dark(#3D3D3B, #BDBDB9);
+  --text-subtle: light-dark(#5E5E5B, #9A9A96);  --text-faint: light-dark(#A3A39F, #5A5A57);
+  --accent: light-dark(#D42A14, #FF5A40);       --accent-fg: light-dark(#FFFFFF, #1A0502);
+  --accent-text: light-dark(#C0260F, #FF6A52);  --accent-subtle: light-dark(#FDE6E1, #2E0E09);
+
+  --stage: #D42A14; --stage-ink: #FFFFFF; --stage-muted: #FFF4F1;
+  --stage-btn: #FFFFFF; --stage-btn-fg: #0B0B0B;   /* 舞台上的主按钮：强调色与舞台同色系时，用纸色反白 */
+  --stage-bg: #D42A14;
+
+  --r-sm: 0px; --r-md: 0px; --r-lg: 0px; --r-xl: 0px;
+  --shade: 0 0 0;
+  --shadow-card: 0 0 0 1px var(--border);
+  --shadow-pop: 0 0 0 2px var(--text);
+  --spring-ui: var(--spring-snappy);
+}
+
+/* --------------------------------------------------------------------------
+   8 · dusk 暮光
+   字体：Bricolage Grotesque（标题，有性格）+ Inter（正文）
+   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..700&family=Inter:wght@400..600&family=Noto+Sans+SC:wght@500;600;700&display=swap" rel="stylesheet">
+   中文：系统黑体，标题 600–700。
+   签名手法：桃—玫瑰—紫的低饱和"晚霞"网状渐变做舞台，叠颗粒；玻璃卡片浮在上面（下面真的有渐变）；
+             大圆角；梅子色强调；柔光投影。渐变用得对的那一类——它是光，不是装饰。
+   -------------------------------------------------------------------------- */
+.style-dusk {
+  --font-display: "Bricolage Grotesque", "Inter", ui-sans-serif, system-ui, "PingFang SC", "Noto Sans SC", "Microsoft YaHei UI", sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, "PingFang SC", "Microsoft YaHei UI", sans-serif;
+  --font-mono: ui-monospace, Consolas, monospace;
+  --display-weight: 650; --display-tracking: -0.035em;
+
+  --bg: light-dark(#FBF6F3, #17121A);           --surface: light-dark(#FFFFFF, #201923);
+  --surface-raised: light-dark(#FFFFFF, #28202B); --surface-sunken: light-dark(#F5ECE8, #110D13);
+  --border: light-dark(#EEE1DC, #352A37);       --border-strong: light-dark(#DFCBC4, #4A3C4D);
+  --text: light-dark(#241A28, #F5ECF2);         --text-muted: light-dark(#54465A, #C8B9C6);
+  --text-subtle: light-dark(#6E5F72, #A595A5);  --text-faint: light-dark(#AE9FB0, #6C5D6E);
+  --accent: light-dark(#8A3D74, #E79BCF);       --accent-fg: light-dark(#FFFFFF, #2A0E21);
+  --accent-text: light-dark(#7B3367, #EEAED9);  --accent-subtle: light-dark(#F6E2EE, #3A2033);
+
+  --stage: #5B3A6B; --stage-ink: #FFFFFF; --stage-muted: #F3DCE8;
+  --stage-btn: #FFFFFF; --stage-btn-fg: #5B2F55;   /* 舞台上的主按钮：强调色与舞台同色系时，用纸色反白 */
+  --stage-bg: radial-gradient(55% 70% at 15% 20%, #F2A882, transparent 60%),
+              radial-gradient(60% 70% at 85% 25%, #D46A8E, transparent 62%),
+              radial-gradient(70% 80% at 50% 110%, #5B3A8B, transparent 70%),
+              #B5658A;
+
+  --r-sm: 10px; --r-md: 14px; --r-lg: 22px; --r-xl: 30px;
+  --shade: 60 20 50;
+  --shadow-card: 0 1px 2px rgb(var(--shade) / .05), 0 16px 40px -18px rgb(var(--shade) / .3);
+  --shadow-pop: inset 0 1px 0 rgb(255 255 255 / .5), 0 0 0 1px rgb(255 255 255 / .35), 0 30px 60px -24px rgb(var(--shade) / .45);
+  --spring-ui: var(--spring-smooth);
+}
+
+/* --------------------------------------------------------------------------
+   9 · studio 摄影棚
+   使用本机无衬线，首帧不等待字体请求。暖白环境配石墨深景，交互色取自唱片纸标。
+   -------------------------------------------------------------------------- */
+.style-studio {
+  --font-display: "Inter", "Helvetica Neue", Arial, "PingFang SC", "Noto Sans SC", "Microsoft YaHei UI", sans-serif;
+  --font-body: "Inter", -apple-system, "Segoe UI", "PingFang SC", "Noto Sans SC", "Microsoft YaHei UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --display-weight: 600; --display-weight-zh: 600; --display-tracking: -.055em;
+  --bg: light-dark(#F6F5F1, #181917); --surface: light-dark(#FDFCFA, #20211F);
+  --surface-raised: light-dark(#FFFFFF, #2A2B28); --surface-sunken: light-dark(#EAE9E4, #121310);
+  --border: light-dark(#D9D8D2, #383A35); --border-strong: light-dark(#B6B5AF, #62645D);
+  --text: light-dark(#1B1C19, #F4F3EF); --text-muted: light-dark(#53544F, #C1C2BA);
+  --text-subtle: light-dark(#63655D, #A9ABA2); --text-faint: light-dark(#AAA9A2, #71736C);
+  --accent: light-dark(#AB3E20, #FFA387); --accent-fg: light-dark(#FFFFFF, #23140F);
+  --accent-text: light-dark(#97381D, #FFAD94); --accent-subtle: light-dark(#F3E2D9, #442A20);
+  --stage: #191A18; --stage-ink: #F4F3EF; --stage-muted: #C2C3BA;
+  --stage-bg: var(--stage); --stage-btn: var(--stage-ink); --stage-btn-fg: var(--stage);
+  --r-sm: 4px; --r-md: 8px; --r-lg: 12px; --r-xl: 18px;
+  --shade: 27 28 24; --shadow-card: 0 2px 6px rgb(var(--shade) / .06);
+  --shadow-pop: 0 12px 32px rgb(var(--shade) / .12); --spring-ui: var(--spring-smooth);
+}

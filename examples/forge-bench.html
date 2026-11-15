@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:">
+<title>渡口铁匠铺</title>
+<style>
+:root {
+  color-scheme: dark;
+  --ink: #101512;
+  --panel: #222622;
+  --paper: #f0e8e3;
+  --mute: #bbb9a9;
+  --faint: #9a9e90;
+  --line: #4a4d43;
+  --ice: #b2ddeb;
+  --sand: #dfc79a;
+  --warm: #d29e78;
+  --gain: #cbd9ae;
+  --loss: #e1b291;
+  --serif: 'STSong', 'Songti SC', 'SimSun', 'Noto Serif CJK SC', serif;
+  --sans: 'Microsoft YaHei UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif;
+  --mono: 'Cascadia Mono', Consolas, 'Courier New', monospace;
+  font: 16px/1.4 var(--sans);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  align-items: center;
+  background: #141917;
+  color: var(--paper);
+}
+button { font: inherit; color: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+button:focus-visible { outline: 2px solid var(--paper); outline-offset: 3px; }
+button:disabled { cursor: default; }
+canvas { image-rendering: pixelated; }
+.bench {
+  width: min(100%, 1216px);
+  margin: 0 auto;
+  border: 1px solid #51544a;
+  background: var(--panel);
+  box-shadow: 0 12px 48px #0b0d0b;
+}
+.panorama {
+  position: relative;
+  overflow: hidden;
+  height: clamp(230px, 43vh, 390px);
+  background: #263332;
+  border-bottom: 3px solid #101411;
+}
+#world { display: block; width: 100%; height: 100%; }
+.location {
+  position: absolute;
+  top: clamp(14px, 2vw, 29px);
+  left: clamp(15px, 2.1vw, 31px);
+  margin: 0;
+  padding: 5px 13px 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #f5e4c2;
+  background: #171b18eb;
+  border-left: 3px solid #c79f66;
+  border-bottom: 1px solid #626250;
+  font: 600 clamp(17px, 2vw, 26px)/1.2 var(--serif);
+  letter-spacing: .08em;
+}
+.location canvas { width: 24px; height: 24px; }
+.tray {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  border-top: 2px solid #747567;
+  background: var(--panel);
+}
+.rack, .inspection { min-width: 0; padding: clamp(18px, 2.3vw, 34px); }
+.rack {
+  background: linear-gradient(120deg, #2b3029, #242922 66%);
+  border-right: 1px solid #111612;
+  box-shadow: inset -1px 0 #55584b;
+  display: flex;
+  flex-direction: column;
+}
+.rack-heading, .inspection-heading { display: flex; align-items: center; }
+.rack-heading { gap: 14px; margin: 0 0 clamp(10px, 2vh, 18px); }
+.rack-heading h2 { margin: 0; color: #e1d8c0; font: 600 clamp(18px, 1.8vw, 24px)/1.2 var(--serif); }
+.rack-heading .rule { flex: 1; height: 1px; background: #626353; }
+.navigate { display: inline-flex; align-items: center; gap: 4px; color: var(--mute); font-size: 12px; white-space: nowrap; }
+kbd {
+  display: inline-block;
+  font: 600 11px/1.2 var(--mono);
+  padding: 1px 4px;
+  color: inherit;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+}
+.slots { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: clamp(6px, .9vw, 14px); flex: 1; }
+.slot {
+  position: relative;
+  min-width: 0;
+  min-height: 119px;
+  appearance: none;
+  cursor: pointer;
+  padding: 22px 2px 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #1d221e;
+  border: 1px solid #53564a;
+  box-shadow: inset 0 3px #171c18;
+}
+.slot:hover { background-color: #292e27; }
+.slot[aria-selected="true"] {
+  background: #34362b;
+  border-color: #847b60;
+  box-shadow: inset 0 3px #25271f;
+}
+.slot[aria-selected="true"]::before {
+  content: '';
+  position: absolute; z-index: 1; inset: -1px;
+  background:
+    linear-gradient(var(--sand),var(--sand)) top left / 13px 3px,
+    linear-gradient(var(--sand),var(--sand)) top left / 3px 13px,
+    linear-gradient(var(--sand),var(--sand)) bottom right / 13px 3px,
+    linear-gradient(var(--sand),var(--sand)) bottom right / 3px 13px;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+.slot .weapon { display: block; width: 64px; height: 64px; margin: 0 0 7px; }
+.slot-name { font-weight: 600; font-size: clamp(14px, 1.3vw, 18px); color: #e2dfd0; line-height: 1.2; }
+.quality-ticks {
+  width: 13px; height: 3px; margin-top: 7px; display: block;
+  background: linear-gradient(to right, var(--ice) 0 5px, transparent 5px 8px, var(--ice) 8px 13px);
+}
+.worn {
+  position: absolute; top: 5px; right: 6px;
+  color: #cfdbc0; font-size: 12px; font-weight: 600; line-height: 1.2; white-space: nowrap;
+}
+.inspection { background: #252824; }
+.inspection-heading { justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.inspection-heading h2 { margin: 0; font: 700 clamp(23px, 2.35vw, 34px)/1.2 var(--serif); color: #f4ead2; }
+.quality { display: inline-flex; gap: 7px; align-items: center; color: var(--ice); font-size: 13px; white-space: nowrap; }
+.quality::before { content:''; width: 6px; height: 6px; border: 1px solid currentColor; transform: rotate(45deg); }
+table { border-collapse: collapse; width: 100%; table-layout: fixed; font-variant-numeric: tabular-nums; }
+th, td { padding: 4px 3px; white-space: nowrap; }
+thead th { font: 500 12px/1.4 var(--sans); color: var(--mute); border-bottom: 1px solid #626252; padding-bottom: 6px; }
+thead th:first-child, tbody th { text-align: left; }
+thead th:nth-child(2), thead th:nth-child(3), thead th:nth-child(4), td { text-align: right; }
+col:nth-child(1) { width: 27%; } col:nth-child(2) { width: 31%; } col:nth-child(3) { width: 22%; } col:nth-child(4) { width: 20%; }
+tbody tr + tr { border-top: 1px solid #393e35; }
+tbody th { font-size: clamp(13px, 1.08vw, 16px); font-weight: 500; color: #dddccb; }
+.unit { display: block; color: var(--faint); font: 500 10px/1 var(--sans); }
+td { font: 500 clamp(15px, 1.24vw, 18px)/1.35 var(--mono); }
+.old { color: #c1c6b6; }
+.new { color: #f5e9cd; font-weight: 700; }
+.diff.gain { color: var(--gain); } .diff.loss { color: var(--loss); } .diff.same { color: var(--faint); }
+.commands {
+  display: flex;
+  justify-content: flex-end; align-items: center; gap: 10px;
+  padding: 10px clamp(18px, 2.3vw, 34px);
+  border-top: 1px solid #636455;
+  box-shadow: inset 0 2px #131713;
+  background: #1d211c;
+}
+.state { margin: 0 auto 0 0; color: #d0d4c0; font-size: 14px; }
+.action {
+  display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+  cursor: pointer; appearance: none; min-height: 41px; padding: 5px 14px;
+  border: 1px solid #747461; background: #292d26; color: #e3dfcb;
+  line-height: 1.25; font-size: 14px; font-weight: 600;
+}
+.action:hover:enabled { border-color: #ebe1c2; }
+.action:active:enabled, .slot:active { transform: translateY(1px); }
+.action.primary { background: var(--sand); color: #29271c; border-color: #ead9b9; box-shadow: inset 0 -2px #a69068; }
+.action:disabled { color: #a2a696; background: #2b2f28; border-color: #515649; box-shadow: none; }
+.action.primary:disabled { background: #394034; color: #d0d8c0; }
+body[data-input="touch"] .key-hint { display: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); }
+@media (min-width: 1350px) { .slot .weapon { width: 96px; height: 96px; } }
+@media (max-width: 850px) {
+  .rack, .inspection { padding: 16px; }
+  .commands { padding-inline: 16px; }
+}
+@media (max-width: 570px) {
+  body { align-items: start; }
+  .bench { border: 0; }
+  .panorama { height: clamp(150px, 28svh, 215px); }
+  .location { top: 10px; left: 12px; padding: 4px 9px; }
+  .location canvas { width: 16px; height: 16px; }
+  .tray { grid-template-columns: 1fr; }
+  .rack { padding: 12px 14px 14px; border-right: 0; border-bottom: 1px solid #595c4d; box-shadow: none; }
+  .rack-heading { margin-bottom: 10px; }
+  .slots { gap: 7px; }
+  .slot { min-height: 89px; padding: 17px 3px 7px; }
+  .slot .weapon { width: 32px; height: 32px; margin-bottom: 5px; }
+  .slot .quality-ticks { margin-top: 5px; }
+  .inspection { padding: 13px 14px 10px; }
+  .inspection-heading { margin-bottom: 6px; }
+  th, td { padding-block: 4px; }
+  .commands { flex-wrap: wrap; padding: 10px 14px 13px; gap: 7px; }
+  .action { flex: 1; min-height: 43px; padding-inline: 6px; }
+  .state:not(:empty) { flex-basis: 100%; font-size: 12px; }
+  .state:empty { display: none; }
+}
+@media (min-width: 571px) and (max-height: 520px) {
+  body { align-items: start; }
+  .panorama { height: max(113px, calc(100svh - 210px)); max-height: 285px; }
+  .rack, .inspection { padding: 9px 15px; }
+  .rack-heading { margin-bottom: 7px; }
+  .slot { min-height: 104px; padding: 14px 2px 5px; }
+  .slot .weapon { width: 32px; height: 32px; }
+  .inspection-heading { margin-bottom: 2px; }
+  .inspection-heading h2 { font-size: 22px; }
+  td, th { padding-block: 3px; }
+  .unit { display: inline; margin-left: 3px; }
+  .commands { padding: 6px 15px; }
+  .action { min-height: 38px; }
+}
+@media (max-width: 345px) {
+  .rack, .inspection, .commands { padding-inline: 10px; }
+  .worn { font-size: 10px; right: 4px; }
+}
+</style>
+</head>
+<body>
+<main class="bench" aria-labelledby="place">
+  <div class="panorama">
+    <canvas id="world" width="416" height="150" role="img" aria-label="雨后渡口的铁匠铺，选中的武器支在铁砧上，右侧开着锻炉。"></canvas>
+    <h1 class="location" id="place"><canvas id="stamp" width="16" height="16" aria-hidden="true"></canvas>渡口铁匠铺</h1>
+  </div>
+  <div class="tray">
+    <section class="rack" aria-labelledby="rack-title">
+      <div class="rack-heading">
+        <h2 id="rack-title">武器架</h2><span class="rule" aria-hidden="true"></span>
+        <span class="navigate key-hint" aria-hidden="true"><kbd>←</kbd><kbd>→</kbd> 选取</span>
+      </div>
+      <div class="slots" id="slots" role="listbox" aria-label="武器预览"></div>
+    </section>
+    <section class="inspection" aria-labelledby="candidate">
+      <div class="inspection-heading"><h2 id="candidate"></h2><span class="quality">精良</span></div>
+      <table aria-label="与现有武器的属性比较">
+        <colgroup><col><col><col><col></colgroup>
+        <thead><tr><th scope="col">属性</th><th scope="col" id="baseline"></th><th scope="col">预览</th><th scope="col">差值</th></tr></thead>
+        <tbody id="stats"></tbody>
+      </table>
+    </section>
+  </div>
+  <footer class="commands">
+    <p class="state" id="state" role="status"></p>
+    <button class="action" id="cancel" type="button">取消预览 <kbd class="key-hint">Esc</kbd></button>
+    <button class="action primary" id="equip" type="button"><span id="equip-label">确认装备</span> <kbd class="key-hint">Enter</kbd></button>
+  </footer>
+  <span class="sr-only" id="announce" aria-live="polite"></span>
+</main>
+<script>
+'use strict';
+
+// All shapes are filled on a one-pixel grid, including the diagonal blade edges.
+class Pixels {
+  constructor(canvas) {
+    this.ctx = canvas.getContext('2d');
+    this.ctx.imageSmoothingEnabled = false;
+  }
+  rect(color, x, y, width, height) {
+    this.ctx.fillStyle = color;
+    this.ctx.fillRect(Math.floor(x), Math.floor(y), width, height);
+  }
+  line(color, x0, y0, x1, y1) {
+    x0 = Math.round(x0); x1 = Math.round(x1);
+    y0 = Math.round(y0); y1 = Math.round(y1);
+    const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0);
+    const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+    let error = dx + dy;
+    this.ctx.fillStyle = color;
+    while (true) {
+      this.ctx.fillRect(x0, y0, 1, 1);
+      if (x0 === x1 && y0 === y1) break;
+      const doubled = 2 * error;
+      if (doubled >= dy) { error += dy; x0 += sx; }
+      if (doubled <= dx) { error += dx; y0 += sy; }
+    }
+  }
+  poly(color, points) {
+    const ys = points.map(p => p[1]);
+    this.ctx.fillStyle = color;
+    for (let y = Math.floor(Math.min(...ys)); y < Math.ceil(Math.max(...ys)); y++) {
+      const scan = y + 0.5, crossings = [];
+      for (let i = 0; i < points.length; i++) {
+        const a = points[i], b = points[(i + 1) % points.length];
+        if ((a[1] <= scan && b[1] > scan) || (b[1] <= scan && a[1] > scan)) {
+          crossings.push(a[0] + (scan - a[1]) * (b[0] - a[0]) / (b[1] - a[1]));
+        }
+      }
+      crossings.sort((a, b) => a - b);
+      for (let i = 0; i + 1 < crossings.length; i += 2) {
+        const start = Math.ceil(crossings[i] - 0.5), end = Math.ceil(crossings[i + 1] - 0.5);
+        if (end > start) this.ctx.fillRect(start, y, end - start, 1);
+      }
+    }
+  }
+  oval(color, cx, cy, rx, ry) {
+    this.ctx.fillStyle = color;
+    for (let dy = -ry; dy <= ry; dy++) {
+      const reach = Math.floor(rx * Math.sqrt(Math.max(0, 1 - (dy * dy) / (ry * ry))));
+      this.ctx.fillRect(Math.round(cx - reach), Math.round(cy + dy), reach * 2 + 1, 1);
+    }
+  }
+}
+
+const items = [
+  { name: '裂砧锤', values: [38, 8, 24], foot: 11 },
+  { name: '燕尾匕', values: [22, 16, 8], foot: 5 },
+  { name: '望潮杖', values: [30, 11, 14], foot: 13 }
+];
+const fields = [
+  { label: '攻击', unit: '点', divisor: 1 },
+  { label: '攻速', unit: '次/秒', divisor: 10 },
+  { label: '削韧', unit: '点', divisor: 1 }
+];
+const metal = {
+  outline: '#161b1c', iron: '#515d61', dark: '#354347', blue: '#8ca6a7',
+  glint: '#d3dfd5', brass: '#b68350', fire: '#e5b575', leather: '#583c31',
+  wood: '#946440', cord: '#c2915e'
+};
+
+function drawHammer(p) {
+  const m = metal;
+  p.poly(m.outline, [[14,8],[21,9],[17,21],[14,29],[12,31],[8,30],[8,27],[12,17]]);
+  p.poly(m.wood, [[15,10],[19,11],[15,23],[12,29],[10,29],[10,26]]);
+  p.line(m.cord, 15,15,13,21);
+  p.poly(m.leather, [[12,20],[16,21],[14,27],[11,28],[10,26]]);
+  for (const [x,y] of [[12,21],[11,24],[10,27]]) { p.line(m.cord, x,y,x+2,y+1); }
+  p.line(m.brass, 9,28,12,29);
+  p.poly(m.outline, [[2,7],[4,4],[10,3],[13,4],[20,4],[23,3],[28,5],[30,7],[30,14],[27,17],[22,17],[19,14],[11,13],[8,14],[3,12]]);
+  p.poly(m.iron, [[3,7],[6,5],[11,4],[14,6],[21,6],[23,5],[28,6],[29,8],[28,14],[26,16],[23,16],[20,13],[10,12],[7,13],[4,11]]);
+  p.poly(m.blue, [[4,7],[7,5],[10,5],[13,7],[21,8],[22,6],[24,5],[28,7],[25,9],[21,10],[12,9],[8,8],[5,9]]);
+  p.line(m.glint,6,5,9,4); p.line(m.glint,13,7,18,7); p.line(m.glint,23,6,26,6);
+  p.poly(m.dark, [[4,8],[8,7],[9,9],[8,12],[5,11]]);
+  p.line('#72888b',4,8,5,11);
+  p.poly('#354350', [[11,7],[14,7],[13,12],[10,12]]);
+  p.line('#a2aca0',11,7,11,10);
+  p.poly(m.dark, [[20,9],[24,8],[25,10],[24,14],[22,14],[20,12]]);
+  p.poly('#916a49', [[25,9],[29,8],[28,14],[26,16],[24,14]]);
+  p.line(m.fire,28,9,27,13); p.line(m.brass,23,15,26,15);
+  p.rect(m.brass,15,10,2,1); p.rect(m.cord,16,11,2,1);
+}
+function drawDagger(p) {
+  const m = metal;
+  p.poly(m.outline, [[5,30],[2,29],[2,26],[5,24],[9,20],[8,18],[6,18],[4,16],[5,14],[8,15],[11,16],[16,11],[23,8],[29,2],[30,1],[30,8],[28,13],[23,17],[17,20],[13,21],[15,24],[14,26],[11,25],[10,23],[7,27]]);
+  p.poly(m.iron, [[10,18],[17,12],[23,9],[29,3],[28,9],[25,13],[20,17],[15,19],[12,20]]);
+  p.poly(m.blue, [[11,18],[17,12],[23,9],[29,3],[26,9],[20,14],[14,19]]);
+  p.poly(m.glint, [[16,14],[20,11],[24,9],[29,3],[27,8],[23,12],[20,13]]);
+  p.poly('#687982', [[13,19],[21,13],[26,9],[28,6],[26,11],[22,15],[16,19]]);
+  p.line(m.brass,16,18,22,15); p.line(m.fire,23,14,25,12);
+  p.poly(m.brass, [[5,15],[8,16],[11,17],[14,21],[14,24],[12,24],[11,21],[8,18],[5,17]]);
+  p.line(m.fire,6,15,10,17); p.rect('#d1c3a0',10,18,2,2);
+  p.poly(m.wood, [[9,20],[11,22],[7,26],[5,28],[4,26]]);
+  p.line(m.leather,7,23,9,24); p.line(m.leather,5,25,7,26);
+  p.line(m.cord,8,21,9,22); p.line(m.cord,5,24,6,25);
+  p.poly(m.brass, [[3,26],[5,26],[7,28],[5,30],[3,29]]);
+  p.rect(m.fire,3,27,2,1);
+}
+function drawStaff(p) {
+  const m = metal;
+  p.poly(m.outline, [[13,2],[19,1],[23,2],[21,4],[17,5],[15,7],[15,10],[17,12],[20,12],[23,10],[24,7],[23,5],[25,3],[27,5],[27,10],[24,14],[21,16],[19,17],[15,29],[14,31],[10,31],[10,28],[13,23],[15,16],[12,14],[10,11],[10,7]]);
+  p.poly(m.wood, [[14,3],[19,2],[21,3],[16,4],[13,7],[13,10],[15,13],[18,14],[21,14],[25,10],[25,7],[24,5],[25,4],[26,6],[26,10],[23,14],[19,16],[17,21],[14,29],[12,30],[12,27],[16,16],[13,14],[11,10],[11,7]]);
+  p.line('#ad8158',12,8,15,4); p.line(m.cord,15,3,18,2);
+  p.line(m.fire,25,6,25,9); p.line(m.brass,23,12,21,14);
+  p.line('#bd956e',16,18,13,27); p.line('#604334',17,18,15,24);
+  p.line(m.brass,14,23,16,24); p.line(m.fire,13,26,15,27);
+  p.rect(m.blue,12,28,2,2); p.rect(m.glint,11,29,1,1);
+  p.poly('#243d43', [[19,5],[22,7],[21,10],[19,12],[17,9],[17,7]]);
+  p.poly('#76acb6', [[19,5],[21,7],[20,9],[19,10],[18,8]]);
+  p.rect('#e1f0df',19,6,1,2); p.rect('#a5d4cd',20,7,1,1);
+  p.poly(m.dark, [[15,14],[18,15],[20,14],[20,16],[17,18],[15,17]]);
+  p.line(m.brass,16,15,18,16);
+}
+function makeCanvas(width, height) {
+  const canvas = document.createElement('canvas');
+  canvas.width = width; canvas.height = height;
+  return canvas;
+}
+const pictures = [drawHammer, drawDagger, drawStaff].map(draw => {
+  const canvas = makeCanvas(32, 32);
+  draw(new Pixels(canvas));
+  return canvas;
+});
+function randomFrom(seed) {
+  return function() {
+    seed = (Math.imul(1664525, seed) + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+}
+
+// The river remains visible through the open side of the shed. All the warm light
+// on the stone, metal and floor below comes from the small hearth on the right.
+function river(p, rnd) {
+  const layers = ['#667d80','#72878a','#7e9392','#8a9e99','#a0aea0'];
+  for (let i = 0; i < layers.length; i++) p.rect(layers[i], 0, i * 12, 216, 13);
+  p.poly('#819390', [[0,43],[10,40],[23,42],[42,36],[47,37],[61,32],[65,33],[74,29],[83,29],[94,34],[108,32],[115,36],[127,32],[136,35],[154,27],[178,32],[204,36],[214,49],[214,60],[0,60]]);
+  p.poly('#687d7c', [[0,55],[12,52],[21,54],[31,50],[42,50],[49,46],[58,44],[68,44],[78,38],[91,36],[98,38],[104,37],[114,43],[127,41],[144,47],[154,44],[179,41],[200,52],[213,55],[213,65],[0,65]]);
+  p.poly('#587173', [[0,62],[13,58],[27,60],[36,58],[52,59],[65,54],[79,55],[88,51],[99,53],[111,49],[124,51],[135,52],[152,50],[172,52],[191,57],[211,55],[211,67],[0,67]]);
+  p.rect('#809492', 0, 66, 210, 45);
+  for (let i=0; i<155; i++) {
+    const x=Math.floor(rnd()*205), y=67+Math.floor(rnd()*43);
+    const colors=['#748a88','#758985','#92a39a','#97a99e'];
+    p.rect(colors[i%4],x,y,1+Math.floor(rnd()*9),1);
+  }
+  // Roof steps, morning mist and moorings along the far bank.
+  for (const [x,y,w] of [[4,60,17],[20,57,13],[35,59,19],[67,58,15],[82,60,12],[120,57,19]]) {
+    p.poly('#637574', [[x-2,y+2],[x+3,y-2],[x+w-5,y-2],[x+w+1,y+2]]);
+    p.rect('#6a7c77',x,y+2,w,4); p.rect('#576c6c',x+3,y+3,2,2);
+  }
+  p.line('#526a6b',0,66,147,66);
+  p.line('#9dada4',12,69,33,69); p.line('#a6b2a5',65,69,80,69);
+  // A single tied-up fishing boat. The sail is furled against the spar.
+  p.poly('#465d5d', [[31,78],[39,80],[70,80],[79,76],[73,82],[64,84],[41,84],[34,82]]);
+  p.line('#9da69a',39,80,68,80); p.line('#73827b',43,85,68,85);
+  p.line('#536661',56,50,57,79); p.line('#586e69',56,51,33,78);
+  p.line('#637872',57,53,74,78); p.line('#596f68',49,59,67,55);
+  p.poly('#79877a', [[50,58],[64,54],[65,56],[51,61]]);
+  p.poly('#5c6e68', [[43,77],[44,73],[54,73],[59,77]]);
+  p.line('#9da694',44,73,53,73);
+  p.rect('#516764',85,75,2,13); p.rect('#506461',103,75,2,12);
+  p.rect('#596d66',83,76,26,2); p.rect('#a6ad9b',84,75,20,1);
+  p.line('#5d726d',86,82,103,77);
+  p.line('#7c8f85',25,90,48,90); p.line('#9cac9c',62,89,77,89);
+}
+
+function backWall(p, rnd) {
+  p.rect('#252b29', 146,0,271,114);
+  const shades=['#343b38','#393e39','#303936','#3d423a','#343b36'];
+  for (let row=0; row<8; row++) {
+    let x=144-(row%2)*13;
+    while (x<418) {
+      const w=14+Math.floor(rnd()*18), y=row*12, rock=shades[Math.floor(rnd()*shades.length)];
+      p.poly(rock, [[x+2,y+1],[x+w-3,y+1],[x+w,y+3],[x+w-1,y+9],[x+w-4,y+12],[x+1,y+10],[x,y+3]]);
+      p.line('#4b5045',x+3,y+2,x+Math.floor(w*.58),y+2);
+      if (rnd()<.35) p.line('#2e3530',x+w-4,y+5,x+w-7,y+8);
+      x+=w+1;
+    }
+  }
+  p.poly('#252b26', [[0,0],[89,0],[167,21],[244,20],[268,0],[278,0],[251,26],[162,30],[73,7],[0,9]]);
+  // The eave and the squared post cast a stepped silhouette into the open sky.
+  p.poly('#232b28', [[0,0],[104,0],[170,17],[165,27],[99,11],[57,9],[0,13]]);
+  p.poly('#3e4135', [[0,0],[95,0],[167,19],[166,22],[102,7],[59,6],[0,9]]);
+  p.line('#60614d',0,6,54,4); p.line('#62614b',102,8,165,22);
+  for (const [x, y] of [[17,8],[27,7],[49,6],[66,7],[82,9],[109,15],[124,19]]) {
+    p.poly('#262d29', [[x,y],[x+8,y],[x+4,y+5],[x+1,y+5]]);
+    p.rect('#4d5143',x+1,y+4,3,1);
+  }
+  p.poly('#222823', [[135,0],[153,0],[149,100],[136,104],[131,99],[135,50]]);
+  p.poly('#515347', [[138,0],[143,0],[141,101],[135,102]]);
+  p.line('#77786a',136,28,134,77); p.line('#3e453b',140,32,138,85);
+  p.rect('#393e33',133,68,13,5); p.rect('#787763',134,68,4,1); p.rect('#242b26',142,67,4,8);
+  p.poly('#30362e', [[146,50],[175,13],[184,12],[149,61]]);
+  p.line('#575b49',149,54,176,18);
+  p.poly('#2f332c', [[143,15],[306,0],[319,0],[317,9],[144,27]]);
+  p.line('#535643',156,22,290,8);
+  p.rect('#242b28',154,77,111,5); p.rect('#545647',156,76,108,2);
+  for (const x of [166,225,254]) { p.rect('#2c3029',x,80,4,13); p.line('#373c31',x+3,87,x+12,80); }
+  // Tongs, punch and two spare hammer heads hang from a short peg rail.
+  p.rect('#2a302a',162,34,43,5); p.rect('#62614e',162,34,43,1);
+  for (const x of [167,176,188,198]) { p.rect('#827e65',x,35,2,2); }
+  p.line('#69716a',167,37,169,47); p.line('#7e8376',169,47,165,57);
+  p.line('#444f4a',170,46,173,56); p.rect('#7c8170',168,46,3,1);
+  p.line('#4b5851',176,37,178,53); p.rect('#69756a',176,47,3,7);
+  p.line('#655a44',187,38,188,60); p.poly('#636d62',[[184,55],[191,55],[192,60],[185,61]]);
+  p.line('#8b8c76',184,55,189,55); p.rect('#433e31',197,36,2,12);
+  p.rect('#535d52',194,45,8,4); p.line('#7d806b',194,45,198,45);
+  p.poly('#424943', [[158,76],[161,69],[168,69],[170,76]]);
+  p.rect('#787c65',159,69,9,1);
+  p.rect('#484e42',173,72,10,4); p.line('#767660',173,72,179,72);
+}
+
+function floor(p, rnd) {
+  p.poly('#333733', [[0,90],[108,85],[176,88],[416,88],[416,150],[0,150]]);
+  const shades=['#464a42','#3d423c','#505349','#42473e','#4f5045'];
+  let y=88;
+  for (let row=0; row<5; row++) {
+    const h=[6,8,11,16,25][row];
+    let x=-Math.floor(rnd()*24);
+    while (x<418) {
+      const w=14+Math.floor(rnd()*(20+row*5));
+      p.poly(shades[Math.floor(rnd()*shades.length)], [[x+4,y+1],[x+w-3,y],[x+w,y+3],[x+w-4,y+h-1],[x+3,y+h-1],[x,y+h-3]]);
+      p.line(row<2?'#575a4d':'#66695b',x+5,y+1,x+Math.floor(w*.58),y+1);
+      x+=w;
+    }
+    y+=h;
+  }
+  // Shallow water follows the long cracks; isolated flat glints keep the
+  // blue-grey wet stone distinct from the sharp edge of the anvil.
+  p.poly('#556561', [[0,95],[18,95],[26,97],[46,96],[59,97],[76,96],[91,98],[105,97],[123,98],[117,100],[96,100],[79,100],[70,103],[45,103],[35,106],[10,105],[0,109]]);
+  p.poly('#677b73', [[0,98],[19,97],[37,99],[57,98],[66,100],[50,100],[46,102],[30,102],[21,104],[0,105]]);
+  p.poly('#52625d', [[37,118],[58,115],[76,116],[88,113],[103,114],[118,111],[142,112],[154,115],[140,116],[128,117],[117,121],[96,122],[78,121],[63,124],[43,123]]);
+  p.poly('#6d8076', [[54,119],[72,118],[87,117],[99,115],[116,116],[123,114],[140,114],[126,117],[114,117],[105,119],[76,120],[66,122],[49,122]]);
+  for (const [x,y,w] of [[4,100,11],[22,100,6],[45,99,9],[46,102,7],[70,99,8],[88,99,9],[101,98,8],[50,122,10],[72,119,13],[91,117,8],[106,116,9],[130,114,6]]) {
+    p.rect('#9ca99a',x,y,w,1);
+  }
+  p.poly('#54483b',[[260,110],[282,108],[307,109],[311,110],[325,109],[336,111],[321,113],[301,113],[291,116],[265,116],[252,115]]);
+  p.rect('#9c7954',276,114,10,1); p.rect('#947451',297,111,10,1);
+  p.rect('#c29564',308,110,7,1); p.rect('#80684b',260,115,9,1);
+}
+
+function hearth(p, rnd) {
+  // The hood is stepped brickwork. The open mouth is only a few stones wide.
+  p.poly('#272c28', [[267,86],[268,45],[275,24],[282,17],[285,0],[322,0],[324,18],[337,28],[347,51],[348,89]]);
+  p.poly('#514b3d', [[271,85],[273,49],[279,31],[287,19],[288,0],[320,0],[320,19],[334,33],[342,54],[343,86]]);
+  const mortar=['#6c5b46','#675444','#756049','#5e5142'];
+  for (let y=3;y<80;y+=7) {
+    const left=y<20?287:Math.max(274,289-Math.floor((y-12)*.38));
+    const right=y<20?320:Math.min(342,319+Math.floor((y-12)*.55));
+    for (let x=left+(Math.floor(y/7)%2)*4; x<right-2;) {
+      const w=Math.min(right-x,7+Math.floor(rnd()*9));
+      p.rect(mortar[Math.floor(rnd()*4)],x,y,w-1,5);
+      p.rect('#817052',x+1,y,Math.max(1,Math.floor(w*.55)),1);
+      x+=w;
+    }
+  }
+  p.poly('#332f28', [[274,85],[274,65],[278,53],[286,43],[296,38],[310,37],[322,42],[331,53],[335,65],[335,84]]);
+  const outer=[[274,80],[275,63],[280,50],[289,41],[301,37],[313,38],[324,44],[332,55],[336,67],[336,83]];
+  const inner=[[282,80],[283,65],[287,56],[294,49],[303,46],[310,47],[318,51],[325,59],[328,68],[328,83]];
+  const arch=['#665444','#75604c','#837054','#947a5a','#9b7d58','#8d7152','#86694d','#785e47','#6b5645'];
+  for (let i=0; i<outer.length-1; i++) {
+    p.poly(arch[i], [outer[i],outer[i+1],inner[i+1],inner[i]]);
+    p.line('#4a4136',outer[i][0],outer[i][1],inner[i][0],inner[i][1]);
+    if(i>1 && i<7) p.line('#aa8055',inner[i][0],inner[i][1],inner[i+1][0]-1,inner[i+1][1]);
+  }
+  p.poly('#452a22',[[281,82],[283,66],[287,57],[294,50],[302,47],[312,48],[320,54],[326,63],[328,70],[328,83]]);
+  p.poly('#6e3827', [[283,80],[285,70],[288,66],[291,62],[296,64],[300,56],[305,57],[310,54],[317,61],[323,66],[327,76],[327,83]]);
+  p.poly('#a74c2c', [[284,80],[286,73],[288,75],[291,62],[295,70],[298,65],[302,59],[304,63],[306,56],[310,66],[315,60],[316,68],[319,65],[319,72],[322,68],[326,76],[326,82]]);
+  p.poly('#d7783d', [[286,80],[290,73],[291,67],[294,73],[297,71],[301,64],[302,70],[304,66],[307,61],[308,70],[310,66],[314,70],[317,66],[318,74],[320,72],[324,79],[323,82],[286,82]]);
+  p.poly('#e9a557', [[290,80],[294,74],[296,74],[298,68],[301,75],[304,72],[306,67],[308,73],[310,70],[312,76],[315,70],[316,76],[319,75],[322,81],[290,82]]);
+  p.poly('#f5cc79', [[295,80],[298,76],[300,79],[304,73],[306,77],[309,75],[311,79],[314,76],[317,79],[319,81],[295,82]]);
+  p.poly('#4a3b2e', [[262,80],[337,80],[350,84],[347,91],[268,91],[257,88]]);
+  p.poly('#a77b50', [[263,80],[337,80],[349,84],[271,85],[257,84]]);
+  p.line('#c49361',280,81,324,81);
+  p.poly('#4c4438',[[268,87],[345,87],[344,103],[336,107],[270,105]]);
+  for (const [x,y,w] of [[269,89,17],[287,89,22],[311,89,17],[330,89,14],[271,96,24],[298,96,18],[318,96,22]]) {
+    p.poly('#5e5140',[[x+1,y],[x+w,y],[x+w-2,y+6],[x,y+6]]);
+    p.rect('#7d664b',x+2,y,w-6,1);
+  }
+  for (const [x,y,w] of [[279,80,6],[293,81,7],[307,81,6],[314,80,8],[325,81,6]]) {
+    p.rect('#5e3e31',x,y,w,2); p.rect('#dd9651',x+1,y,w-3,1);
+  }
+  // Bellows and a hooked iron poker live in the shadows beside the furnace.
+  p.line('#292c26',367,13,361,36); p.line('#6a6650',368,13,362,36);
+  p.poly('#2c2d27', [[360,31],[365,32],[372,42],[376,54],[372,60],[363,58],[356,50],[351,41],[351,38]]);
+  p.poly('#6c5140', [[358,34],[363,34],[371,45],[374,54],[370,57],[364,55],[357,48],[353,41]]);
+  p.line('#a07951',355,39,367,53); p.line('#3d3830',358,38,370,52);
+  p.line('#675543',365,32,372,40); p.rect('#726c50',369,54,3,2);
+  p.line('#85826a',347,61,343,88); p.line('#3e4339',348,61,345,88);
+  p.line('#8c8267',350,66,347,89); p.line('#282f29',351,66,349,89);
+  p.line('#9b865f',343,87,348,88);
+}
+
+function anvil(p, rnd) {
+  p.oval('#333831',209,138,49,5);
+  p.poly('#252b25', [[177,121],[185,117],[211,115],[232,117],[241,122],[239,137],[242,141],[232,145],[203,147],[177,144],[171,139],[175,134]]);
+  p.poly('#67523b', [[178,122],[189,118],[211,117],[232,119],[239,122],[236,138],[238,140],[227,143],[200,145],[178,142],[174,138]]);
+  p.poly('#4d4332', [[180,126],[204,129],[234,124],[232,140],[216,144],[197,144],[179,141]]);
+  p.poly('#7a6143', [[177,122],[189,119],[207,118],[230,119],[237,122],[230,125],[201,128],[182,126]]);
+  p.line('#a28458',181,123,197,125); p.line('#90734e',214,124,231,122);
+  for (const [x,y,h] of [[181,128,11],[185,127,14],[193,129,12],[199,131,11],[212,129,13],[218,128,11],[229,126,12],[234,126,10]]) {
+    p.line('#736044',x,y,x-1,y+h); p.line('#37382a',x+2,y+2,x+3,y+h);
+  }
+  p.poly('#393f36', [[175,133],[201,136],[236,132],[236,135],[200,140],[175,137]]);
+  p.line('#736f54',176,133,198,136); p.line('#83816b',217,135,230,133);
+  p.rect('#a99d73',183,135,2,1); p.rect('#a29169',225,135,2,1);
+  // The horn is forged to a point, the heel is square, and the waist narrows
+  // above the broad feet. Only the right bevel carries the orange fire.
+  p.poly('#202929', [[148,103],[169,103],[176,101],[234,101],[239,103],[255,103],[257,105],[256,110],[239,111],[232,115],[227,119],[225,122],[236,124],[236,128],[224,132],[193,132],[180,128],[180,124],[191,121],[191,117],[185,113],[172,112],[164,110],[155,107]]);
+  p.poly('#515d5c', [[149,103],[170,104],[180,102],[236,102],[239,104],[254,104],[253,107],[235,108],[217,111],[179,110],[160,107]]);
+  p.poly('#8b9990', [[149,103],[168,103],[177,101],[235,101],[238,103],[228,105],[175,106],[161,105]]);
+  p.line('#b6c3ae',154,103,169,103); p.line('#c0cbb7',182,102,213,102);
+  p.rect('#536361',222,102,6,1); p.line('#ddbb85',237,103,253,103);
+  p.poly('#394643', [[177,107],[211,109],[224,108],[228,111],[223,116],[217,120],[216,125],[202,127],[189,124],[195,120],[192,114],[184,111]]);
+  p.poly('#455452', [[180,108],[207,109],[219,108],[217,111],[208,114],[199,115],[193,112]]);
+  p.poly('#6f6750', [[228,108],[239,106],[253,106],[253,109],[237,110],[230,114],[224,120],[223,123],[219,125],[218,122],[222,114]]);
+  p.line('#b98f5e',236,108,248,107); p.line('#a48761',228,114,224,119);
+  p.poly('#636c60', [[184,123],[196,122],[204,125],[218,125],[224,122],[234,125],[224,128],[194,129],[182,127]]);
+  p.line('#929985',182,125,190,124); p.line('#c6a16f',223,127,232,125);
+  p.poly('#3e4840', [[182,127],[193,129],[222,129],[232,127],[232,129],[225,131],[194,131],[183,129]]);
+  // The lower rack has tongs on a peg and split charcoal under the bench.
+  p.rect('#262d26',85,96,40,4); p.rect('#6d6c57',86,96,39,1);
+  p.rect('#3b4034',89,100,3,12); p.rect('#404338',120,100,4,11);
+  p.line('#777a68',102,98,108,108); p.line('#565f53',102,98,101,108);
+  for (const [x,y,w] of [[84,107,8],[88,105,11],[96,107,9],[101,105,10],[109,107,13]]) {
+    p.poly('#303731',[[x,y+2],[x+2,y],[x+w-2,y+1],[x+w,y+4],[x+1,y+5]]);
+    p.line('#5f614f',x+2,y+1,x+w-3,y+1);
+  }
+}
+
+function foreground(p) {
+  p.poly('#252b25', [[0,0],[7,0],[7,97],[11,109],[5,120],[0,120]]);
+  p.line('#475044',6,16,5,93);
+  p.poly('#272c26',[[386,0],[402,0],[399,103],[395,112],[387,110]]);
+  p.poly('#494739',[[389,0],[395,0],[393,106],[388,109]]);
+  p.line('#686047',390,18,389,92);
+  p.rect('#292f29',386,69,14,6); p.rect('#77725a',386,69,4,1);
+  p.poly('#262c26',[[348,110],[383,107],[417,111],[417,125],[389,129],[351,120]]);
+  p.poly('#58503d',[[347,110],[379,106],[417,109],[417,114],[389,119],[347,115]]);
+  p.line('#887758',351,110,377,107); p.line('#746349',355,115,379,118);
+  p.rect('#30352b',354,117,5,19); p.rect('#4b4636',356,117,3,17);
+  p.poly('#353a32',[[368,104],[371,100],[376,99],[381,100],[382,103],[377,107],[370,108]]);
+  p.line('#8d8970',371,101,376,100); p.line('#5b604e',375,106,381,103);
+  p.line('#77715b',380,109,403,105); p.line('#a3906c',380,108,388,107);
+  p.poly('#242b25',[[0,140],[14,137],[27,140],[35,145],[58,148],[62,150],[0,150]]);
+}
+
+const scene = makeCanvas(416,150);
+{
+  const p=new Pixels(scene), rnd=randomFrom(7141);
+  p.rect('#333b35',0,0,416,150);
+  river(p,rnd); backWall(p,rnd); floor(p,rnd); hearth(p,rnd); anvil(p,rnd); foreground(p);
+  const s=new Pixels(document.getElementById('stamp'));
+  s.poly('#d4b887',[[0,4],[5,4],[6,3],[15,3],[15,6],[12,7],[10,9],[10,10],[14,12],[14,13],[4,13],[4,12],[7,10],[7,9],[5,7],[3,7]]);
+  s.line('#f2d9a6',7,3,14,3); s.line('#967a57',6,12,12,12);
+}
+
+const world=document.getElementById('world');
+const slots=document.getElementById('slots');
+const cancel=document.getElementById('cancel');
+const equip=document.getElementById('equip');
+const state=document.getElementById('state');
+const statusText=document.getElementById('announce');
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+let equipped=1, selected=0;
+let sparkHandle=0;
+
+function paintWorld(moment=1) {
+  const width=world.clientWidth, height=world.clientHeight;
+  if (!width || !height) return;
+  const aspect=width/height;
+  let cropWidth=scene.width, cropHeight=scene.height;
+  if (aspect < scene.width/scene.height) cropWidth=Math.max(1,Math.round(cropHeight*aspect));
+  else cropHeight=Math.max(1,Math.round(cropWidth/aspect));
+  const cropX=Math.round((scene.width-cropWidth)*.53);
+  const cropY=Math.min(scene.height-cropHeight, Math.max(0,Math.round(84-cropHeight*.5)));
+  if (world.width!==cropWidth || world.height!==cropHeight) {
+    world.width=cropWidth; world.height=cropHeight;
+  }
+  const p=new Pixels(world);
+  p.ctx.drawImage(scene,cropX,cropY,cropWidth,cropHeight,0,0,cropWidth,cropHeight);
+  // Iron heel and two fork tips hold all three silhouettes at the same anchor.
+  const foot=204-cropX, ground=101-cropY;
+  p.poly('#262e28',[[foot-8,ground],[foot-6,ground-3],[foot-3,ground-3],[foot-2,ground-1],[foot+4,ground-1],[foot+6,ground-4],[foot+8,ground-4],[foot+7,ground],[foot+5,ground+1],[foot-6,ground+1]]);
+  p.line('#787c68',foot-6,ground,foot-2,ground);
+  p.ctx.drawImage(pictures[selected],foot-items[selected].foot*2,40-cropY,64,64);
+  p.line('#c1a071',foot+3,ground,foot+7,ground-3);
+  if (moment<1) {
+    const colors=['#d5a36d','#eecb8e','#ce8e54'];
+    for (let i=0;i<6;i++) {
+      const x=foot+1+(i-2.5)*7*moment;
+      const y=ground-1-(6+i%3*5)*Math.sin(moment*Math.PI)+moment*6;
+      if (moment<.75 || i%2===0) p.rect(colors[i%3],x,y,moment<.3?2:1,1);
+    }
+  }
+}
+function stopSparks() {
+  if (sparkHandle) cancelAnimationFrame(sparkHandle);
+  sparkHandle=0;
+}
+function strike() {
+  stopSparks();
+  if (reduced.matches) return;
+  const start=performance.now();
+  function frame(now) {
+    const t=Math.min(1,(now-start)/230);
+    paintWorld(Math.max(0,t));
+    if (t<1) sparkHandle=requestAnimationFrame(frame);
+    else sparkHandle=0;
+  }
+  frame(start);
+}
+function valueText(field,value) {
+  return field.divisor===1?String(value):(value/field.divisor).toFixed(1);
+}
+const slotButtons=items.map((item,i)=>{
+  const button=document.createElement('button');
+  button.type='button'; button.className='slot';
+  button.setAttribute('role','option');
+  const sprite=pictures[i].cloneNode();
+  sprite.className='weapon';
+  sprite.setAttribute('aria-hidden','true');
+  sprite.getContext('2d').drawImage(pictures[i],0,0);
+  const name=document.createElement('span'); name.className='slot-name'; name.textContent=item.name;
+  const ticks=document.createElement('span'); ticks.className='quality-ticks'; ticks.setAttribute('aria-hidden','true');
+  const mark=document.createElement('span'); mark.className='worn'; mark.textContent='已装备'; mark.setAttribute('aria-hidden','true');
+  button.append(sprite,name,ticks,mark);
+  button.addEventListener('click',()=>choose(i));
+  slots.append(button);
+  return button;
+});
+const rows=fields.map(field=>{
+  const row=document.createElement('tr'), title=document.createElement('th');
+  title.scope='row';
+  title.append(document.createTextNode(field.label));
+  const unit=document.createElement('span'); unit.className='unit'; unit.textContent=field.unit; title.append(unit);
+  row.append(title);
+  const cells=['old','new','diff'].map(role=>{
+    const td=document.createElement('td'); td.className=role; row.append(td); return td;
+  });
+  document.getElementById('stats').append(row);
+  return cells;
+});
+function render(message='') {
+  const current=items[equipped], preview=items[selected];
+  for (let i=0;i<items.length;i++) {
+    const b=slotButtons[i];
+    b.tabIndex=i===selected?0:-1;
+    b.setAttribute('aria-selected',String(i===selected));
+    b.setAttribute('aria-label',items[i].name+'，精良'+(i===equipped?'，已装备':''));
+    b.querySelector('.worn').hidden=i!==equipped;
+  }
+  document.getElementById('candidate').textContent=preview.name;
+  document.getElementById('baseline').textContent='身上·'+current.name;
+  for (let i=0;i<fields.length;i++) {
+    const f=fields[i], v=preview.values[i], base=current.values[i], delta=v-base;
+    const [oldCell,newCell,diff]=rows[i];
+    oldCell.textContent=valueText(f,base); newCell.textContent=valueText(f,v);
+    diff.textContent=delta===0?valueText(f,0):(delta>0?'+':'−')+valueText(f,Math.abs(delta));
+    diff.className='diff '+(delta===0?'same':delta>0?'gain':'loss');
+  }
+  const same=selected===equipped;
+  equip.disabled=same; cancel.disabled=same;
+  document.getElementById('equip-label').textContent=same?'已装备':'确认装备';
+  state.textContent=message;
+  statusText.textContent=same?'当前装备'+current.name:'预览'+preview.name+'，身上装备'+current.name;
+  paintWorld();
+}
+function choose(i,focus=false) {
+  stopSparks(); selected=i; render();
+  if (focus) slotButtons[i].focus({preventScroll:true});
+}
+function confirmEquip() {
+  if (equipped===selected) return;
+  equipped=selected;
+  render('已装备'+items[equipped].name);
+  slotButtons[selected].focus({preventScroll:true});
+  strike();
+}
+function cancelPreview() {
+  if (equipped===selected) return;
+  stopSparks(); selected=equipped;
+  render('已取消预览');
+  slotButtons[equipped].focus({preventScroll:true});
+}
+equip.addEventListener('click',confirmEquip);
+cancel.addEventListener('click',cancelPreview);
+if (matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints>0) document.body.dataset.input='touch';
+document.addEventListener('pointerdown',e=>{
+  document.body.dataset.input=e.pointerType==='touch'?'touch':'mouse';
+});
+document.addEventListener('keydown',e=>{
+  if (e.metaKey||e.ctrlKey||e.altKey) return;
+  document.body.dataset.input='keyboard';
+  const key=e.key;
+  if (['ArrowLeft','ArrowUp','ArrowRight','ArrowDown','Home','End'].includes(key)) {
+    e.preventDefault();
+    const next=key==='Home'?0:key==='End'?items.length-1:
+      (selected+(key==='ArrowLeft'||key==='ArrowUp'?-1:1)+items.length)%items.length;
+    choose(next,true);
+  } else if (key==='Escape') {
+    e.preventDefault(); if(!e.repeat) cancelPreview();
+  } else if (key==='Enter'||key===' ') {
+    e.preventDefault();
+    if(e.repeat) return;
+    if(document.activeElement===cancel) cancelPreview();
+    else confirmEquip();
+  }
+});
+new ResizeObserver(()=>paintWorld()).observe(world);
+reduced.addEventListener('change',()=>{stopSparks();paintWorld();});
+render();
+</script>
+</body>
+</html>

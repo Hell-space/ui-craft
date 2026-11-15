@@ -1,0 +1,128 @@
+<!--@title 小记 · 记账-->
+<!--@use 手机 App、小程序的首页。宽屏时在页面中央用手机画框展示，窄屏时去掉画框铺满。立场：一本放在口袋里的账本。贯穿装置是账本的格线——蓝色横线、金额栏前一道红竖线、预算用一把 30 天的刻度尺。结构：状态栏 → 月份 → 最大的数字（还能花多少）+ 刻度尺 → 一条"记一笔"的输入 → 按天分组的账目 → 底部标签栏-->
+<!--@sample 生椰拿铁|打车去客户那|这个月还可以花-->
+<style>
+/* 本页的版式与细节。颜色和字体都来自预设变量，换 --style / --accent 会跟着变。 */
+body { background: var(--surface-sunken); }
+.desk { min-height: 100dvh; display: flex; align-items: center; justify-content: center; gap: clamp(2rem, 7vw, 6rem); padding: 1.5rem; }
+.caption { max-width: 17rem; }
+.caption .kick { font: 500 .75rem/1 var(--font-mono, monospace); letter-spacing: .12em; color: var(--text-subtle); }
+.caption h1 { margin-top: 1rem; font-family: var(--font-display); font-size: clamp(2.5rem, 1.5rem + 2.5vw, 3.5rem); line-height: 1.15; letter-spacing: .04em; }
+.caption p { margin-top: 1rem; color: var(--text-muted); line-height: 1.8; }
+.caption ul { margin-top: 1.5rem; border-top: 1px solid var(--border-strong); font-size: var(--fs-sm); color: var(--text-muted); }
+.caption li { padding: .6rem 0; border-bottom: 1px solid var(--border); display: flex; gap: .75rem; }
+.caption li b { font: 500 .75rem/1.6 var(--font-mono, monospace); color: var(--accent-text); }
+
+.app { --blue: light-dark(#CBD7E6, #2B3644); --red: var(--accent); --mono: var(--font-mono, ui-monospace, monospace); }
+.px { padding-inline: 1.375rem; }
+.app-title { display: flex; align-items: baseline; justify-content: space-between; padding-block: .25rem 0; }
+.app-title h2 { font-family: var(--font-display); font-size: 1.75rem; letter-spacing: .02em; }
+.app-title h2 small { font-family: var(--font-body); font-size: .8125rem; color: var(--text-subtle); letter-spacing: 0; margin-left: .5rem; font-weight: 400; }
+
+/* 最大的数字：货币符号与小数降一级，后面一句换算成今天用得上的话 */
+.left { margin-top: 1.5rem; }
+.left .lab { font-size: .8125rem; color: var(--text-muted); }
+.left .big { margin-top: .25rem; font-family: var(--font-display); font-size: 3.75rem; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums lining-nums; }
+.left .big small { font-size: .42em; color: var(--text-muted); letter-spacing: 0; }
+.left .per { margin-top: .6rem; font-size: .875rem; color: var(--text-muted); }
+.left .per b { color: var(--text); font-weight: 600; }
+
+/* 刻度尺：一格一天，实心是已花的比例，竖线是今天 */
+.ruler { position: relative; margin-top: 1.25rem; height: 2.75rem; }
+.ruler .ticks { position: absolute; inset: 0 0 1.25rem; background:
+   repeating-linear-gradient(90deg, var(--text-subtle) 0 1px, transparent 1px calc(100% / 6)) 0 100% / 100% 12px no-repeat,
+   repeating-linear-gradient(90deg, var(--border-strong) 0 1px, transparent 1px calc(100% / 30)) 0 100% / 100% 6px no-repeat; }
+.ruler .spent { position: absolute; left: 0; bottom: 1.25rem; height: 6px; width: var(--v); background: var(--text); border-radius: 0 3px 3px 0; transform-origin: left; animation: m-grow 900ms var(--ease-out-expo, ease-out) .3s both; }
+@keyframes m-grow { from { scale: 0 1; } }
+.ruler .today { position: absolute; left: var(--t); bottom: 1.25rem; top: .1rem; width: 1.5px; background: var(--red); }
+.ruler .today::after { content: "今天"; position: absolute; top: -.1rem; left: .35rem; font-size: .6875rem; color: var(--red); white-space: nowrap; }
+.ruler .ends { position: absolute; inset: auto 0 0; display: flex; justify-content: space-between; font: .6875rem/1 var(--mono); color: var(--text-subtle); }
+.pace { margin-top: .5rem; font-size: .8125rem; color: var(--text-muted); }
+.pace em { font-style: normal; color: var(--ok); font-weight: 600; }
+
+/* 记一笔：一条可以直接打字的输入 */
+.add { margin-top: 1.5rem; display: flex; align-items: center; gap: .75rem; height: 3.25rem; padding: 0 .5rem 0 1rem; border-radius: 999px; background: var(--surface);
+       box-shadow: 0 0 0 1px var(--border), 0 8px 18px -12px rgb(var(--shade, 0 0 0) / .35); }
+.add svg { width: 1.125rem; height: 1.125rem; color: var(--text-subtle); flex: none; }
+.add input { flex: 1; min-width: 0; border: 0; background: none; outline: none; font-size: .9375rem; }
+.add input::placeholder { color: var(--text-faint); }
+.add button { height: 2.375rem; padding: 0 1rem; border: 0; border-radius: 999px; background: var(--text); color: var(--bg); font-weight: 600; font-size: .875rem; cursor: pointer; }
+.add:focus-within { box-shadow: 0 0 0 1.5px var(--text), 0 8px 18px -12px rgb(var(--shade, 0 0 0) / .35); }
+
+/* 账页：蓝色横线，金额栏前一道红竖线 */
+.day { margin-top: 1.75rem; }
+.day-head { display: flex; align-items: baseline; justify-content: space-between; padding: 0 0 .4rem; border-bottom: 1.5px solid var(--text); }
+.day-head h3 { font-family: var(--font-display); font-size: 1.0625rem; }
+.day-head span { font-size: .8125rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.lines { background: linear-gradient(90deg, transparent calc(100% - 5.6rem), var(--red) 0 calc(100% - 5.6rem + 1px), transparent 0); }
+.lines li { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) 5.1rem; gap: .5rem; align-items: center; min-height: 3.25rem; border-bottom: 1px solid var(--blue); }
+.lines time { font: .75rem/1 var(--mono); color: var(--text-subtle); }
+.lines .what { font-size: .9375rem; line-height: 1.35; }
+.lines .what small { display: block; font-size: .75rem; color: var(--text-subtle); }
+.lines .amt { text-align: right; font-family: var(--font-display); font-size: 1.0625rem; font-variant-numeric: tabular-nums; }
+.lines .amt.in { color: var(--ok); }
+.end-note { text-align: center; margin: 1.5rem 0 .5rem; font-size: .75rem; color: var(--text-subtle); }
+.app .tabbar { background: var(--bg); box-shadow: inset 0 1px 0 var(--border-strong); }   /* 实底：账目滚到下面时不透出来 */
+.app .tabbar > [aria-current] { color: var(--text); }
+
+@media (max-width: 760px) { .caption { display: none; } }
+@media (max-width: 460px) { .desk { padding: 0; } }
+</style>
+
+<div class="desk">
+  <div class="caption" data-reveal>
+    <p class="kick">手机首页</p>
+    <h1>小记</h1>
+    <p>一本放在口袋里的账本。打开只回答一件事：这个月还能花多少。</p>
+    <ul><li><b>01</b>一句话记一笔，金额和分类自己认</li><li><b>02</b>刻度尺对着日子看，花快了一眼就知道</li><li><b>03</b>账目按天排在格线上，像翻纸本</li></ul>
+  </div>
+
+  <div class="phone app">
+    <div class="phone-scroll">
+      <div class="statusbar"><span class="mono">9:41</span><span class="subtle" style="font-size: var(--fs-xs)">11 月 13 日 周五</span></div>
+      <div class="px">
+        <div class="app-title" data-reveal><h2>十一月<small>个人账本</small></h2><button class="btn sm ghost icon" type="button" aria-label="搜索"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></button></div>
+
+        <!-- 最大的数字回答核心问题 -->
+        <section class="left" data-reveal style="--delay:80ms" aria-label="本月预算">
+          <p class="lab">这个月还可以花</p>
+          <p class="big"><small>¥</small><span data-count="4113" data-delay="200">4,113</span><small>.60</small></p>
+          <p class="per">还剩 17 天 · 平均每天 <b>¥242</b></p>
+          <div class="ruler" role="img" aria-label="预算已花 37%，日子已过 43%">
+            <div class="ticks"></div><div class="spent" style="--v:37%"></div><div class="today" style="--t:43%"></div>
+            <div class="ends"><span>1 日</span><span>15</span><span>30 日</span></div>
+          </div>
+          <p class="pace">已花 ¥2,386 / 预算 ¥6,500 · <em>比日子慢 2 天</em></p>
+        </section>
+
+        <!-- 记一笔：最常做的事放在拇指够得到、眼睛也看得到的地方 -->
+        <label class="add" data-reveal style="--delay:160ms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><input type="text" placeholder="记一笔，比如：午饭 32" aria-label="记一笔"><button type="button">记下</button></label>
+
+        <section class="day" aria-labelledby="d1" data-reveal style="--delay:220ms">
+          <div class="day-head"><h3 id="d1">今天</h3><span>支出 ¥148.70</span></div>
+          <ol class="lines">
+            <li><time>12:30</time><span class="what">和同事午饭<small>餐饮 · 支付宝</small></span><span class="amt">−84.00</span></li>
+            <li><time>09:15</time><span class="what">打车去客户那<small>交通 · 可报销</small></span><span class="amt">−46.70</span></li>
+            <li><time>08:42</time><span class="what">生椰拿铁<small>餐饮 · 微信</small></span><span class="amt">−18.00</span></li>
+          </ol>
+        </section>
+        <section class="day" aria-labelledby="d2">
+          <div class="day-head"><h3 id="d2">昨天</h3><span>支出 ¥286.20 · 收入 ¥46.70</span></div>
+          <ol class="lines">
+            <li><time>20:05</time><span class="what">便利店晚饭<small>餐饮</small></span><span class="amt">−37.20</span></li>
+            <li><time>19:20</time><span class="what">摇粒绒外套<small>购物 · 超出预算 ¥140</small></span><span class="amt">−249.00</span></li>
+            <li><time>10:02</time><span class="what">打车报销到账<small>收入</small></span><span class="amt in">+46.70</span></li>
+          </ol>
+        </section>
+        <p class="end-note">本月已记 37 笔</p>
+      </div>
+    </div>
+
+    <nav class="tabbar" aria-label="底部导航">
+      <button type="button" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 4h11l3 3v13H5zM9 9h6M9 13h6M9 17h3"/></svg>账本</button>
+      <button type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M21 19H3"/></svg>统计</button>
+      <button type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg>预算</button>
+      <button type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>我的</button>
+    </nav>
+  </div>
+</div>

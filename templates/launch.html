@@ -1,0 +1,276 @@
+<!--@title Meridian 2 · 长文本推理模型-->
+<!--@use AI 模型、软件新版本、硬件、App 的发布页与产品首页。整页深色，不在中途切成浅色。立场：一份 400 页的文件摊开在眼前，它一眼就找到该先看的三处。贯穿装置是"页线"：一页一根细线，被找到的那几页亮起来——首屏、结尾都用它。结构：导航 → 首屏（超大名字 + 一句话 + 它找到的三处 + 400 根页线）→ 规格带 → 可切换的能力示例 → 与上一代的对比条 → 可复制的用法 → 结尾 → 页脚。主视觉换成你的产品自己的东西，不要换成光晕和抽象球体-->
+<!--@sample Meridian|400 页|陆知行|租赁合同|对赌回购-->
+<style>
+/* 本页的版式与细节。颜色和字体都来自预设变量（默认 graphite + 柠檬绿强调色、固定深色），换 --style / --accent 会跟着变。 */
+.launch { overflow-x: clip; --mono: var(--font-mono, ui-monospace, monospace); --mark: var(--accent);
+          --line: color-mix(in srgb, var(--text) 16%, transparent); --line-read: color-mix(in srgb, var(--text) 34%, transparent); }
+.kick { display: inline-flex; align-items: center; gap: .65rem; font: 500 .75rem/1 var(--mono); letter-spacing: .12em; color: var(--text-subtle); }
+.kick b { font-weight: 500; color: var(--mark); }
+
+/* 首屏：名字是全页最大的东西 */
+.hero2 { padding-top: clamp(3rem, 2rem + 5vw, 6.5rem); }
+.launch .word { margin-top: 1.25rem; font-family: var(--font-display); font-weight: 600; font-size: clamp(3.5rem, 1rem + 12.5vw, 13rem);
+        line-height: .86; letter-spacing: -.055em; white-space: nowrap; }
+.word .ver { color: var(--mark); }
+.hero-row { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 2rem clamp(2rem, 5vw, 5rem); margin-top: clamp(2rem, 3.5vw, 3rem); align-items: end; }
+.hero-row > * { min-width: 0; }
+.lede2 { font-size: clamp(1.125rem, 1rem + .45vw, 1.375rem); line-height: 1.7; color: var(--text-muted); max-width: 24em; text-wrap: pretty; }
+.lede2 b { color: var(--text); font-weight: 600; }
+.cta { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.75rem; }
+.cta .btn.lg { height: 3.25rem; padding-inline: 1.6rem; font-size: 1rem; }
+.fine { margin-top: 1rem; font-size: var(--fs-sm); color: var(--text-subtle); }
+.finds-head { display: flex; justify-content: space-between; gap: 1rem; font: 500 .75rem/1 var(--mono); letter-spacing: .06em; color: var(--text-subtle); padding-bottom: .75rem; }
+.finds { border-top: 1px solid var(--border-strong); }
+.finds li { display: grid; grid-template-columns: 3.75rem minmax(0, 1fr) auto; gap: 1rem; align-items: baseline; padding: .85rem 0; border-bottom: 1px solid var(--border); font-size: .9375rem; line-height: 1.55; }
+.finds .p { font: 500 .75rem/1 var(--mono); color: var(--mark); }
+.finds small { display: block; color: var(--text-subtle); font-size: .8125rem; }
+.finds .loss { font-family: var(--font-display); font-variant-numeric: tabular-nums; color: var(--text-muted); white-space: nowrap; }
+
+/* 页线：400 根，一页一根；扫描线走过的页变亮，被找到的三页立起来 */
+.pages { position: relative; height: clamp(6rem, 9vw, 8.5rem); margin-top: clamp(2.75rem, 4.5vw, 4.5rem); }
+.pages .comb { position: absolute; inset: 1.6rem 0 1.9rem; background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px calc(100% / 400)); }
+.pages .comb.read { background: repeating-linear-gradient(90deg, var(--line-read) 0 1px, transparent 1px calc(100% / 400));
+                    animation: pg-read 2.4s cubic-bezier(.45, 0, .25, 1) .5s both; }
+.pages .scan { position: absolute; top: .9rem; bottom: 1.4rem; width: 9%; margin-left: -9%; pointer-events: none;
+               background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-layer, var(--accent)) 26%, transparent) 70%, var(--accent-layer, var(--mark)) 99%, transparent);
+               animation: pg-scan 2.4s cubic-bezier(.45, 0, .25, 1) .5s both; }
+@keyframes pg-read { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes pg-scan { 0% { left: 0; opacity: 1; } 92% { opacity: 1; } 100% { left: 109%; opacity: 0; } }
+.mk { position: absolute; top: .9rem; bottom: 1.4rem; left: var(--x); width: 2px; margin-left: -1px; background: var(--mark); border-radius: 1px;
+      box-shadow: 0 0 14px color-mix(in srgb, var(--accent-layer, var(--accent)) 70%, transparent); transform-origin: 50% 100%;
+      animation: pg-mark 600ms var(--spring-bouncy, cubic-bezier(.3, 1.4, .5, 1)) var(--at) both; }
+.mk span { position: absolute; top: -1.15rem; left: 50%; translate: -50% 0; font: 500 .6875rem/1 var(--mono); color: var(--mark); white-space: nowrap; }
+@keyframes pg-mark { from { scale: 1 0; opacity: 0; } to { scale: 1 1; opacity: 1; } }
+.pages .ends { position: absolute; inset: auto 0 0; display: flex; justify-content: space-between; font: 500 .6875rem/1 var(--mono); color: var(--text-faint); letter-spacing: .04em; }
+:root[data-respect-reduced-motion] .pages :is(.read, .scan, .mk) { animation-duration: 1ms; animation-delay: 0ms; }
+
+/* 规格带 */
+.specs2 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--border-strong); margin-top: clamp(4rem, 3rem + 4vw, 6rem); }
+.specs2 > div { padding: 1.25rem 1.5rem 0 0; }
+.specs2 > div + div { padding-left: 1.5rem; border-left: 1px solid var(--border); }
+.specs2 dt { font-size: var(--fs-sm); color: var(--text-muted); }
+.specs2 dd { margin: .55rem 0 0; font-family: var(--font-display); font-size: clamp(2.25rem, 1.5rem + 2vw, 3.25rem); line-height: 1; letter-spacing: -.035em; font-weight: 600; font-variant-numeric: tabular-nums; }
+.specs2 dd small { font-family: var(--font-body); font-size: .875rem; letter-spacing: 0; font-weight: 400; color: var(--text-muted); margin-left: .3rem; }
+.specs2 p { margin-top: .6rem; font-size: .8125rem; color: var(--text-subtle); }
+.specs2 p em { font-style: normal; color: var(--mark); }
+
+/* 区块 */
+.sec { padding-top: clamp(5rem, 3rem + 7vw, 9rem); }
+.sec-top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1.5rem; margin-bottom: clamp(1.75rem, 3vw, 2.5rem); }
+.sec-top h2, .end h2 { font-size: clamp(2rem, 1.2rem + 2.6vw, 3.5rem); line-height: 1.15; letter-spacing: -.02em; margin-top: 1rem; max-width: 18em; }
+:lang(zh) .sec-top h2, :lang(zh) .end h2 { letter-spacing: 0; line-height: 1.3; }
+
+/* 能力示例：左边是你问的话，右边是它的回答 */
+.demo { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: start; }
+.demo > * { min-width: 0; }
+.ask { padding-top: 1.5rem; border-top: 1px solid var(--border-strong); }
+.ask .kick { letter-spacing: .08em; }
+.ask h3 { margin-top: 1rem; font-family: var(--font-display); font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.125rem); line-height: 1.35; font-weight: 600; }
+.ask p { margin-top: 1rem; color: var(--text-muted); line-height: 1.8; }
+.answer { padding: clamp(1.25rem, 2.5vw, 2rem); border-radius: var(--r-lg); background: var(--surface); box-shadow: 0 0 0 1px var(--border), inset 0 1px 0 color-mix(in srgb, var(--accent-layer, var(--accent)) 60%, transparent); }
+.who { display: flex; align-items: center; gap: .5rem; font: 500 .75rem/1 var(--mono); color: var(--text-subtle); letter-spacing: .04em; }
+.who svg { width: 1rem; height: 1rem; color: var(--mark); }
+.answer .result { margin-top: 1rem; font-family: var(--font-display); font-size: clamp(1.375rem, 1.1rem + .8vw, 1.75rem); font-weight: 600; line-height: 1.35; }
+.answer .result + p { margin-top: .4rem; color: var(--text-muted); font-size: var(--fs-sm); }
+.checks { margin-top: 1.25rem; display: grid; }
+.checks > div { display: grid; grid-template-columns: 1.75rem minmax(0, 1fr) auto; gap: .9rem; align-items: start; padding: .9rem 0; border-top: 1px solid var(--border); }
+.checks .n { font: 500 .75rem/1.6rem var(--mono); color: var(--mark); }
+.checks .t { font-weight: 600; line-height: 1.6; }
+.letter { margin-top: 1rem; font-size: 1.0625rem; line-height: 1.95; max-width: 32em; }
+.code { margin-top: 1rem; padding: 1rem 1.25rem; border-radius: var(--r-md); background: var(--surface-sunken); box-shadow: inset 0 0 0 1px var(--border); overflow-x: auto;
+        font: .8125rem/1.8 var(--mono); white-space: pre; }
+.code .k { color: var(--mark); } .code .c { color: var(--text-subtle); } .code .s { color: var(--ok); }
+
+/* 对比：亮条是新模型，灰条是上一代 */
+.legend { display: flex; gap: 1.25rem; font-size: var(--fs-sm); color: var(--text-muted); }
+.legend span { display: inline-flex; align-items: center; gap: .5rem; }
+.legend i { width: .75rem; height: .75rem; border-radius: 2px; background: var(--mark); }
+.legend i.prev { background: var(--text-faint); }
+.bench > div { display: grid; grid-template-columns: minmax(0, 16rem) minmax(0, 1fr); gap: .5rem 3rem; align-items: center; padding: 1.1rem 0; border-top: 1px solid var(--border); }
+.bench .t { font-weight: 600; }
+.bench .bars { display: grid; gap: 6px; }
+.bench .bars > div { display: grid; grid-template-columns: minmax(0, 1fr) 4.5rem; gap: .9rem; align-items: center; }
+.bench .bar { height: .5rem; }
+.bench .bar:not(.faint) > i { background: var(--mark); }
+.bench .v { text-align: right; font-family: var(--font-display); font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* 用法：可以直接复制的提示词 */
+.uses-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--border-strong); }
+.use { display: flex; flex-direction: column; gap: .9rem; padding: 1.5rem 1.5rem 0 0; }
+.use + .use { padding-left: 1.5rem; border-left: 1px solid var(--border); }
+.use h3 { font-size: 1.125rem; }
+.use .prompt { flex: 1; color: var(--text-muted); font-size: .9375rem; line-height: 1.85; }
+.use .btn { align-self: flex-start; }
+.btn.done { color: var(--ok); }
+
+/* 结尾：页线再出现一次，全部读完 */
+.end { padding-block: clamp(6rem, 4rem + 8vw, 11rem) clamp(4rem, 3rem + 4vw, 6rem); }
+.end .pages { margin-top: 0; margin-bottom: clamp(2rem, 4vw, 3.5rem); height: 4.5rem; }
+.end .pages .comb { inset: 1.2rem 0 .4rem; background: repeating-linear-gradient(90deg, var(--line-read) 0 1px, transparent 1px calc(100% / 400)); }
+.end .mk { top: .5rem; bottom: .4rem; animation: none; }
+.end .row { margin-top: 1.75rem; }
+
+@media (max-width: 900px) {
+  .hero-row, .demo { grid-template-columns: minmax(0, 1fr); }
+  .specs2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .specs2 > div:nth-child(3) { padding-left: 0; border-left: 0; }
+  .specs2 > div:nth-child(n+3) { margin-top: 1.25rem; border-top: 1px solid var(--border); }
+  .bench > div { grid-template-columns: minmax(0, 1fr); }
+  .uses-grid { grid-template-columns: minmax(0, 1fr); }
+  .use, .use + .use { padding: 1.5rem 0; border-left: 0; }
+  .use + .use { border-top: 1px solid var(--border); }
+}
+@media (max-width: 560px) { .finds li { grid-template-columns: 3.25rem minmax(0, 1fr); } .finds .loss { grid-column: 2; } .mk span { font-size: .625rem; } }
+</style>
+
+<div class="launch">
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#home" lang="en"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4v16M8 4v16M12 4v16M16 4v16M20 4v16"/></svg>Meridian</a>
+    <nav class="links hide-sm" aria-label="主导航"><a href="#demo">能力</a><a href="#bench">对比</a><a href="#uses">用法</a></nav>
+    <a class="btn sm ink" href="#uses">查看用法</a>
+  </div>
+</header>
+
+<main id="home">
+  <!-- 首屏：名字是全页最大的东西；主视觉是它的工作本身——400 页里找出 3 页 -->
+  <section class="wrap hero2">
+    <p class="kick" data-reveal><b>新模型</b>2026 年 11 月 · API 与网页版同日上线</p>
+    <h1 class="word" lang="en" data-reveal style="--delay:80ms">Meridian <span class="ver">2</span></h1>
+    <div class="hero-row">
+      <div data-reveal style="--delay:220ms">
+        <p class="lede2">一次读完 <b>400 页</b>的合同、财报或代码库，再告诉你哪三处最该先看，每一处都能点回原文。</p>
+        <div class="cta"><a class="btn lg primary" href="#demo">体验示例</a><a class="btn lg" href="#demo">看它怎么回答</a></div>
+        <p class="fine">原有接口无需改动 · 输入 ¥4 / 百万 tokens</p>
+      </div>
+      <div data-reveal style="--delay:320ms">
+        <p class="finds-head"><span>一份 400 页的投资协议 · 用时 41 秒</span><span>先看这三处</span></p>
+        <ol class="finds">
+          <li><span class="p">p.14</span><span>第 3.2 条 交割条件<small>多了一项"无重大不利变化"，对方随时可以退出</small></span><span class="loss">高风险</span></li>
+          <li><span class="p">p.87</span><span>第 11 条 对赌回购<small>业绩没达标时按 12% 年息回购</small></span><span class="loss">约 ¥2,400 万</span></li>
+          <li><span class="p">p.312</span><span>附件 7 担保范围<small>包括子公司的全部债务</small></span><span class="loss">无上限</span></li>
+        </ol>
+      </div>
+    </div>
+    <div class="pages" role="img" aria-label="400 页的文件，第 14、87、312 页被标出">
+      <div class="comb"></div><div class="comb read"></div><div class="scan"></div>
+      <span class="mk" style="--x: 3.5%; --at: 1.0s"><span>p.14</span></span>
+      <span class="mk" style="--x: 21.75%; --at: 1.4s"><span>p.87</span></span>
+      <span class="mk" style="--x: 78%; --at: 2.6s"><span>p.312</span></span>
+      <div class="ends"><span>第 1 页</span><span>第 400 页</span></div>
+    </div>
+  </section>
+
+  <!-- 规格带：四个带单位的数字，写清口径 -->
+  <section class="wrap">
+    <dl class="specs2" data-reveal>
+      <div><dt>一次能读</dt><dd><span data-count="1">1</span><small>M tokens</small></dd><p>约 400 页中文合同</p></div>
+      <div><dt>首字延迟</dt><dd><span data-count="0.38" data-decimals="2">0.38</span><small>秒</small></dd><p><em>快 41%</em> · 较上一代</p></div>
+      <div><dt>长文问答准确率</dt><dd><span data-count="91.6" data-decimals="1">91.6</span><small>%</small></dd><p><em>+7.2 点</em> · 内部测试集</p></div>
+      <div><dt>价格（输入）</dt><dd><small style="margin:0 .1em 0 0">¥</small><span data-count="4">4</span><small>/ 百万 tokens</small></dd><p>输出 ¥12 / 百万 tokens</p></div>
+    </dl>
+  </section>
+
+  <!-- 能力示例：同一个场景，三种问法。左边是用户的问题，右边是模型的回答 -->
+  <section class="wrap sec" id="demo" data-tabs>
+    <div class="sec-top" data-reveal>
+      <div><p class="kick">能力</p><h2>同一份租赁合同，三种问法</h2></div>
+      <div class="pills" role="tablist" aria-label="示例类别">
+        <button type="button" role="tab" aria-selected="true">找风险</button>
+        <button type="button" role="tab">写回函</button>
+        <button type="button" role="tab">算数字</button>
+      </div>
+    </div>
+    <div role="tabpanel">
+      <div class="demo">
+        <div class="ask"><p class="kick">你问</p><h3>这份租赁合同，哪几条对我不利？</h3><p>上传了 46 页的写字楼租赁合同。作为承租方，最该先和房东谈的是哪几条？</p></div>
+        <div class="answer">
+          <p class="who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 4v16M9 4v16M13 4v16M17 4v16"/></svg>Meridian 2 · 用时 6.4 秒</p>
+          <p class="result">先谈三条，按损失大小排</p>
+          <p>引用的条款号都能点开回到原文。</p>
+          <div class="checks">
+            <div><span class="n">01</span><div><p class="t">第 14.2 条：提前退租要付 6 个月租金</p><p class="subtle">同区域常见是 2–3 个月，可以要求按剩余租期递减。</p></div><span class="badge danger">约 ¥38 万</span></div>
+            <div><span class="n">02</span><div><p class="t">第 9.1 条：每年租金上调 8%</p><p class="subtle">没有封顶，五年后月租比现在高 47%。</p></div><span class="badge warn">约 ¥21 万</span></div>
+            <div><span class="n">03</span><div><p class="t">第 22 条：装修恢复原状由承租方承担</p><p class="subtle">没写验收标准，退租时容易扯皮。</p></div><span class="badge">待估</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div role="tabpanel" hidden>
+      <div class="demo">
+        <div class="ask"><p class="kick">你问</p><h3>帮我给房东写一封回函</h3><p>沿用上面三条，语气客气但立场清楚，能直接发出去。</p></div>
+        <div class="answer">
+          <p class="who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 4v16M9 4v16M13 4v16M17 4v16"/></svg>Meridian 2 · 回函草稿</p>
+          <p class="letter">陈经理您好：合同我们逐条看过了，整体没有问题，想就三处和您商量。第 14.2 条的提前退租违约金，希望按剩余租期递减；第 9.1 条的年度调价，希望设一个 5% 的上限；第 22 条的恢复原状，希望附上验收标准。方便的话这周四下午当面聊。</p>
+          <div class="row" style="margin-top: 1.25rem"><button class="btn sm" type="button" data-copy=".letter" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg><span>复制全文</span></button><span class="subtle">186 字</span></div>
+        </div>
+      </div>
+    </div>
+    <div role="tabpanel" hidden>
+      <div class="demo">
+        <div class="ask"><p class="kick">你问</p><h3>把调价条款写成一个函数</h3><p>输入首年月租、年涨幅和封顶，算出每年的月租，方便和房东对数字。</p></div>
+        <div class="answer">
+          <p class="who"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 4v16M9 4v16M13 4v16M17 4v16"/></svg>Meridian 2 · Python</p>
+          <pre class="code"><code><span class="k">def</span> rent_by_year(first, rise, cap=<span class="k">None</span>, years=<span class="s">5</span>):
+    <span class="c"># 每年按 rise 上调；有封顶时单年涨幅不超过 cap</span>
+    r = min(rise, cap) <span class="k">if</span> cap <span class="k">else</span> rise
+    <span class="k">return</span> [round(first * (<span class="s">1</span> + r) ** y) <span class="k">for</span> y <span class="k">in</span> range(years)]
+
+rent_by_year(<span class="s">86000</span>, <span class="s">0.08</span>)            <span class="c"># [86000, 92880, 100310, 108335, 117002]</span>
+rent_by_year(<span class="s">86000</span>, <span class="s">0.08</span>, cap=<span class="s">0.05</span>)  <span class="c"># [86000, 90300, 94815, 99556, 104534]</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 和上一代比：亮条是新模型，灰条是上一代。每项写清测的是什么 -->
+  <section class="wrap sec" id="bench">
+    <div class="sec-top" data-reveal>
+      <div><p class="kick">对比</p><h2>和上一代比，长文本上进步最大</h2></div>
+      <div class="legend"><span><i></i>Meridian 2</span><span><i class="prev"></i>Meridian 1.5</span></div>
+    </div>
+    <div class="bench" data-stagger>
+      <div data-reveal><div><p class="t">长合同条款定位</p><p class="subtle">300 页以上，找出指定条款</p></div>
+        <div class="bars"><div><div class="bar"><i style="--v:94"></i></div><span class="v">94.1%</span></div><div><div class="bar faint"><i style="--v:78"></i></div><span class="v subtle">78.3%</span></div></div></div>
+      <div data-reveal><div><p class="t">跨文档事实核对</p><p class="subtle">财报正文与附注是否一致</p></div>
+        <div class="bars"><div><div class="bar"><i style="--v:88"></i></div><span class="v">88.7%</span></div><div><div class="bar faint"><i style="--v:71"></i></div><span class="v subtle">71.0%</span></div></div></div>
+      <div data-reveal><div><p class="t">代码库问答</p><p class="subtle">12 万行仓库，回答调用链问题</p></div>
+        <div class="bars"><div><div class="bar"><i style="--v:81"></i></div><span class="v">81.2%</span></div><div><div class="bar faint"><i style="--v:69"></i></div><span class="v subtle">69.4%</span></div></div></div>
+      <div data-reveal><div><p class="t">中文写作评审</p><p class="subtle">编辑盲评，满分 10</p></div>
+        <div class="bars"><div><div class="bar"><i style="--v:86"></i></div><span class="v">8.6</span></div><div><div class="bar faint"><i style="--v:80"></i></div><span class="v subtle">8.0</span></div></div></div>
+    </div>
+  </section>
+
+  <!-- 用法：可以直接复制的提示词。方括号里是要替换的部分 -->
+  <section class="wrap sec" id="uses">
+    <div class="sec-top" data-reveal><div><p class="kick">用法</p><h2>三段拿去就能用的提示词</h2></div></div>
+    <div class="uses-grid" data-stagger>
+      <article class="use" data-reveal><p class="kick">审合同</p><h3>找出对我不利的条款</h3>
+        <p class="prompt" id="p1">我是［甲方 / 乙方］。请通读这份合同，列出对我最不利的三条，写明条款号、可能的损失和可以怎么谈。</p>
+        <button class="btn sm" type="button" data-copy="#p1" hidden><span>复制</span></button></article>
+      <article class="use" data-reveal><p class="kick">读财报</p><h3>核对正文和附注</h3>
+        <p class="prompt" id="p2">请对比这份财报的正文与附注，找出数字或口径不一致的地方，按金额从大到小排列，每条附上页码。</p>
+        <button class="btn sm" type="button" data-copy="#p2" hidden><span>复制</span></button></article>
+      <article class="use" data-reveal><p class="kick">读代码</p><h3>讲清一条调用链</h3>
+        <p class="prompt" id="p3">在这个仓库里，［函数名］被调用后会依次经过哪些模块？画出调用顺序，并指出最可能出性能问题的一处。</p>
+        <button class="btn sm" type="button" data-copy="#p3" hidden><span>复制</span></button></article>
+    </div>
+  </section>
+
+  <!-- 结尾：页线再出现一次 -->
+  <section class="wrap end">
+    <div class="pages" aria-hidden="true"><div class="comb"></div>
+      <span class="mk" style="--x: 3.5%"></span><span class="mk" style="--x: 21.75%"></span><span class="mk" style="--x: 78%"></span></div>
+    <h2 data-reveal>下一份长文档，交给它先读一遍。</h2>
+    <div class="row" data-reveal><a class="btn lg primary" href="#demo">体验示例</a><a class="btn lg" href="#uses">查看用法</a></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap row between">
+    <a class="brand" href="#home" lang="en">Meridian</a>
+    <p>© 2026 陆知行实验室 · 上海</p>
+  </div>
+</footer>
+</div>

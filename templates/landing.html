@@ -1,0 +1,302 @@
+<!--@title 纪要 · 开完会，待办已经分好了-->
+<!--@use 产品官网、落地页、品牌首页。结构：导航 → 首屏（宋体大标题 + 朱笔批注 + 会议记录纸：原话被划线、待办逐条落下）→ 指标带 → 三步（每步一个小界面）→ 一句证言 + 一个数字 → 定价表 → 唯一的深色收尾 → 页脚。贯穿装置是"朱笔"：标题、原话、收尾都用同一支笔划线-->
+<!--@sample 开完会|待办已经|周三产品例会|周予安|纪要听完整场会议-->
+<style>
+/* 本页的版式与细节。颜色、字体、圆角全部来自预设变量：换 --style / --accent 会跟着变。
+   贯穿装置：朱笔（--pen）。只在三处出现——标题里的一个词、原话里被拎出来的那几句、收尾的一个圈。别处不要再用它。 */
+.lp { --pen: var(--accent); --rule: var(--text); --mono: var(--font-mono, ui-monospace, monospace); }
+.lp-kicker { display: flex; align-items: center; gap: .75rem; font: 500 .75rem/1.4 var(--mono); letter-spacing: .14em; color: var(--text-subtle); }
+.lp-kicker::before { content: ""; width: 1.75rem; height: 1px; background: currentColor; }
+
+/* 首屏：左边一句话，右边一张会议记录纸 */
+.lp-hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(2.5rem, 5vw, 5rem); align-items: center;
+           padding-block: clamp(3rem, 2rem + 4vw, 5.5rem) clamp(3.5rem, 2rem + 5vw, 6rem); }
+.lp-hero > * { min-width: 0; }
+.lp-h1 { font-family: var(--font-display); font-weight: var(--display-weight-zh, 600); font-size: clamp(2.9rem, 1.4rem + 4.4vw, 5.4rem);
+         line-height: 1.14; letter-spacing: .02em; margin-top: 1.5rem; }
+.lp-h1 .ln { display: block; }
+.lp-pen { position: relative; white-space: nowrap; }
+.lp-pen svg, .end .circ svg { max-width: none; }   /* ui.css 给 svg 设了 max-width:100%，会把比文字宽的笔画压窄 */
+.lp-pen svg { position: absolute; left: -3%; bottom: -.16em; width: 106%; height: .4em; overflow: visible; pointer-events: none; }
+.lp-pen path { fill: none; stroke: var(--pen); stroke-width: 2.2; stroke-linecap: round; }
+.lp-lede { margin-top: 1.75rem; font-size: clamp(1.0625rem, 1rem + .25vw, 1.1875rem); line-height: 1.8; color: var(--text-muted); max-width: 25em; text-wrap: pretty; }
+.lp-cta { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2.25rem; }
+.lp-cta .btn.lg { height: 3.25rem; padding-inline: 1.6rem; font-size: 1rem; border-radius: var(--r-md); }
+.lp-note { margin-top: 1.1rem; font-size: var(--fs-sm); color: var(--text-subtle); }
+
+/* 会议记录纸：原话在上，拎出的待办在下；悬停一条待办，它出自的那句原话一起亮 */
+.sheet { background: var(--surface); border-radius: var(--r-lg); box-shadow: 0 0 0 1px var(--border), 0 1px 0 var(--hi) inset,
+         0 30px 60px -30px rgb(var(--shade, 0 0 0) / .35), 0 12px 24px -16px rgb(var(--shade, 0 0 0) / .18); overflow: hidden; }
+.sheet-head { display: flex; align-items: baseline; gap: .75rem; padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--border); }
+.sheet-head b { font-weight: 600; }
+.sheet-head span { font: .75rem/1 var(--mono); color: var(--text-subtle); letter-spacing: .04em; }
+.sheet-head .live { margin-left: auto; display: inline-flex; align-items: center; gap: .45rem; color: var(--ok); }
+.sheet-head .live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: lp-pulse 2.4s ease-in-out infinite; }
+@keyframes lp-pulse { 50% { opacity: .25; } }
+.said { padding: .6rem 1.5rem 1rem; }
+.said p { display: grid; grid-template-columns: 3.1rem 3.6rem minmax(0, 1fr) 1.4rem; gap: .25rem .75rem; align-items: baseline;
+          padding: .55rem .5rem; margin-inline: -.5rem; border-radius: var(--r-sm); font-size: .9375rem; line-height: 1.7; transition: background-color 200ms ease; }
+.said time { font: .75rem/1.7 var(--mono); color: var(--text-faint); }
+.said .who { font-weight: 600; font-size: .875rem; }
+.said .k { justify-self: end; }
+.said mark { background: linear-gradient(var(--pen), var(--pen)) 0 100% / 0% 2px no-repeat; color: inherit; padding-bottom: 1px;
+             transition: background-size 700ms var(--ease-out-expo); transition-delay: var(--at, 0ms); }
+.is-in .said mark, .no-motion .said mark { background-size: 100% 2px; }
+.k { display: inline-grid; place-items: center; width: 1.3rem; height: 1.3rem; border-radius: 50%; border: 1.5px solid var(--pen); color: var(--pen);
+     font: 600 .6875rem/1 var(--mono); }
+.got { border-top: 1px dashed var(--border-strong); background: color-mix(in srgb, var(--surface-sunken) 60%, var(--surface)); padding: 1rem 1.5rem 1.25rem; }
+.got-head { display: flex; justify-content: space-between; align-items: baseline; font: .75rem/1.4 var(--mono); letter-spacing: .06em; color: var(--text-subtle); }
+.got-head em { font-style: normal; color: var(--ok); }
+.got ol { margin-top: .6rem; display: grid; gap: .4rem; }
+.got li { display: grid; grid-template-columns: 1.3rem 3.6rem minmax(0, 1fr) auto; gap: .75rem; align-items: center; padding: .65rem .75rem;
+          background: var(--surface); border-radius: var(--r-md); box-shadow: 0 0 0 1px var(--border); font-size: .9375rem; line-height: 1.5;
+          transition: box-shadow 200ms ease, translate 200ms var(--ease-out-expo); }
+.got li .who { font-weight: 600; font-size: .875rem; }
+.got li .due { font-size: .8125rem; color: var(--text-muted); white-space: nowrap; }
+.got li .due.soon { color: var(--pen); font-weight: 600; }
+.sheet:has([data-k="1"]:hover) [data-k="1"], .sheet:has([data-k="2"]:hover) [data-k="2"], .sheet:has([data-k="3"]:hover) [data-k="3"] { background-color: var(--accent-subtle); }
+.got li:hover { box-shadow: 0 0 0 1.5px var(--pen); translate: 0 -1px; }
+
+/* 指标：衬线数字，细线分栏 */
+.lp-metrics { border-top: 1px solid var(--rule); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.lp-metrics > div { padding: 1.25rem 1.5rem 0 0; }
+.lp-metrics > div + div { padding-left: 1.5rem; border-left: 1px solid var(--border); }
+.lp-metrics dt { font-size: var(--fs-sm); color: var(--text-muted); }
+.lp-metrics dd { margin: .5rem 0 0; font-family: var(--font-display); font-size: clamp(2.25rem, 1.5rem + 2vw, 3.25rem); line-height: 1; letter-spacing: -.02em;
+                 font-variant-numeric: tabular-nums lining-nums; }
+.lp-metrics dd small { font-family: var(--font-body); font-size: .9375rem; letter-spacing: 0; color: var(--text-muted); margin-left: .3rem; }
+.lp-metrics p { margin-top: .6rem; font-size: .8125rem; color: var(--text-subtle); }
+
+/* 区块标题 */
+.lp-sec { padding-block: clamp(4.5rem, 3rem + 6vw, 8rem); }
+.lp-sec h2 { font-family: var(--font-display); font-size: clamp(2rem, 1.3rem + 2.4vw, 3.25rem); line-height: 1.3; letter-spacing: .02em; margin-top: 1.25rem; max-width: 16em; }
+.lp-sec .lp-sub { margin-top: 1.25rem; font-size: 1.0625rem; line-height: 1.8; color: var(--text-muted); max-width: 32em; }
+
+/* 三步：同一条细线下的三栏，每栏一个真实的小界面 */
+.steps { margin-top: clamp(2.5rem, 4vw, 4rem); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--rule); }
+.step { padding: 1.5rem 1.75rem 0 0; display: grid; grid-template-rows: auto auto 1fr; gap: .75rem; }
+.step + .step { padding-left: 1.75rem; border-left: 1px solid var(--border); }
+.step-n { display: flex; align-items: baseline; gap: .75rem; }
+.step-n span { font: .75rem/1 var(--mono); color: var(--pen); letter-spacing: .08em; }
+.step-n h3 { font-family: var(--font-display); font-size: 1.75rem; font-weight: var(--display-weight-zh, 600); line-height: 1.2; }
+.step > p { color: var(--text-muted); line-height: 1.8; }
+.vig { margin-top: .75rem; align-self: end; background: var(--surface-sunken); border-radius: var(--r-lg); padding: 1rem; display: grid; gap: .5rem; min-height: 11rem; align-content: center; }
+.vig .row-i { display: flex; align-items: center; gap: .75rem; background: var(--surface); border-radius: var(--r-md); padding: .6rem .75rem; box-shadow: 0 0 0 1px var(--border); font-size: .875rem; }
+.vig .row-i .grow { flex: 1; min-width: 0; }
+.vig .row-i small { display: block; color: var(--text-subtle); font-size: .75rem; }
+.vig .quote-i { background: var(--surface); border-radius: var(--r-md); padding: .9rem 1rem; box-shadow: 0 0 0 1px var(--border); font-size: .9375rem; line-height: 1.7; }
+.vig .quote-i mark { background: linear-gradient(var(--pen), var(--pen)) 0 100% / 100% 2px no-repeat; color: inherit; }
+.vig .arrow { justify-self: center; color: var(--text-faint); }
+.vig .ping { display: grid; grid-template-columns: auto 1fr; gap: .25rem .75rem; background: var(--surface); border-radius: var(--r-md); padding: .8rem 1rem;
+             box-shadow: 0 0 0 1px var(--border), 0 10px 22px -14px rgb(var(--shade, 0 0 0) / .4); font-size: .875rem; line-height: 1.6; }
+.vig .ping svg { width: 1.1rem; height: 1.1rem; color: var(--pen); margin-top: .2rem; }
+.vig .ping small { grid-column: 2; color: var(--text-subtle); font-size: .75rem; }
+
+/* 证言：一句话 + 一个数字 */
+.say { display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: clamp(2rem, 5vw, 5rem); align-items: end; }
+.say blockquote { font-family: var(--font-display); font-size: clamp(1.6rem, 1.1rem + 1.6vw, 2.5rem); line-height: 1.55; letter-spacing: .02em; text-indent: -.6em; text-wrap: pretty; }
+.say blockquote::before { content: "「"; color: var(--pen); }
+.say blockquote::after { content: "」"; color: var(--pen); }
+.say figcaption { margin-top: 1.75rem; display: flex; align-items: center; gap: .75rem; font-size: var(--fs-sm); color: var(--text-muted); }
+.say .big { font-family: var(--font-display); font-size: clamp(3.5rem, 2rem + 4vw, 5.5rem); line-height: 1; letter-spacing: -.03em; font-variant-numeric: lining-nums; }
+.say .big small { font-family: var(--font-body); font-size: 1rem; letter-spacing: 0; color: var(--text-muted); margin-left: .4rem; }
+.say .big-cap { margin-top: .75rem; padding-top: .75rem; border-top: 1px solid var(--rule); font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.7; }
+
+/* 定价：一张表，不是三张漂浮的卡 */
+.plans2 { margin-top: clamp(2.5rem, 4vw, 3.5rem); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--surface);
+          border-radius: var(--r-lg); box-shadow: 0 0 0 1px var(--border); }
+.plan2 { padding: 1.75rem 1.75rem 2rem; display: flex; flex-direction: column; gap: 1.25rem; position: relative; }
+.plan2 + .plan2 { border-left: 1px solid var(--border); }
+.plan2.pick { box-shadow: inset 0 3px 0 var(--pen); }
+.plan2 header { display: flex; justify-content: space-between; align-items: center; gap: .75rem; }
+.plan2 h3 { font-size: 1.0625rem; }
+.plan2 .price { font-family: var(--font-display); font-size: 3.25rem; line-height: 1; letter-spacing: -.02em; }
+.plan2 .price small { font-family: var(--font-body); font-size: .875rem; letter-spacing: 0; color: var(--text-muted); margin-left: .35rem; }
+.plan2 .for { font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.7; min-height: 3.4em; }
+.plan2 ul { flex: 1; display: grid; gap: .55rem; align-content: start; padding-top: 1.25rem; border-top: 1px solid var(--border); font-size: .9375rem; }
+.plan2 li { display: flex; gap: .6rem; align-items: baseline; }
+.plan2 li::before { content: ""; flex: none; width: .55rem; height: .3rem; border-left: 1.5px solid var(--pen); border-bottom: 1.5px solid var(--pen); rotate: -45deg; translate: 0 -.2em; }
+
+/* 收尾：全页唯一的深色块，朱笔圈一下 */
+.end .pad { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2rem; align-items: end; }
+.end h2 { font-family: var(--font-display); font-size: clamp(2.25rem, 1.4rem + 3vw, 4rem); line-height: 1.25; letter-spacing: .02em; }
+.end .circ { position: relative; white-space: nowrap; }
+.end .circ { display: inline-block; }
+.end .circ svg { position: absolute; left: -.38em; top: -.3em; width: calc(100% + .76em); height: calc(100% + .6em); overflow: visible; pointer-events: none; }
+.end .circ path { fill: none; stroke: var(--stage-btn, var(--pen)); stroke-width: 1.7; stroke-linecap: round; }
+.end p { margin-top: 1rem; color: var(--stage-muted); font-size: 1.0625rem; }
+
+@media (max-width: 960px) {
+  .lp-hero, .say, .end .pad { grid-template-columns: minmax(0, 1fr); }
+  .steps, .plans2 { grid-template-columns: minmax(0, 1fr); }
+  .step, .step + .step { padding: 1.5rem 0 2rem; border-left: 0; }
+  .step + .step { border-top: 1px solid var(--border); }
+  .plan2 + .plan2 { border-left: 0; border-top: 1px solid var(--border); }
+  .plan2.pick { order: -1; }
+  .lp-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lp-metrics > div:nth-child(3) { padding-left: 0; border-left: 0; }
+  .lp-metrics > div:nth-child(n+3) { margin-top: 1.25rem; border-top: 1px solid var(--border); }
+}
+@media (max-width: 560px) {
+  .said p { grid-template-columns: 3.4rem minmax(0, 1fr) 1.4rem; }
+  .said time { grid-column: 1 / -1; line-height: 1; }
+  .got li { grid-template-columns: 1.3rem minmax(0, 1fr); }
+  .got li .who { grid-column: 2; }
+  .got li > span:nth-child(3), .got li .due { grid-column: 2; }
+  .sheet-head { flex-wrap: wrap; }
+}
+</style>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 6h14M5 12h9M5 18h5"/></svg>纪要</a>
+    <nav class="links hide-sm" aria-label="主导航"><a href="#how">怎么用</a><a href="#price">价格</a><a role="link" aria-disabled="true">文档</a></nav>
+    <a class="btn sm ghost" role="link" aria-disabled="true">登录</a>
+    <a class="btn sm ink" href="#price">查看方案</a>
+  </div>
+</header>
+
+<main class="lp" id="home">
+  <!-- 首屏：一句结论 + 产品自己在工作的样子。主视觉是真的界面，不是插画 -->
+  <section class="wrap lp-hero">
+    <div>
+      <p class="lp-kicker" data-reveal>会议纪要 · 给每周开很多会的团队</p>
+      <h1 class="lp-h1">
+        <span class="ln" data-reveal style="--delay:60ms">开完会，</span>
+        <span class="ln" data-reveal style="--delay:140ms">待办已经</span>
+        <span class="ln" data-reveal style="--delay:220ms"><span class="lp-pen">分好了<svg viewBox="0 0 100 13" preserveAspectRatio="none" aria-hidden="true"><path class="draw" style="--delay:700ms" d="M2 8.5 C 20 4.5, 44 10.5, 68 6.5 S 92 5, 98 7.5"/></svg></span>。</span>
+      </h1>
+      <p class="lp-lede" data-reveal style="--delay:320ms">纪要听完整场会议，把“谁在什么时候之前做什么”单独拎出来，直接发到每个人的待办里。会上谁都不用再记。</p>
+      <div class="lp-cta" data-reveal style="--delay:400ms">
+        <a class="btn lg ink" href="#price">查看试用方案</a>
+        <a class="btn lg" href="#how">看一场真实的会</a>
+      </div>
+      <p class="lp-note" data-reveal style="--delay:460ms">不用绑卡 · 支持腾讯会议、飞书、Zoom</p>
+    </div>
+
+    <figure class="sheet" data-reveal="scale" style="--delay:240ms" aria-label="纪要从一场会议里拎出待办的示例">
+      <div class="sheet-head"><b>周三产品例会</b><span>47:12 · 6 人</span><span class="live">已整理</span></div>
+      <div class="said">
+        <p data-k="1"><time>14:02</time><span class="who">周予安</span><span>退款流程那个原型，<mark style="--at:1100ms">我周五前发给法务</mark>看一下。</span><span class="k">1</span></p>
+        <p><time>14:04</time><span class="who">何苗</span><span>法务那边上次回得挺快的。</span><span></span></p>
+        <p data-k="2"><time>14:05</time><span class="who">林朝</span><span>库存接口要等大促排期，<mark style="--at:1500ms">我下周二确认</mark>。</span><span class="k">2</span></p>
+        <p data-k="3"><time>14:09</time><span class="who">何苗</span><span>新话术<mark style="--at:1900ms">我约客服主管过一遍</mark>，时间还没定。</span><span class="k">3</span></p>
+      </div>
+      <div class="got">
+        <div class="got-head"><span>拎出的待办 · 3</span><em>已同步到飞书</em></div>
+        <ol>
+          <li data-k="1" data-reveal="up" style="--delay:1300ms"><span class="k">1</span><span class="who">周予安</span><span>把退款流程原型发给法务</span><span class="due soon">周五前</span></li>
+          <li data-k="2" data-reveal="up" style="--delay:1700ms"><span class="k">2</span><span class="who">林朝</span><span>确认 11 月大促的库存接口</span><span class="due">下周二</span></li>
+          <li data-k="3" data-reveal="up" style="--delay:2100ms"><span class="k">3</span><span class="who">何苗</span><span>约客服主管过一遍新话术</span><span class="due">待排期</span></li>
+        </ol>
+      </div>
+    </figure>
+  </section>
+
+  <!-- 指标带：带单位、带口径的真实数字 -->
+  <section class="wrap">
+    <dl class="lp-metrics" data-reveal>
+      <div><dt>每场会平均拎出</dt><dd><span data-count="4.2" data-decimals="1">4.2</span><small>件待办</small></dd><p>近 30 天 1.8 万场会议</p></div>
+      <div><dt>待办按时完成率</dt><dd><span data-count="81">81</span><small>%</small></dd><p>比手写纪要高 23 个点</p></div>
+      <div><dt>会后出纪要</dt><dd><span data-count="90">90</span><small>秒</small></dd><p>60 分钟的会</p></div>
+      <div><dt>正在用的团队</dt><dd><span data-count="2140">2,140</span><small>个</small></dd><p>截至 11 月</p></div>
+    </dl>
+  </section>
+
+  <!-- 三步：每步一个结论 + 一个真实的小界面 -->
+  <section class="wrap lp-sec" id="how">
+    <p class="lp-kicker" data-reveal>怎么用</p>
+    <h2 data-reveal>听、拎、追。<br>这三件事，以后都不用你做。</h2>
+    <div class="steps" data-stagger>
+      <div class="step" data-reveal>
+        <div class="step-n"><span>01</span><h3>听</h3></div>
+        <p>把纪要拉进会议就行。它像一位不说话的同事，只负责听；会后 90 秒，纪要和录音一起到。</p>
+        <div class="vig">
+          <div class="row-i"><span class="avatar">腾</span><span class="grow">腾讯会议<small>自动加入日历里的会</small></span><input class="switch" type="checkbox" checked aria-label="腾讯会议"></div>
+          <div class="row-i"><span class="avatar">飞</span><span class="grow">飞书会议<small>已连接</small></span><input class="switch" type="checkbox" checked aria-label="飞书会议"></div>
+          <div class="row-i"><span class="avatar">Z</span><span class="grow">Zoom<small>未连接</small></span><input class="switch" type="checkbox" aria-label="Zoom"></div>
+        </div>
+      </div>
+      <div class="step" data-reveal>
+        <div class="step-n"><span>02</span><h3>拎</h3></div>
+        <p>负责人、截止时间、依赖谁，都从原话里来。点一下就跳回那一秒，没有“我当时不是这个意思”。</p>
+        <div class="vig">
+          <p class="quote-i">“退款这块<mark>我周五前把原型给到法务</mark>，他们看完咱们再排开发。”</p>
+          <svg class="arrow" width="16" height="22" viewBox="0 0 16 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M8 1v19M2 14l6 6 6-6"/></svg>
+          <div class="row-i"><span class="k">1</span><span class="grow">周予安 · 原型发给法务<small>原话 31:07 · 依赖 法务</small></span><span class="badge accent">周五前</span></div>
+        </div>
+      </div>
+      <div class="step" data-reveal>
+        <div class="step-n"><span>03</span><h3>追</h3></div>
+        <p>待办进了各自的清单就不用再管。快到期还没动静的，纪要会在群里轻轻提一句。</p>
+        <div class="vig">
+          <div class="row-i" style="display:grid; gap:.5rem"><span style="display:flex; justify-content:space-between"><span>本周待办</span><small>12 件里完成 9 件</small></span><span class="bar"><i style="--v:75"></i></span></div>
+          <div class="ping"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>“确认库存接口”明天到期，林朝还没开始。</span><small>纪要 · 产品组群 · 18:00</small></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 一条有观点的证言，配一个具体数字 -->
+  <section class="wrap lp-sec" style="padding-top:0">
+    <figure class="say" data-reveal>
+      <div>
+        <blockquote>以前开完会，要再开一个会来对齐“刚才说了什么”。现在这个会没有了。</blockquote>
+        <figcaption><span class="avatar">赵</span>赵蔚 · 跨境电商产品负责人，团队 28 人</figcaption>
+      </div>
+      <div>
+        <p class="big">−6<small>小时 / 周</small></p>
+        <p class="big-cap">她的团队每人每周少开的对齐会。用纪要前后各统计四周。</p>
+      </div>
+    </figure>
+  </section>
+
+  <!-- 定价：一张表，推荐的那一栏顶上一道朱笔 -->
+  <section class="wrap lp-sec" id="price" style="padding-top:0">
+    <p class="lp-kicker" data-reveal>价格</p>
+    <h2 data-reveal>按开会的人算，旁听的不要钱。</h2>
+    <div class="plans2" data-reveal>
+      <div class="plan2">
+        <header><h3>个人</h3></header>
+        <p class="price">¥0</p>
+        <p class="for">一个人试试，或者只有几场重要的会。</p>
+        <ul><li>每月 10 场会</li><li>纪要与待办</li><li>保留 30 天</li></ul>
+        <a class="btn block" role="link" aria-disabled="true">开始用</a>
+      </div>
+      <div class="plan2 pick">
+        <header><h3>团队</h3><span class="badge accent">多数团队选这个</span></header>
+        <p class="price">¥39<small>每人每月</small></p>
+        <p class="for">只算开会发言的人，旁听、只看纪要的不收钱。</p>
+        <ul><li>不限场次</li><li>待办同步到飞书、钉钉</li><li>到期前一天提醒</li><li>永久保留</li></ul>
+        <a class="btn primary block" role="link" aria-disabled="true">试用 14 天</a>
+      </div>
+      <div class="plan2">
+        <header><h3>企业</h3></header>
+        <p class="price" style="font-size: 2.25rem; padding-block: .5rem">聊一聊</p>
+        <p class="for">要放在自己的服务器上，或者要过安全审计。</p>
+        <ul><li>私有化部署</li><li>单点登录与审计日志</li><li>专属支持</li></ul>
+        <a class="btn block" role="link" aria-disabled="true">联系我们</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 收尾：全页唯一的深色块 -->
+  <section class="stage end" style="margin-bottom: var(--s-7)">
+    <div class="pad">
+      <div>
+        <h2 data-reveal>下一场会，带上它<span class="circ">试试<svg viewBox="0 0 100 64" preserveAspectRatio="none" aria-hidden="true"><path class="draw" style="--delay:500ms" d="M60 5 C 30 1, 4 13, 4 33 C 4 53, 38 62, 68 58 C 94 54, 99 33, 89 17 C 81 6, 62 3, 42 7"/></svg></span>。</h2>
+        <p data-reveal>装好只要两分钟，第一份纪要今天就能拿到。</p>
+      </div>
+      <div class="row" data-reveal><a class="btn lg primary" href="#price">查看试用方案</a></div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap cols">
+    <div><a class="brand" href="#home">纪要</a><p style="margin-top: var(--s-3); max-width: 22em">把会议变成待办。杭州 · 2026</p></div>
+    <div><h4>产品</h4><a href="#how">功能</a><a href="#price">价格</a><a role="link" aria-disabled="true">更新日志</a></div>
+    <div><h4>资源</h4><a role="link" aria-disabled="true">文档</a><a role="link" aria-disabled="true">接入指南</a><a role="link" aria-disabled="true">状态</a></div>
+    <div><h4>公司</h4><a role="link" aria-disabled="true">关于</a><a role="link" aria-disabled="true">隐私</a><a role="link" aria-disabled="true">联系</a></div>
+  </div>
+</footer>

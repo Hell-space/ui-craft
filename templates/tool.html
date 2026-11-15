@@ -1,0 +1,210 @@
+<!--@title 专注 · 番茄钟-->
+<!--@use 单一用途的小工具、小应用、demo（计时器、计算器、转换器、记录类）。立场：一件放在桌角的计时器，不是一个 App。结构：左边一个表盘回答"现在是什么状态、下一步按哪里"，右边是今天的时间轴与设置。贯穿装置是刻度：表盘的刻度、时间轴的刻度用同一种细线-->
+<!--@sample 写季度复盘|评审改版方案|今天的专注-->
+<style>
+/* 本页的版式与细节。颜色和字体都来自预设变量，换 --style / --accent 会跟着变。 */
+.tool { --mono: var(--font-mono, ui-monospace, monospace); max-width: 70rem; margin-inline: auto; padding: var(--s-5) var(--gutter) var(--s-8); }
+.tool-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: var(--s-4); border-bottom: 1px solid var(--border); }
+.tool-head .meta { display: flex; align-items: center; gap: 1rem; font-size: var(--fs-sm); color: var(--text-muted); }
+.tool-head .meta b { font-family: var(--font-display); font-size: 1rem; color: var(--text); font-variant-numeric: tabular-nums; }
+.tool-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(1.5rem, 4vw, 4rem); margin-top: clamp(1.5rem, 3vw, 2.5rem); align-items: start; }
+.tool-grid > * { min-width: 0; }
+
+/* 表盘：刻度、进度弧、弧头的点，中间是时间 */
+.dial-wrap { display: grid; justify-items: center; text-align: center; padding: clamp(1rem, 3vw, 2rem) 0; }
+.task { font-size: var(--fs-sm); color: var(--text-muted); display: inline-flex; align-items: center; gap: .5rem; }
+.task::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.task.paused::before { background: var(--text-faint); }
+.task-name { margin-top: .5rem; font-family: var(--font-display); font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2rem); line-height: 1.3; }
+.dial { position: relative; width: min(100%, 25rem); aspect-ratio: 1; margin-top: clamp(1.25rem, 3vw, 2rem); }
+.dial svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.dial .tick { stroke: var(--border-strong); stroke-width: 1; }
+.dial .tick.major { stroke: var(--text-subtle); stroke-width: 1.5; }
+.dial .track { fill: none; stroke: var(--surface-sunken); stroke-width: 10; }
+.dial .arc { fill: none; stroke: var(--accent); stroke-width: 10; stroke-linecap: round; stroke-dasharray: var(--v, 0) 100;
+             transition: stroke-dasharray 400ms var(--ease-out-quart); }
+.dial .face { fill: var(--surface); stroke: var(--border); }
+.dial .readout { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: .4rem; }
+.dial .time { font-family: var(--font-display); font-size: clamp(3.75rem, 2rem + 6vw, 5.75rem); line-height: 1; letter-spacing: -.02em;
+              font-variant-numeric: tabular-nums lining-nums; font-weight: var(--display-weight, 500); }
+.dial .time i { font-style: normal; color: var(--text-faint); position: relative; top: -.07em; margin: 0 .02em; }
+.dial .left { font-size: var(--fs-sm); color: var(--text-subtle); }
+.controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .75rem 1rem; margin-top: clamp(1.25rem, 3vw, 2rem); }
+.controls .btn.lg { min-width: 9rem; }
+#custom-time { min-inline-size: 6em; font-variant-numeric: tabular-nums; }
+.hint { margin-top: 1rem; font-size: .75rem; color: var(--text-faint); }
+
+/* 今天：一条 8 点到 20 点的时间轴，每段专注是一块 */
+.side { display: grid; gap: var(--s-4); }
+.side h3 { font-size: 1rem; }
+.day-sum { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.day-sum .big { font-family: var(--font-display); font-size: 2.25rem; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.day-sum .big small { font-family: var(--font-body); font-size: .8125rem; color: var(--text-muted); letter-spacing: 0; margin: 0 .25rem 0 .15rem; }
+.axis2 { position: relative; height: 2.25rem; margin-top: 1.1rem; border-bottom: 1px solid var(--text); }
+.axis2 .blk { position: absolute; bottom: 0; height: 1.5rem; left: var(--a); width: var(--w); border-radius: 3px 3px 0 0; background: color-mix(in srgb, var(--accent-layer, var(--accent)) 55%, var(--surface)); }
+.axis2 .blk.now { background: repeating-linear-gradient(-45deg, var(--accent) 0 4px, color-mix(in srgb, var(--accent-layer, var(--accent)) 70%, var(--surface)) 4px 8px); }
+.axis2 .now-line { position: absolute; bottom: -4px; top: -4px; left: var(--a); width: 2px; background: var(--text); }
+.hours { display: flex; justify-content: space-between; margin-top: .4rem; font: 11px var(--mono); color: var(--text-subtle); }
+.hours span { position: relative; } .hours span::before { content: ""; position: absolute; left: 50%; top: -.55rem; width: 1px; height: .3rem; background: var(--text-subtle); }
+.log { margin-top: 1rem; display: grid; }
+.log > div { display: grid; grid-template-columns: 3.25rem minmax(0, 1fr) auto; gap: .75rem; align-items: baseline; padding: .7rem 0; border-top: 1px solid var(--border); font-size: .9375rem; }
+.log time { font: .75rem var(--mono); color: var(--text-subtle); }
+.log small { display: block; font-size: .75rem; color: var(--text-subtle); }
+.log .len { font-family: var(--font-display); font-variant-numeric: tabular-nums; color: var(--text-muted); }
+.setting { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); padding: .8rem 0; border-top: 1px solid var(--border); }
+.setting:first-of-type { border-top: 0; }
+.duration-dialog { width: min(22rem, calc(100% - 2rem)); padding: var(--s-5); border: 1px solid var(--border); border-radius: var(--r-lg); color: var(--text); background: var(--surface); }
+.duration-dialog form { display: grid; gap: var(--s-4); }
+@media (max-width: 860px) { .tool-grid { grid-template-columns: minmax(0, 1fr); } .tool-head .meta .hide-sm { display: none; } }
+</style>
+
+<div class="tool" id="timer">
+  <header class="tool-head">
+    <a class="brand" href="#timer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>专注</a>
+    <div class="meta"><span class="hide-sm">11 月 13 日 周五</span><span>今天第 <b id="round">4</b> 个</span><button class="btn sm ghost" id="theme" type="button">切换明暗</button></div>
+  </header>
+
+  <div class="tool-grid">
+    <!-- 表盘：全页最大的东西回答"现在是什么状态" -->
+    <section class="card dial-wrap" aria-label="计时">
+      <p class="task" id="phase" role="status">专注中</p>
+      <p class="task-name">写季度复盘</p>
+      <div class="dial">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <g id="ticks"></g>
+          <circle class="face" cx="100" cy="100" r="78"/>
+          <circle class="track" cx="100" cy="100" r="86"/>
+          <circle class="arc" id="bar" cx="100" cy="100" r="86" pathLength="100" transform="rotate(-90 100 100)" style="--v:25"/>
+        </svg>
+        <div class="readout"><p class="time" id="time" aria-live="off">18<i>:</i>42</p><p class="left" id="elapsed">25 分钟里过去了 6 分 18 秒</p></div>
+      </div>
+      <div class="controls">
+        <div class="seg" data-managed role="group" aria-label="专注时长"><button type="button" data-minutes="25" aria-pressed="true">25 分</button><button type="button" data-minutes="50" aria-pressed="false">50 分</button><button type="button" id="custom-time" aria-haspopup="dialog" aria-pressed="false">自定</button></div>
+        <button class="btn" id="skip" type="button">重新计时</button>
+        <button class="btn primary lg" id="toggle" type="button">暂停</button>
+      </div>
+      <p class="hint">按空格暂停或继续 · 结束后自动休息 5 分钟</p>
+    </section>
+
+    <div class="side">
+      <!-- 今天：时间轴把一天摊开，比一串列表更快看出"上午专注、下午被打断" -->
+      <section class="card" aria-labelledby="h-day">
+        <div class="day-sum"><h3 id="h-day">今天的专注</h3><p class="big">1<small>小时</small>15<small>分</small></p></div>
+        <div class="axis2" role="img" aria-label="8 点到 20 点：9:35 到 10:25、10:40 到 11:05、14:10 起进行中">
+          <span class="blk" style="--a:13.2%; --w:6.9%"></span>
+          <span class="blk" style="--a:22.2%; --w:3.5%"></span>
+          <span class="blk now" style="--a:51.4%; --w:2.6%"></span>
+          <span class="now-line" style="--a:54%"></span>
+        </div>
+        <div class="hours" aria-hidden="true"><span>8</span><span>10</span><span>12</span><span>14</span><span>16</span><span>18</span><span>20</span></div>
+        <div class="log">
+          <div><time>14:10</time><span>写季度复盘<small>进行中 · 第 4 个</small></span><span class="badge accent">进行中</span></div>
+          <div><time>10:40</time><span>回邮件<small>一次完成</small></span><span class="len">25′</span></div>
+          <div><time>09:35</time><span>评审改版方案<small>中途暂停 1 次</small></span><span class="len">50′</span></div>
+        </div>
+      </section>
+      <section class="card" aria-labelledby="h-set">
+        <h3 id="h-set">设置</h3>
+        <div style="margin-top: var(--s-2)">
+          <label class="setting"><span class="label">结束时响铃</span><input id="chime" class="switch" type="checkbox"></label>
+          <label class="setting"><span><span class="label">自动开始休息</span><br><span class="subtle">专注结束后休息 5 分钟</span></span><input id="auto-break" class="switch" type="checkbox" checked></label>
+          <label class="setting"><span class="label">标签标题显示剩余时间</span><input id="title-time" class="switch" type="checkbox" checked></label>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+<dialog id="duration" class="duration-dialog" aria-labelledby="duration-title">
+  <form>
+    <h2 id="duration-title">专注时长</h2>
+    <label class="field">分钟<input id="minutes" type="number" required min="1" max="180" step="1" inputmode="numeric"></label>
+    <div class="row"><button type="button" class="btn" id="cancel-duration">取消</button><button type="submit" class="btn primary">应用时长</button></div>
+  </form>
+</dialog>
+
+<script>
+(function () {
+  const get = id => document.getElementById(id);
+  // 表盘刻度：60 格，每 5 格一根长的
+  const ticks = get('ticks'), NS = 'http://www.w3.org/2000/svg';
+  for (let i = 0; i < 60; i++) {
+    const a = i / 60 * Math.PI * 2, major = i % 5 === 0, r1 = 97, r2 = major ? 91 : 94;
+    const l = document.createElementNS(NS, 'line');
+    l.setAttribute('x1', 100 + r1 * Math.sin(a)); l.setAttribute('y1', 100 - r1 * Math.cos(a));
+    l.setAttribute('x2', 100 + r2 * Math.sin(a)); l.setAttribute('y2', 100 - r2 * Math.cos(a));
+    l.setAttribute('class', major ? 'tick major' : 'tick'); ticks.appendChild(l);
+  }
+  const picker = get('duration'), custom = get('custom-time'), minutes = get('minutes');
+  let focusMinutes = 25, mode = 'focus', remaining = (18*60+42)*1000;
+  let running = true, deadline = Date.now()+remaining, tick = 0, sound;
+  function bell() {
+    if (!get('chime').checked || !sound || sound.state !== 'running') return;
+    const osc=sound.createOscillator(), volume=sound.createGain(), start=sound.currentTime;
+    osc.frequency.value=740; volume.gain.setValueAtTime(.075,start);
+    volume.gain.exponentialRampToValueAtTime(.001,start+.18);
+    osc.connect(volume).connect(sound.destination); osc.start(); osc.stop(start+.19);
+  }
+  function draw() {
+    clearTimeout(tick);
+    const now=Date.now();
+    if (running) remaining=Math.max(0,deadline-now);
+    if (running && remaining===0) {
+      bell();
+      if (mode==='focus' && get('auto-break').checked) {
+        mode='break'; deadline+=300000; remaining=Math.max(0,deadline-now);
+      }
+      running=remaining>0;
+    }
+    const total=mode==='focus'?focusMinutes*60:300;
+    const seconds=Math.ceil(remaining/1000), elapsed=Math.max(0,total-seconds);
+    const label=remaining===0?'已结束':running?(mode==='focus'?'专注中':'休息中'):'已暂停';
+    if (get('phase').textContent!==label) get('phase').textContent=label;
+    get('phase').classList.toggle('paused', !running);
+    get('time').innerHTML=String(Math.floor(seconds/60)).padStart(2,'0')+'<i>:</i>'+String(seconds%60).padStart(2,'0');
+    get('bar').style.setProperty('--v',100*elapsed/total);
+    get('elapsed').textContent=(total/60)+' 分钟里过去了 '+Math.floor(elapsed/60)+' 分 '+(elapsed%60)+' 秒';
+    get('toggle').textContent=running?'暂停':remaining===0?'开始':'继续';
+    document.title=get('title-time').checked?get('time').textContent+' · '+label:'专注 · 番茄钟';
+    if (running) tick=setTimeout(draw,(remaining%1000||1000)+2);
+  }
+  function resetFocus(value) {
+    mode='focus'; focusMinutes=value; remaining=value*60000; deadline=Date.now()+remaining;
+    document.querySelectorAll('.seg button').forEach(button=>{
+      const selected=button===custom?![25,50].includes(value):Number(button.dataset.minutes)===value;
+      button.setAttribute('aria-pressed',String(selected));
+    });
+    custom.textContent=[25,50].includes(value)?'自定':value+' 分';
+    draw();
+  }
+  function toggle() {
+    draw();
+    if (!running && remaining===0) resetFocus(focusMinutes);
+    running=!running;
+    if (running) deadline=Date.now()+remaining;
+    draw();
+  }
+  get('toggle').addEventListener('click',toggle);
+  get('skip').addEventListener('click',()=>resetFocus(focusMinutes));
+  document.querySelectorAll('[data-minutes]').forEach(button=>button.addEventListener('click',()=>resetFocus(Number(button.dataset.minutes))));
+  custom.addEventListener('click',()=>{ minutes.value=String(focusMinutes); picker.showModal(); minutes.select(); });
+  get('cancel-duration').addEventListener('click',()=>picker.close());
+  picker.querySelector('form').addEventListener('submit',event=>{ event.preventDefault(); resetFocus(minutes.valueAsNumber); picker.close(); });
+  picker.addEventListener('close',()=>custom.focus({preventScroll:true}));
+  get('title-time').addEventListener('change',draw);
+  get('chime').addEventListener('change',()=>{
+    const Audio=window.AudioContext || window.webkitAudioContext;
+    if (get('chime').checked && Audio) { sound=sound || new Audio(); sound.resume().catch(()=>{}); }
+  });
+  window.addEventListener('keydown',event=>{
+    if (event.code!=='Space' || picker.open || event.repeat || event.isComposing || event.target.closest('input,textarea,button,select,a,[contenteditable]')) return;
+    event.preventDefault(); toggle();
+  });
+  get('theme').addEventListener('click',()=>{
+    const root=document.documentElement;
+    const dark=root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme=dark?'light':'dark';
+  });
+  document.addEventListener('visibilitychange',()=>{ if (!document.hidden) draw(); });
+  draw();
+})();
+</script>

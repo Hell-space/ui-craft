@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="头盔通风外形风洞对比：三种方案与基准在 20、35、50 km/h 下的阻力与通风（演示测量）。">
+<title>风洞试验室</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2310171B'/%3E%3Cpath d='M8.5 22c0-6 4-10.5 9-10.5s8.5 3.6 8.5 8.6l-1.6 1.6c-4.2-.5-10-.4-15.9.3z' fill='%23E3E7E4'/%3E%3Cpath d='M3 9.5c6 0 9-3.5 15-3.5s9 2.5 11 2.5' fill='none' stroke='%2362D6EB' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#ECEDE8;--raised:#FAFAF7;--hover:#E3E5DF;
+  --ink:#15191C;--ink-2:#454F54;--ink-3:#697378;
+  --line:#D2D6D0;--line-2:#ADB3AD;
+  --good:#0B7454;--bad:#B3410D;--flat:#5C666A;
+  --demo:#875800;--demo-bg:rgba(186,130,0,.14);
+  --focus:#2556D8;
+  --t-bg:#10171B;--t-line:#26323A;--t-hi:#18232A;
+  --t-ink:#E6EDEF;--t-ink-2:#9DADB4;--t-ink-3:#71828A;
+  --t-good:#47D3A1;--t-bad:#FF9459;--t-flat:#A6B4BA;
+  --smoke:#C6D4DB;--vent:#62D6EB;
+  --f-sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei UI","Microsoft YaHei","Noto Sans CJK SC","Noto Sans SC","Source Han Sans SC",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-num:"Bahnschrift","DIN Alternate","D-DIN","Barlow","Roboto Condensed","Arial Narrow",var(--f-sans);
+  --f-mono:"Cascadia Mono","SF Mono","JetBrains Mono",Menlo,Consolas,ui-monospace,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0C1012;--raised:#161D21;--hover:#12181B;
+    --ink:#E5EBEC;--ink-2:#A7B2B6;--ink-3:#7E8A8F;
+    --line:#232D32;--line-2:#3B474D;
+    --good:#45CF9C;--bad:#FF9157;--flat:#9AA7AC;
+    --demo:#E5B550;--demo-bg:rgba(229,181,80,.12);
+    --focus:#86A9FF;
+    --t-bg:#0D1417;--t-line:#222D33;--t-hi:#162026;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-sans);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+h1,h2,h3,p{margin:0}
+button{font:inherit;color:inherit}
+.sr{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+
+/* ---------- 页面骨架 ---------- */
+.page{max-width:1480px;margin:0 auto;padding:16px 28px 32px;display:grid;grid-template-columns:minmax(0,1fr) 380px;grid-template-rows:auto auto 1fr;grid-template-areas:"head head" "rig panel" "note panel";gap:16px 30px}
+
+.head{grid-area:head;display:flex;align-items:center;justify-content:space-between;gap:10px 20px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.mark{width:36px;height:36px;flex:none;border-radius:8px}
+.brand h1{font-size:23px;line-height:1.15;font-weight:700;letter-spacing:.08em;white-space:nowrap}
+.brand p{margin-top:2px;font-size:12.5px;color:var(--ink-2);letter-spacing:.04em}
+.demo{display:inline-flex;align-items:center;gap:8px;flex:none;padding:5px 10px;font-size:12.5px;line-height:1.3;color:var(--demo);border:1px solid currentColor;border-radius:4px;background:repeating-linear-gradient(135deg,var(--demo-bg) 0 5px,transparent 5px 10px)}
+.demo b{font-weight:700;letter-spacing:.06em}
+
+/* ---------- 试验段：画面 → 风速 → 读数，同在一块仪表里 ---------- */
+.rig{grid-area:rig;min-width:0;align-self:start;background:var(--t-bg);color:var(--t-ink);border-radius:var(--r);overflow:hidden;box-shadow:0 0 0 1px var(--t-line),0 18px 40px -26px rgba(8,16,20,.6)}
+.view{position:relative;aspect-ratio:23/10}
+#tunnel{position:absolute;inset:0;width:100%;height:100%;display:block}
+.legend{position:absolute;left:14px;top:12px;display:flex;flex-wrap:wrap;gap:3px 16px;margin:0;padding:5px 10px;list-style:none;font-size:12px;line-height:1.4;color:var(--t-ink-2);background:rgba(8,13,16,.74);border-radius:4px;pointer-events:none}
+.legend li{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.sw{display:inline-block;width:20px;height:0;border-top:2px solid}
+.sw-smoke{border-top:3px dotted var(--smoke)}
+.sw-vent{border-color:var(--vent)}
+.sw-ghost{border-top:1.5px dashed var(--t-ink)}
+
+/* SVG 内部样式 */
+.sb{stroke:var(--smoke);stroke-opacity:.13;stroke-width:1}
+.sp{stroke:var(--smoke);stroke-opacity:.78;stroke-width:2.1;stroke-linecap:round;stroke-dasharray:.1 22}
+#ventOut .vb{stroke:var(--vent);stroke-opacity:.3;stroke-width:1.3}
+#ventOut .vp{stroke:var(--vent);stroke-width:2.8;stroke-linecap:round;stroke-dasharray:.1 15}
+#ventIn .vb{stroke:#0A7C93;stroke-opacity:.5;stroke-width:1.3}
+#ventIn .vp{stroke:#077A90;stroke-width:2.8;stroke-linecap:round;stroke-dasharray:.1 15}
+#ghostOut{fill:none;stroke:#E6EDEF;stroke-opacity:.85;stroke-width:1.6;stroke-dasharray:7 5}
+#ghostIn{fill:none;stroke:#3C494F;stroke-width:1.6;stroke-dasharray:7 5}
+.helm{opacity:0;transition:opacity .28s ease}
+.helm.on{opacity:1}
+#vent{transition:opacity .3s ease}
+
+/* 风速档：只负责选择 */
+.strip{display:grid;grid-template-columns:104px repeat(3,minmax(0,1fr));border-top:1px solid var(--t-line)}
+.strip-lab{display:flex;align-items:center;gap:8px;padding:0 0 0 20px;font-size:12px;color:var(--t-ink-2);letter-spacing:.06em;white-space:nowrap}
+.spd{position:relative;display:block;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cell{display:flex;align-items:baseline;justify-content:center;gap:4px;height:100%;min-height:50px;padding:11px 12px 10px;border-left:1px solid var(--t-line);font-family:var(--f-num);font-size:13px;color:var(--t-ink-3);transition:background-color .18s}
+.cell b{font-size:24px;line-height:1;font-weight:600;color:var(--t-ink-2);font-variant-numeric:tabular-nums}
+.spd:hover .cell{background:rgba(255,255,255,.035)}
+.spd input:checked+.cell{background:var(--t-hi);box-shadow:inset 0 3px 0 var(--t-ink);color:var(--t-ink-2)}
+.spd input:checked+.cell b{color:var(--t-ink)}
+.spd input:focus-visible+.cell{outline:2px solid #8FB0FF;outline-offset:-4px}
+
+/* 读数：两个量的绝对值、单位、对基准的差，只在这里出现一次 */
+.readout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--t-line);background:var(--t-hi)}
+.ro{min-width:0;padding:12px 20px 13px;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"k k" "v d" "b b";align-items:baseline;column-gap:16px}
+.ro+.ro{border-left:1px solid var(--t-line)}
+.ro-k{grid-area:k;font-size:13px;font-weight:700;color:var(--t-ink);letter-spacing:.04em}
+.ro-k small{margin-left:8px;font-size:12px;font-weight:400;color:var(--t-ink-3);letter-spacing:0}
+.ro-v{grid-area:v}
+.ro-b{grid-area:b}
+.ro-d{grid-area:d;justify-self:start;display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap}
+.ro-d b{font-family:var(--f-num);font-size:21px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums}
+.ro-d small{font-size:12px;font-weight:600}
+.ro-d.flat small{font-family:var(--f-num);font-weight:500}
+.ro-d.same{color:var(--t-ink-3)}
+.ro-v{margin-top:4px;font-family:var(--f-num);white-space:nowrap;color:var(--t-ink);font-variant-numeric:tabular-nums}
+.ro-v b{font-size:42px;line-height:1.05;font-weight:600;letter-spacing:-.01em}
+.ro-v small{margin-left:5px;font-size:16px;color:var(--t-ink-2)}
+.ro-b{display:flex;flex-wrap:wrap;gap:0 14px;margin-top:6px;font-size:12.5px;line-height:1.55;color:var(--t-ink-3)}
+.ro-b .num{font-family:var(--f-num);font-weight:600;color:var(--t-ink-2);font-variant-numeric:tabular-nums}
+.bmark{display:inline-block;width:14px;height:0;margin-right:6px;vertical-align:middle;border-top:1.5px dashed var(--t-ink-2)}
+.rig .good{color:var(--t-good)}.rig .bad{color:var(--t-bad)}.rig .flat{color:var(--t-flat)}
+
+/* ---------- 右侧面板 ---------- */
+.panel{grid-area:panel;min-width:0;display:flex;flex-direction:column;gap:22px}
+.sec-h{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12.5px;font-weight:600;letter-spacing:.06em;color:var(--ink-2)}
+.sec-h::after{content:"";order:1;flex:1;height:1px;background:var(--line)}
+.sec-h .kbd-hint{order:2}
+.panel .good{color:var(--good)}.panel .bad{color:var(--bad)}.panel .flat{color:var(--flat)}
+
+.opts{display:flex;flex-direction:column;gap:4px}
+.opt{display:block;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.card{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;gap:14px;padding:8px 14px 8px 8px;border:1px solid transparent;border-radius:var(--r);transition:background-color .15s,border-color .15s}
+.opt:hover .card{background:var(--hover)}
+.opt input:checked+.card{background:var(--raised);border-color:var(--ink);box-shadow:0 1px 2px rgba(10,20,25,.06)}
+.opt input:focus-visible+.card{outline:2px solid var(--focus);outline-offset:2px}
+.glyph{display:block;width:72px;height:45px}
+.g-fill{fill:var(--ink-3);transition:fill .15s}
+.opt input:checked+.card .g-fill{fill:var(--ink)}
+.g-line{fill:none;stroke:var(--ink-2);stroke-width:6;stroke-dasharray:14 9;stroke-linejoin:round}
+.o-t{display:block;min-width:0}
+.o-name{display:flex;align-items:baseline;gap:8px;font-size:16px;font-weight:600;line-height:1.3}
+.code{font:500 12px/1 var(--f-mono);color:var(--ink-3);letter-spacing:.02em}
+.o-spec{display:block;margin-top:3px;font-size:12.5px;line-height:1.45;color:var(--ink-3)}
+.spec-line{display:none;margin-top:8px;font-size:12.5px;line-height:1.45;color:var(--ink-3)}
+
+.base-chip{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;gap:14px;padding:8px 14px 8px 8px;border:1px dashed var(--line-2);border-radius:var(--r)}
+.b-name{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;font-size:15px;font-weight:600;line-height:1.35}
+.b-kind{font-size:12px;font-weight:500;color:var(--ink-3)}
+.base-chip.flash{animation:flash .6s ease-out}
+@keyframes flash{from{background:var(--raised);border-color:var(--ink)}}
+.base-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:40px;padding:0 14px;font-size:14px;font-weight:600;color:var(--ink);background:var(--raised);border:1px solid var(--line-2);border-radius:var(--r);cursor:pointer;transition:background-color .15s,border-color .15s,opacity .15s}
+.btn:hover:not([aria-disabled="true"]){border-color:var(--ink)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary:hover:not([aria-disabled="true"]){background:var(--ink-2);border-color:var(--ink-2)}
+.btn[aria-disabled="true"]{opacity:.4;cursor:not-allowed}
+.btn:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* 排位：四种外形在当前风速下的相对位置（不重复数值） */
+.rk{display:grid;grid-template-columns:34px minmax(0,1fr);align-items:center;gap:6px}
+.rk+.rk{margin-top:4px}
+.rk-k{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.gauge{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:10px;font-size:11.5px;color:var(--ink-3)}
+.g-end{font-family:var(--f-num);font-size:12px;white-space:nowrap}
+.g-body{position:relative;padding:0 6px}
+.g-lab{position:relative;height:16px}
+.g-lab span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap;line-height:16px}
+.g-up span{font:600 11.5px/16px var(--f-mono);color:var(--ink)}
+.g-dn span{font-family:var(--f-mono)}
+.g-dn .g-bl{font-family:var(--f-sans);color:var(--ink-2)}
+.g-track{position:relative;height:14px}
+.g-track::before{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--line-2)}
+.g-track i{position:absolute;top:50%;transform:translate(-50%,-50%)}
+.g-track .g-span{height:4px;border-radius:2px;transform:translateY(-50%)}
+.g-span.good{background:var(--good)}.g-span.bad{background:var(--bad)}.g-span.flat{background:var(--flat)}
+.g-o{width:2px;height:10px;background:var(--ink-3);opacity:.7}
+.g-b{width:12px;height:12px;border-radius:50%;border:2px dashed var(--ink-2);background:var(--bg)}
+.g-c{width:12px;height:12px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 3px var(--bg)}
+
+.note{grid-area:note;align-self:start;display:grid;gap:3px;max-width:76ch;font-size:12.5px;line-height:1.65;color:var(--ink-3)}
+.note b{color:var(--demo);font-weight:700}
+.note .k{color:var(--ink-2)}
+
+kbd{display:inline-block;min-width:18px;padding:0 5px;font:500 11px/17px var(--f-mono);text-align:center;color:var(--ink-2);background:var(--raised);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:4px}
+.rig kbd{color:var(--t-ink-2);background:transparent;border-color:#33424A}
+.btn.primary kbd{color:inherit;background:transparent;border-color:rgba(127,127,127,.55)}
+.kbd-hint{display:none;align-items:center;gap:3px;font-weight:400;letter-spacing:0}
+@media (hover:hover) and (pointer:fine){.kbd-hint{display:inline-flex}}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:1180px){.page{grid-template-columns:minmax(0,1fr) 340px;column-gap:24px}}
+@media (max-width:1023px){
+  .page{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"head" "rig" "panel" "note"}
+  .panel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px 28px;align-items:start}
+  .panel .sec-sch{grid-row:1/span 2}
+}
+@media (max-width:719px){
+  .page{padding:12px 16px 28px;gap:12px}
+  .head{flex-wrap:nowrap;padding-bottom:10px}
+  .brand{gap:10px}
+  .brand h1{font-size:20px}
+  .brand p,.demo span{display:none}
+  .mark{width:30px;height:30px}
+  .demo{padding:4px 8px;font-size:12px}
+  .panel{display:flex;align-items:stretch;gap:20px}
+  .view{aspect-ratio:16/10}
+  .legend{left:8px;top:8px;padding:3px 8px;gap:2px 12px;font-size:11px}
+  .sw{width:16px}
+  .strip{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .strip-lab{display:none}
+  .spd:nth-child(2) .cell{border-left:0}
+  .cell{min-height:46px;padding:10px 6px 9px}
+  .cell b{font-size:21px}
+  .ro{padding:10px 12px 12px;grid-template-areas:"k d" "v v" "b b";column-gap:8px}
+  .ro-d{justify-self:end}
+  .ro-k small{display:none}
+  .ro-d b{font-size:15px}
+  .ro-d small{font-size:11.5px}
+  .ro-v{margin-top:2px}
+  .ro-v b{font-size:31px}
+  .ro-v small{font-size:14px;margin-left:4px}
+  .ro-b{flex-direction:column;margin-top:4px;font-size:12px;line-height:1.5}
+  .opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .card{grid-template-columns:none;justify-items:center;gap:3px;padding:8px 4px 8px;text-align:center;border-color:var(--line)}
+  .glyph{width:56px;height:35px}
+  .o-name{justify-content:center;gap:5px;font-size:14px}
+  .o-spec{display:none}
+  .spec-line{display:block}
+  .base-chip{grid-template-columns:56px minmax(0,1fr);gap:10px;padding:7px 10px 7px 6px}
+  .base-chip .glyph{width:56px;height:35px}
+  .btn{min-height:44px;flex:1 1 auto}
+  .rk{grid-template-columns:30px minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:reduce){
+  .helm,#vent,.cell,.card,.btn{transition:none}
+  .base-chip.flash{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="head">
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="7" fill="#10171B"/>
+        <path d="M8.5 22c0-6 4-10.5 9-10.5s8.5 3.6 8.5 8.6l-1.6 1.6c-4.2-.5-10-.4-15.9.3z" fill="#E3E7E4"/>
+        <path d="M3 9.5c6 0 9-3.5 15-3.5s9 2.5 11 2.5" fill="none" stroke="#62D6EB" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M3.5 26.5h25" fill="none" stroke="#71828A" stroke-width="1.8" stroke-linecap="round" stroke-dasharray=".1 4.2"/>
+      </svg>
+      <div>
+        <h1>风洞试验室</h1>
+        <p>头盔通风外形 · 阻力与通风对比</p>
+      </div>
+    </div>
+    <p class="demo"><b>演示测量</b><span>数值为示意，非实测数据</span></p>
+  </header>
+
+  <section class="rig" aria-label="试验段">
+    <div class="view">
+      <svg id="tunnel" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid slice" role="img" aria-label="风洞试验段示意">
+        <defs>
+          <pattern id="pGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#A9C3D0" stroke-opacity=".07"/></pattern>
+          <linearGradient id="gSec" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#141D22"/><stop offset="1" stop-color="#0E1519"/></linearGradient>
+          <linearGradient id="gShell" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6F8F6"/><stop offset=".6" stop-color="#DCE2DF"/><stop offset="1" stop-color="#C0C9C6"/></linearGradient>
+          <linearGradient id="gHead" x1="0" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#6C7980"/><stop offset="1" stop-color="#3B464C"/></linearGradient>
+          <linearGradient id="gWake" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#C6D4DB" stop-opacity=".14"/><stop offset=".65" stop-color="#C6D4DB" stop-opacity=".045"/><stop offset="1" stop-color="#C6D4DB" stop-opacity="0"/></linearGradient>
+          <linearGradient id="gIn" x1="0" x2="1"><stop offset="0" stop-color="#0E1519"/><stop offset="1" stop-color="#0E1519" stop-opacity="0"/></linearGradient>
+          <linearGradient id="gOut" x1="0" x2="1"><stop offset="0" stop-color="#0E1519" stop-opacity="0"/><stop offset="1" stop-color="#0E1519" stop-opacity=".9"/></linearGradient>
+          <linearGradient id="gMF" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="960" y2="0"><stop offset=".29" stop-color="#000"/><stop offset=".38" stop-color="#fff"/><stop offset=".8" stop-color="#fff"/><stop offset=".94" stop-color="#000"/></linearGradient>
+        </defs>
+        <rect width="960" height="480" fill="#0A1013"/>
+        <rect y="34" width="960" height="396" fill="url(#gSec)"/>
+        <rect y="34" width="960" height="396" fill="url(#pGrid)"/>
+        <path id="wake" fill="url(#gWake)"/>
+        <g id="smoke" fill="none"></g>
+        <rect y="34" width="96" height="396" fill="url(#gIn)"/>
+        <rect x="836" y="34" width="124" height="396" fill="url(#gOut)"/>
+        <path id="hcomb" fill="none" stroke="#2B3941" stroke-width="1"/>
+        <path d="M0 34H960M0 430H960" stroke="#34444C" stroke-width="2"/>
+        <path id="ticks" fill="none" stroke="#34444C" stroke-width="1.5"/>
+        <!-- 转盘、支杆与天平 -->
+        <ellipse cx="481" cy="430" rx="84" ry="5" fill="#18232A" stroke="#34444C" stroke-width="1.5"/>
+        <rect x="469" y="388" width="24" height="42" fill="#2B373D"/>
+        <rect x="442" y="384" width="78" height="8" rx="2" fill="#3A474E"/>
+        <path d="M481 436V446" stroke="#34444C" stroke-width="4"/>
+        <rect x="420" y="446" width="122" height="22" rx="3" fill="#121A1F" stroke="#2A3840"/>
+        <path d="M432 457h22M462 457h10" stroke="#3E5059" stroke-width="2" stroke-linecap="round"/>
+        <!-- 头模 -->
+        <path fill="url(#gHead)" d="M478 150C432 150 398 180 394 222C393 232 390 240 386 248L376 272C380 278 386 280 391 281C389 288 391 294 389 298C392 308 396 318 404 324C418 332 436 334 446 342L450 388L514 388C514 368 520 352 536 338C560 318 566 280 564 246C560 188 526 150 478 150Z"/>
+        <ellipse cx="514" cy="277" rx="9" ry="15" fill="#4B575E"/>
+        <g id="helmets"></g>
+        <path id="ghostOut"/>
+        <path id="ghostIn"/>
+        <g id="vent" fill="none"><g id="ventOut"></g><g id="ventIn"></g></g>
+      </svg>
+      <ul class="legend" aria-hidden="true">
+        <li><i class="sw sw-smoke"></i>烟线</li>
+        <li><i class="sw sw-vent"></i>通风气流</li>
+        <li><i class="sw sw-ghost"></i><span id="lgGhost">基准外形</span></li>
+      </ul>
+    </div>
+    <div class="strip" id="strip" role="radiogroup" aria-label="风速">
+      <div class="strip-lab" aria-hidden="true"><span>风速</span><span class="kbd-hint"><kbd>←</kbd><kbd>→</kbd></span></div>
+    </div>
+    <div class="readout" role="group" aria-label="当前读数">
+      <div class="ro" id="roDrag"></div>
+      <div class="ro" id="roCool"></div>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <section class="sec sec-sch">
+      <h2 class="sec-h"><span id="hSchemes">通风外形</span><span class="kbd-hint" aria-hidden="true"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></span></h2>
+      <div class="opts" id="opts" role="radiogroup" aria-labelledby="hSchemes"></div>
+      <p class="spec-line" id="specLine"></p>
+    </section>
+
+    <section class="sec">
+      <h2 class="sec-h"><span>对比基准</span></h2>
+      <div class="base-chip" id="baseChip"></div>
+      <div class="base-actions">
+        <button class="btn primary" id="setBase" type="button"><span id="setBaseTxt">设为基准</span><span class="kbd-hint" aria-hidden="true"><kbd>B</kbd></span></button>
+        <button class="btn" id="resetBase" type="button"><span>恢复初始基准</span><span class="kbd-hint" aria-hidden="true"><kbd>R</kbd></span></button>
+      </div>
+    </section>
+
+    <section class="sec">
+      <h2 class="sec-h"><span>同风速下四种外形的位置</span></h2>
+      <div class="rk"><span class="rk-k">阻力</span><div id="gDrag"></div></div>
+      <div class="rk"><span class="rk-k">通风</span><div id="gCool"></div></div>
+    </section>
+  </aside>
+
+  <footer class="note">
+    <p><b>演示测量</b>：本页数值仅用于界面演示，不是任何真实头盔的试验结果。</p>
+    <p><span class="k">条件</span>　偏航 0°，气温 22 °C，头模 57 cm（头皮恒温 35 °C），每个测点 3 次取平均。</p>
+    <p><span class="k">判读</span>　重复性为阻力 ±0.02 N、散热 ±0.3 W，差值落在范围内记为「持平」；踩踏功率 = 阻力差 × 风速，仅计头盔部分。</p>
+  </footer>
+
+  <p class="sr" id="live" aria-live="polite"></p>
+</div>
+<noscript><p style="padding:16px;text-align:center">需要启用 JavaScript 才能操作风洞对比。</p></noscript>
+
+<script>
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s);};
+var NS='http://www.w3.org/2000/svg';
+
+/* ---------- 数据（演示测量） ---------- */
+var SPEEDS=[20,35,50];
+var IDS=['R0','S1','S2','S3'];
+var SCHEMES=['S1','S2','S3'];
+var INITIAL_BASE='R0';
+var DEFAULT={scheme:'S1',speed:35,baseline:INITIAL_BASE};
+var KEY='fengdong-shiyanshi/v1';
+var NOISE={drag:0.02,cool:0.3};
+var UNIT={drag:'N',cool:'W'};
+var DEC={drag:2,cool:1};
+var LAB={drag:'阻力',cool:'通风'};
+var HINT={drag:'越低越好',cool:'头模散热 · 越高越好'};
+var WORD={drag:{good:'更低',bad:'更高'},cool:{good:'更凉',bad:'更闷'}};
+var MINUS='−';
+
+var ITEMS={
+  R0:{name:'上一代量产壳',spec:'14 孔 · 开孔 48 cm²',
+    drag:[0.51,1.57,3.19],cool:[12.4,17.1,20.6],
+    outer:'M384 218C378 176 410 128 470 122C530 116 580 146 600 200C606 222 604 244 596 262C584 264 566 263 552 260C522 252 490 245 456 240C426 236 400 230 384 218Z',
+    vents:[[394,200,18,8,-72],[424,164,30,9,-44],[474,140,36,10,-4],[526,146,34,10,22],[568,184,26,9,54]]},
+  S1:{name:'闭合整流',spec:'6 孔 · 开孔 14 cm² · 封闭后壳',
+    drag:[0.46,1.38,2.78],cool:[8.9,11.6,13.4],
+    outer:'M386 216C382 172 416 126 478 122C540 118 596 156 616 222L612 236C596 246 572 254 552 256C522 252 490 244 458 240C428 236 402 230 386 216Z',
+    rim:'M612 236C596 246 572 254 552 256C522 252 490 244 458 240C428 236 402 230 386 216',
+    hl:'M401 192C406 159 437 134 478 130C528 126 572 150 596 192',
+    seam:'M548 134C566 164 580 204 584 252',
+    vents:[[399,193,18,7,-70],[606,226,12,6,74]],
+    flows:['M280 208C330 206 370 202 398 194C414 172 442 150 480 143C526 136 576 168 604 222C616 240 650 250 710 254C760 257 800 258 850 260']},
+  S2:{name:'导流槽',spec:'11 孔 · 开孔 42 cm² · 内置导流槽',
+    drag:[0.50,1.46,2.94],cool:[12.6,19.2,24.0],
+    outer:'M384 216C380 176 412 128 474 122C536 117 584 152 596 214C598 230 592 244 580 252C568 259 556 260 546 258C520 252 490 244 456 240C426 236 400 230 384 216Z',
+    rim:'M580 252C568 259 556 260 546 258C520 252 490 244 456 240C426 236 400 230 384 216',
+    hl:'M398 194C404 158 434 132 474 129C520 126 560 150 578 188',
+    channel:'M397 206C414 182 440 158 476 150C520 144 556 166 572 214',
+    vents:[[392,204,18,8,-74],[420,168,36,9,-46],[472,144,46,10,-4],[530,152,40,10,20],[574,210,26,9,64]],
+    flows:['M280 205C330 205 368 204 392 203C410 182 438 154 478 142C522 134 560 160 576 208C590 234 636 250 700 256C750 260 795 262 850 264',
+           'M280 197C330 197 370 196 395 195C413 174 440 148 478 136C522 128 564 154 580 202C594 228 642 244 706 250C756 254 800 256 850 258',
+           'M280 213C330 213 368 212 390 211C408 190 438 162 478 149C520 142 556 168 572 214C586 240 630 256 694 262C744 266 790 268 850 270']},
+  S3:{name:'开放格栅',spec:'19 孔 · 开孔 71 cm² · 格栅骨架',
+    drag:[0.55,1.72,3.54],cool:[15.8,21.4,25.1],
+    outer:'M382 218C376 172 412 124 472 120C532 116 578 150 588 210C590 230 584 246 572 254C560 260 548 261 540 258C516 252 488 244 456 240C424 236 398 230 382 218Z',
+    rim:'M572 254C560 260 548 261 540 258C516 252 488 244 456 240C424 236 398 230 382 218',
+    hl:'M396 196C402 158 432 130 472 127C520 124 556 148 572 186',
+    vents:[[392,202,20,10,-72],[416,174,26,11,-50],[442,146,30,13,-24],[480,136,32,13,-2],[518,142,30,13,16],[552,164,28,12,40],[570,200,22,10,64],[436,190,26,10,-18],[480,182,30,10,0],[522,190,26,10,16],[556,226,18,9,44]],
+    flows:['M280 205C330 205 368 204 392 202C404 190 420 176 440 162C456 152 470 144 480 136C494 118 530 106 590 104C660 102 740 108 850 116',
+           'M280 186C330 184 380 178 410 172C440 162 470 152 500 150C526 150 542 156 552 164C580 186 640 198 720 202C770 204 810 206 850 208',
+           'M280 166C350 158 412 150 442 146C474 141 512 144 540 158C560 170 568 184 572 200C590 228 640 246 710 252C760 256 805 258 850 260',
+           'M280 214C350 212 402 196 436 190C470 184 502 184 524 192C542 199 552 211 556 226C570 244 620 258 690 264C740 268 795 270 850 272',
+           'M280 180C330 178 380 176 416 174C434 166 452 156 470 150C490 146 506 144 518 142C534 128 570 118 630 116C700 114 770 118 850 124']}
+};
+var CODE_NAME=function(id){return id+' '+ITEMS[id].name;};
+
+/* ---------- 状态与持久化 ---------- */
+function pick(base,o){
+  var r={scheme:base.scheme,speed:base.speed,baseline:base.baseline};
+  if(!o) return r;
+  if(SCHEMES.indexOf(o.scheme)>-1) r.scheme=o.scheme;
+  if(SPEEDS.indexOf(+o.speed)>-1) r.speed=+o.speed;
+  if(IDS.indexOf(o.baseline)>-1) r.baseline=o.baseline;
+  return r;
+}
+function load(){
+  var s=pick(DEFAULT,null);
+  try{ s=pick(s,JSON.parse(localStorage.getItem(KEY)||'null')); }catch(e){}
+  try{
+    var h=new URLSearchParams(location.hash.slice(1));
+    if(h.has('s')||h.has('v')||h.has('b')) s=pick(s,{scheme:h.get('s'),speed:h.get('v'),baseline:h.get('b')});
+  }catch(e){}
+  return s;
+}
+function save(){
+  try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){}
+  try{ history.replaceState(null,'','#s='+state.scheme+'&v='+state.speed+'&b='+state.baseline); }catch(e){}
+}
+var state=load();
+
+/* ---------- 比较与格式 ---------- */
+function cmp(m,cur,base,si){
+  var c=ITEMS[cur][m][si], b=ITEMS[base][m][si], p=Math.pow(10,DEC[m]);
+  var d=Math.round((c-b)*p)/p, pct=(c-b)/b*100, v;
+  if(cur===base) v='same';
+  else if(Math.abs(d)<=NOISE[m]+1e-9) v='flat';
+  else v=(m==='drag'?d<0:d>0)?'good':'bad';
+  return {c:c,b:b,d:d,pct:pct,v:v};
+}
+function sign(x){return x<0?MINUS:(x>0?'+':'±');}
+function fmtPct(p){return sign(+p.toFixed(1))+Math.abs(p).toFixed(1)+'%';}
+function fmtD(d,m){return sign(d)+Math.abs(d).toFixed(DEC[m]);}
+
+/* ---------- 图形工具 ---------- */
+function capsule(cx,cy,len,h,deg){
+  var r=h/2,t=deg*Math.PI/180,ux=Math.cos(t),uy=Math.sin(t),nx=-uy,ny=ux,hl=Math.max(0,len/2-r);
+  var ax=cx-ux*hl,ay=cy-uy*hl,bx=cx+ux*hl,by=cy+uy*hl;
+  var f=function(n){return n.toFixed(1);};
+  return 'M'+f(ax+nx*r)+' '+f(ay+ny*r)+'L'+f(bx+nx*r)+' '+f(by+ny*r)+
+    'A'+r+' '+r+' 0 0 0 '+f(bx-nx*r)+' '+f(by-ny*r)+'L'+f(ax-nx*r)+' '+f(ay-ny*r)+
+    'A'+r+' '+r+' 0 0 0 '+f(ax+nx*r)+' '+f(ay+ny*r)+'Z';
+}
+function ventsD(v){return v.map(function(a){return capsule(a[0],a[1],a[2],a[3],a[4]);}).join('');}
+function glyph(id,line){
+  var it=ITEMS[id];
+  return '<svg class="glyph" viewBox="368 106 256 160" aria-hidden="true">'+
+    (line?'<path class="g-line" d="'+it.outer+'"/>':'<path class="g-fill" fill-rule="evenodd" d="'+it.outer+ventsD(it.vents)+'"/>')+'</svg>';
+}
+function smooth(e0,e1,x){var t=Math.min(1,Math.max(0,(x-e0)/(e1-e0)));return t*t*(3-2*t);}
+
+/* ---------- 试验段静态部件 ---------- */
+var svg=$('#tunnel');
+(function(){
+  var hc='M2 38V426M12 38V426M22 38V426';
+  for(var y=40;y<428;y+=10) hc+='M2 '+y+'H22';
+  $('#hcomb').setAttribute('d',hc);
+  var tk='';
+  for(var x=0;x<=960;x+=40){var L=x%200===0?10:5;tk+='M'+x+' 430v-'+L+'M'+x+' 34v'+L;}
+  $('#ticks').setAttribute('d',tk);
+
+  var defs=svg.querySelector('defs'),extra='',html='';
+  SCHEMES.forEach(function(id){
+    var it=ITEMS[id];
+    extra+='<clipPath id="clip-'+id+'"><path d="'+it.outer+'"/></clipPath>'+
+      '<mask id="mF-'+id+'" maskUnits="userSpaceOnUse" x="0" y="0" width="960" height="480"><rect width="960" height="480" fill="url(#gMF)"/><path d="'+it.outer+'" fill="#000"/></mask>'+
+      '<mask id="mG-'+id+'" maskUnits="userSpaceOnUse" x="0" y="0" width="960" height="480"><rect width="960" height="480" fill="#fff"/><path d="'+it.outer+'" fill="#000"/></mask>';
+    html+='<g class="helm" data-id="'+id+'">'+
+      '<path d="'+it.outer+'" fill="url(#gShell)"/>'+
+      '<path d="'+it.rim+'" fill="none" stroke="#A6B1AE" stroke-width="11" clip-path="url(#clip-'+id+')"/>'+
+      (it.seam?'<path d="'+it.seam+'" fill="none" stroke="#9AA6A4" stroke-width="1" clip-path="url(#clip-'+id+')"/>':'')+
+      (it.channel?'<path d="'+it.channel+'" fill="none" stroke="#7D8A8E" stroke-width="1.3" stroke-dasharray="4 4" opacity=".8"/>':'')+
+      '<path d="'+it.hl+'" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="2.4" stroke-linecap="round"/>'+
+      '<path d="'+ventsD(it.vents)+'" fill="#172025" stroke="#66747A" stroke-width=".9"/>'+
+      '<path d="'+it.outer+'" fill="none" stroke="#8A979A" stroke-width="1.3"/>'+
+      '</g>';
+  });
+  defs.insertAdjacentHTML('beforeend',extra);
+  $('#helmets').innerHTML=html;
+})();
+
+/* ---------- 流线：椭圆绕流 + 尾流扰动 ---------- */
+var F={cx:478,cy:228,a:134,b:114,top:40,floor:424};
+var XS=[];for(var x=-12;x<=972;x+=6)XS.push(x);
+function solveY(X,psi){
+  var lo=Math.sqrt(Math.max(0,1-X*X))+1e-6,hi=psi+1.6;
+  for(var k=0;k<36;k++){var m=(lo+hi)/2,f=m-m/(X*X+m*m)-psi;if(f>0)hi=m;else lo=m;}
+  return (lo+hi)/2;
+}
+var lanes=[];
+for(var y0=50;y0<=420;y0+=17){
+  (function(y0){
+    var psi=(y0-F.cy)/F.b,s=psi<0?-1:1,ap=Math.max(Math.abs(psi),.03);
+    lanes.push({psi:psi,ys:XS.map(function(x){return F.cy+s*solveY((x-F.cx)/F.a,ap)*F.b;})});
+  })(y0);
+}
+var smokeG=$('#smoke'),smokeEls=[],smokeP=[];
+lanes.forEach(function(L,i){
+  var b=document.createElementNS(NS,'path'),p=document.createElementNS(NS,'path');
+  b.setAttribute('class','sb');p.setAttribute('class','sp');
+  smokeG.appendChild(b);smokeG.appendChild(p);
+  smokeEls.push({b:b,p:p});smokeP.push({el:p,ph:(i*7.37)%22.1});
+});
+function lanePath(L,i,amp,ph){
+  var w=Math.exp(-L.psi*L.psi/1.1),sg=L.psi<0?-1:1,d='';
+  for(var k=0;k<XS.length;k++){
+    var x=XS[k],y=L.ys[k];
+    if(x>F.cx&&w>.01){
+      var s=smooth(F.cx+.3*F.a,F.cx+1.2*F.a,x);
+      if(s>0){
+        var grow=.55+.45*smooth(F.cx+F.a,900,x),fade=1-.4*smooth(F.cx+1.4*F.a,990,x);
+        y+=sg*amp*.9*w*s*fade+amp*.7*w*s*grow*Math.sin((x-F.cx)/20-ph+i*1.9);
+      }
+    }
+    if(y<F.top)y=F.top;else if(y>F.floor)y=F.floor;
+    d+=(k?'L':'M')+x+' '+y.toFixed(1);
+  }
+  return d;
+}
+var wakeEl=$('#wake');
+function wakePath(amp){
+  var x0=F.cx+70,cy=F.cy+10,top='',bot=[];
+  for(var x=x0;x<=972;x+=12){
+    var h=(30+amp*2.1)*(.25+.75*smooth(x0,x0+170,x))*(1+(x-x0)/900);
+    top+=(x===x0?'M':'L')+x+' '+(cy-h).toFixed(1);
+    bot.push(x+' '+(cy+h*.9).toFixed(1));
+  }
+  return top+'L'+bot.reverse().join('L')+'Z';
+}
+function drawFlow(amp,ph){
+  for(var i=0;i<lanes.length;i++){var d=lanePath(lanes[i],i,amp,ph);smokeEls[i].b.setAttribute('d',d);smokeEls[i].p.setAttribute('d',d);}
+  wakeEl.setAttribute('d',wakePath(amp));
+}
+
+/* ---------- 通风气流与基准外形 ---------- */
+var ventG=$('#vent'),ventOut=$('#ventOut'),ventIn=$('#ventIn'),ventP=[],ventFor='';
+function buildVent(){
+  if(ventFor===state.scheme) return;
+  ventFor=state.scheme;
+  var it=ITEMS[state.scheme],h='';
+  it.flows.forEach(function(d,i){h+='<path class="vb" d="'+d+'"/><path class="vp" data-ph="'+(i*5.3).toFixed(1)+'" d="'+d+'"/>';});
+  ventOut.setAttribute('mask','url(#mF-'+state.scheme+')');
+  ventIn.setAttribute('clip-path','url(#clip-'+state.scheme+')');
+  ventOut.innerHTML=h;ventIn.innerHTML=h;
+  ventP=Array.prototype.map.call(ventG.querySelectorAll('.vp'),function(el){return {el:el,ph:+el.getAttribute('data-ph')};});
+}
+var ghostOut=$('#ghostOut'),ghostIn=$('#ghostIn');
+
+/* ---------- 动画 ---------- */
+var mq=window.matchMedia?window.matchMedia('(prefers-reduced-motion: reduce)'):null;
+var still=!!(mq&&mq.matches);
+var tgt={rate:210,amp:10},cur={rate:210,amp:10},dist=0,phase=0,last=0,geoT=0,raf=0,onScreen=true;
+function setDash(){
+  var i;
+  for(i=0;i<smokeP.length;i++) smokeP[i].el.setAttribute('stroke-dashoffset',(-((dist+smokeP[i].ph)%22.1)).toFixed(2));
+  var vd=dist*.55;
+  for(i=0;i<ventP.length;i++) ventP[i].el.setAttribute('stroke-dashoffset',(-((vd+ventP[i].ph)%15.1)).toFixed(2));
+}
+function loop(t){
+  raf=0;
+  var dt=last?Math.min(.05,(t-last)/1000):0;last=t;
+  cur.rate+=(tgt.rate-cur.rate)*(1-Math.exp(-dt*3.5));
+  cur.amp+=(tgt.amp-cur.amp)*(1-Math.exp(-dt*5));
+  dist+=cur.rate*dt;phase+=cur.rate*dt/20;
+  setDash();
+  geoT+=dt;if(geoT>=1/30){geoT=0;drawFlow(cur.amp,phase);}
+  schedule();
+}
+function schedule(){if(!raf&&!still&&onScreen&&!document.hidden)raf=requestAnimationFrame(loop);}
+function halt(){if(raf){cancelAnimationFrame(raf);raf=0;}last=0;}
+function stillFrame(){cur.amp=tgt.amp;cur.rate=tgt.rate;drawFlow(cur.amp,0);setDash();}
+if(mq){var onMq=function(e){still=e.matches;if(still){halt();stillFrame();}else schedule();};
+  if(mq.addEventListener)mq.addEventListener('change',onMq);else if(mq.addListener)mq.addListener(onMq);}
+if('IntersectionObserver' in window){
+  new IntersectionObserver(function(en){onScreen=en[0].isIntersecting;if(onScreen)schedule();else halt();}).observe($('.view'));
+}
+document.addEventListener('visibilitychange',function(){if(document.hidden)halt();else schedule();});
+
+/* ---------- 构建控件 ---------- */
+var optsEl=$('#opts');
+SCHEMES.forEach(function(id){
+  var it=ITEMS[id];
+  optsEl.insertAdjacentHTML('beforeend',
+    '<label class="opt"><input class="sr" type="radio" name="scheme" value="'+id+'">'+
+    '<span class="card">'+glyph(id)+
+      '<span class="o-t"><span class="o-name"><span class="code">'+id+'</span><span>'+it.name+'</span></span><span class="o-spec">'+it.spec+'</span></span>'+
+    '</span></label>');
+});
+var stripEl=$('#strip');
+SPEEDS.forEach(function(s){
+  stripEl.insertAdjacentHTML('beforeend',
+    '<label class="spd"><input class="sr" type="radio" name="speed" value="'+s+'">'+
+    '<span class="cell"><b>'+s+'</b>km/h</span></label>');
+});
+var setBtn=$('#setBase'),resetBtn=$('#resetBase'),live=$('#live');
+
+/* ---------- 渲染 ---------- */
+function anchor(p){
+  if(p<8) return 'left:'+p+'%;transform:translateX(-6px)';
+  if(p>92) return 'left:'+p+'%;transform:translateX(calc(-100% + 6px))';
+  return 'left:'+p+'%';
+}
+function gaugeHTML(m,si){
+  var step=m==='drag'?.1:1,vals=IDS.map(function(id){return ITEMS[id][m][si];});
+  var lo=Math.floor(Math.min.apply(null,vals)/step+1e-9)*step,hi=Math.ceil(Math.max.apply(null,vals)/step-1e-9)*step;
+  if(hi-lo<step*.999)hi=lo+step;
+  var P=function(v){return (v-lo)/(hi-lo)*100;};
+  var c=state.scheme,b=state.baseline,pc=P(ITEMS[c][m][si]),pb=P(ITEMS[b][m][si]),r=cmp(m,c,b,si);
+  var marks='',dn='',placed=[];
+  if(c!==b) marks+='<i class="g-span '+r.v+'" style="left:'+Math.min(pc,pb)+'%;width:'+Math.abs(pc-pb)+'%"></i>';
+  IDS.forEach(function(id){if(id!==c&&id!==b)marks+='<i class="g-o" style="left:'+P(ITEMS[id][m][si])+'%"></i>';});
+  marks+='<i class="g-b" style="left:'+pb+'%"></i><i class="g-c" style="left:'+pc+'%"></i>';
+  if(c!==b){dn+='<span class="g-bl" style="'+anchor(pb)+'">基准</span>';placed.push(pb);}
+  IDS.forEach(function(id){
+    if(id===c||id===b)return;
+    var p=P(ITEMS[id][m][si]);
+    if(placed.every(function(q){return Math.abs(q-p)>11;})){dn+='<span style="'+anchor(p)+'">'+id+'</span>';placed.push(p);}
+  });
+  var f=function(v){return m==='drag'?v.toFixed(1):v.toFixed(0);};
+  return '<div class="gauge" aria-hidden="true"><span class="g-end">'+f(lo)+'</span><div class="g-body">'+
+    '<div class="g-lab g-up"><span style="'+anchor(pc)+'">'+c+(c===b?' · 基准':'')+'</span></div>'+
+    '<div class="g-track">'+marks+'</div><div class="g-lab g-dn">'+dn+'</div></div>'+
+    '<span class="g-end">'+f(hi)+' '+UNIT[m]+'</span></div>';
+}
+function roHTML(m,si){
+  var c=cmp(m,state.scheme,state.baseline,si),d,extra;
+  if(c.v==='same') d='<span class="ro-d same"><b>—</b><small>即基准</small></span>';
+  else if(c.v==='flat') d='<span class="ro-d flat"><b>持平</b><small>'+fmtPct(c.pct)+'</small></span>';
+  else d='<span class="ro-d '+c.v+'"><b>'+fmtPct(c.pct)+'</b><small>'+WORD[m][c.v]+'</small></span>';
+  var base='<span><i class="bmark"></i>基准 <span class="num">'+c.b.toFixed(DEC[m])+' '+UNIT[m]+'</span></span>';
+  if(c.v==='same') extra='<span>当前方案即基准</span>';
+  else if(c.v==='flat') extra='<span>差 <span class="num">'+fmtD(c.d,m)+' '+UNIT[m]+'</span>，在重复性内</span>';
+  else if(m==='drag') extra='<span>'+(c.d<0?'约省':'约多耗')+' <span class="num">'+(Math.abs(c.d)*state.speed/3.6).toFixed(1)+' W</span> 踩踏功率</span>';
+  else extra='<span>差 <span class="num">'+fmtD(c.d,m)+' '+UNIT[m]+'</span></span>';
+  return '<h2 class="ro-k">'+LAB[m]+'<small>'+HINT[m]+'</small></h2>'+
+    '<div class="ro-v"><b>'+c.c.toFixed(DEC[m])+'</b><small>'+UNIT[m]+'</small></div>'+d+
+    '<div class="ro-b">'+base+extra+'</div>';
+}
+function phrase(m,si){
+  var c=cmp(m,state.scheme,state.baseline,si),s=LAB[m]+' '+c.c.toFixed(DEC[m])+' '+UNIT[m];
+  if(c.v==='same')return s;
+  if(c.v==='flat')return s+'，与基准持平';
+  return s+'，比基准'+(c.pct>0?'高':'低')+' '+Math.abs(c.pct).toFixed(1)+'%';
+}
+function pulse(el){
+  if(still||!el||!el.animate)return;
+  el.animate([{opacity:.25,transform:'translateY(3px)'},{opacity:1,transform:'none'}],{duration:240,easing:'ease-out'});
+}
+
+function render(why){
+  var si=SPEEDS.indexOf(state.speed),same=state.scheme===state.baseline,it=ITEMS[state.scheme],bi=ITEMS[state.baseline];
+
+  Array.prototype.forEach.call(document.querySelectorAll('input[name=scheme]'),function(r){r.checked=r.value===state.scheme;});
+  Array.prototype.forEach.call(document.querySelectorAll('input[name=speed]'),function(r){r.checked=+r.value===state.speed;});
+  $('#specLine').innerHTML='<span class="code">'+state.scheme+'</span>　'+it.spec;
+
+  /* 读数（唯一的数值区） */
+  $('#roDrag').innerHTML=roHTML('drag',si);
+  $('#roCool').innerHTML=roHTML('cool',si);
+
+  /* 基准 */
+  var init=state.baseline===INITIAL_BASE;
+  $('#baseChip').innerHTML=glyph(state.baseline,true)+'<div><div class="b-name"><span class="code">'+state.baseline+'</span><span>'+bi.name+'</span><span class="b-kind">'+(init?'初始基准':'自设基准')+'</span></div><span class="o-spec">'+bi.spec+'</span></div>';
+  $('#setBaseTxt').textContent=same?state.scheme+' 已是基准':'把 '+state.scheme+' 设为基准';
+  setBtn.setAttribute('aria-disabled',same?'true':'false');
+  resetBtn.setAttribute('aria-disabled',init?'true':'false');
+
+  /* 排位 */
+  $('#gDrag').innerHTML=gaugeHTML('drag',si);
+  $('#gCool').innerHTML=gaugeHTML('cool',si);
+
+  /* 试验段 */
+  Array.prototype.forEach.call(document.querySelectorAll('.helm'),function(g){g.classList.toggle('on',g.getAttribute('data-id')===state.scheme);});
+  ghostOut.setAttribute('d',bi.outer);ghostIn.setAttribute('d',bi.outer);
+  ghostOut.setAttribute('mask','url(#mG-'+state.scheme+')');ghostIn.setAttribute('clip-path','url(#clip-'+state.scheme+')');
+  ghostOut.style.display=ghostIn.style.display=same?'none':'';
+  buildVent();
+  ventG.style.opacity=(.3+.7*Math.min(1,Math.max(0,(it.cool[si]-8)/17.5))).toFixed(2);
+  $('#lgGhost').textContent=same?'基准即当前外形':'基准外形';
+  svg.setAttribute('aria-label','风洞试验段示意：'+CODE_NAME(state.scheme)+' 在 '+state.speed+' km/h 气流中'+(same?'，它同时是基准':'，虚线为基准 '+CODE_NAME(state.baseline)+' 的外形'));
+  var t=(it.drag[2]-2.6)/1.1;
+  tgt.amp=(5+26*Math.max(0,Math.min(1,t)))*(.85+.12*si);
+  tgt.rate=state.speed*6;
+  if(why==='init'){cur.amp=tgt.amp;cur.rate=tgt.rate;}
+  if(still)stillFrame();
+  else{if(!raf){drawFlow(cur.amp,phase);setDash();}schedule();}
+
+  if(why==='scheme'||why==='speed'||why==='base'||why==='reset'){
+    Array.prototype.forEach.call(document.querySelectorAll('.ro-v b,.ro-d'),pulse);
+  }
+  if(why==='base'||why==='reset'){var ch=$('#baseChip');ch.classList.remove('flash');void ch.offsetWidth;ch.classList.add('flash');}
+
+  var msg='';
+  if(why==='scheme')msg='已选 '+CODE_NAME(state.scheme)+'。'+state.speed+' km/h：'+phrase('drag',si)+'；'+phrase('cool',si)+'。';
+  else if(why==='speed')msg='风速 '+state.speed+' km/h：'+phrase('drag',si)+'；'+phrase('cool',si)+'。';
+  else if(why==='base')msg='已将 '+CODE_NAME(state.baseline)+' 设为基准。';
+  else if(why==='reset')msg='已恢复初始基准 '+CODE_NAME(INITIAL_BASE)+'。';
+  if(msg)live.textContent=msg;
+}
+
+function set(patch,why){
+  var next=pick(state,patch);
+  if(next.scheme===state.scheme&&next.speed===state.speed&&next.baseline===state.baseline)return;
+  state=next;save();render(why);
+}
+function setBaseline(){if(state.baseline!==state.scheme)set({baseline:state.scheme},'base');}
+function resetBaseline(){if(state.baseline!==INITIAL_BASE)set({baseline:INITIAL_BASE},'reset');}
+
+/* ---------- 交互 ---------- */
+optsEl.addEventListener('change',function(e){if(e.target.name==='scheme')set({scheme:e.target.value},'scheme');});
+stripEl.addEventListener('change',function(e){if(e.target.name==='speed')set({speed:+e.target.value},'speed');});
+setBtn.addEventListener('click',setBaseline);
+resetBtn.addEventListener('click',resetBaseline);
+document.addEventListener('keydown',function(e){
+  if(e.ctrlKey||e.metaKey||e.altKey||e.defaultPrevented)return;
+  var t=e.target,tag=t&&t.tagName;
+  if(tag==='TEXTAREA'||tag==='SELECT'||(tag==='INPUT'&&t.type!=='radio')||(t&&t.isContentEditable))return;
+  var k=e.key;
+  if(k==='1'||k==='2'||k==='3'){
+    set({scheme:SCHEMES[+k-1]},'scheme');e.preventDefault();
+    if(t&&t.name==='scheme'){var on=optsEl.querySelector('input:checked');if(on)on.focus();}
+  }
+  else if((k==='ArrowLeft'||k==='ArrowRight')&&tag!=='INPUT'){
+    var i=SPEEDS.indexOf(state.speed)+(k==='ArrowRight'?1:-1);
+    if(i>=0&&i<SPEEDS.length)set({speed:SPEEDS[i]},'speed');
+    e.preventDefault();
+  }
+  else if(k==='b'||k==='B'){setBaseline();}
+  else if(k==='r'||k==='R'){resetBaseline();}
+});
+
+render('init');
+save();
+})();
+</script>
+</body>
+</html>

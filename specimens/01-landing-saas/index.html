@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verbatim — Customer interviews, ready to quote</title>
+<meta name="description" content="Verbatim turns recorded customer interviews into structured, searchable research notes. Every insight links back to the second it was said.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F3EC;
+  --paper-2:#EFEADF;
+  --card:#FFFDF8;
+  --ink:#1B1A17;
+  --ink-2:#4A473F;
+  --ink-3:#7A7568;
+  --rule:#DCD5C6;
+  --rule-soft:#E7E1D4;
+  --mark:#F3DE6B;
+  --mark-soft:rgba(243,222,107,.55);
+  --accent:#2F5D50;
+  --accent-ink:#F3F1EA;
+  --t-blue:#DCE6EE;  --t-blue-ink:#2D4A63;
+  --t-rose:#F1DEDA;  --t-rose-ink:#7A3A2E;
+  --t-sage:#DFE7DA;  --t-sage-ink:#3C5A33;
+  --t-sand:#EDE3CC;  --t-sand-ink:#6B5424;
+
+  --serif:"Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans:"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  --wrap:1200px;
+  --gutter:clamp(20px, 4vw, 40px);
+  --r-sm:4px; --r:8px; --r-lg:12px;
+  --shadow:0 1px 0 rgba(27,26,23,.04), 0 12px 32px -12px rgba(27,26,23,.18);
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font:400 17px/1.6 var(--sans);
+  font-feature-settings:"ss01","cv11";
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  overflow-x:hidden;
+}
+img,svg{display:block;max-width:100%}
+a{color:inherit}
+p{margin:0}
+h1,h2,h3{margin:0;font-weight:400}
+button{font:inherit;color:inherit}
+::selection{background:var(--mark)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gutter)}
+.eyebrow{
+  font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);
+  display:flex;align-items:center;gap:10px;
+}
+.eyebrow::before{content:"";width:18px;height:1px;background:currentColor}
+.h2{
+  font:400 clamp(32px, 4.2vw, 48px)/1.08 var(--serif);
+  letter-spacing:-.018em;text-wrap:balance;
+}
+.h2 em{font-style:italic}
+.lede{font-size:19px;line-height:1.55;color:var(--ink-2);max-width:34em;text-wrap:pretty}
+.mark{
+  background-image:linear-gradient(var(--mark),var(--mark));
+  background-repeat:no-repeat;background-size:100% 62%;background-position:0 78%;
+  padding:0 .08em;margin:0 -.08em;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+}
+
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:46px;padding:0 20px;border-radius:var(--r);
+  font:500 15px/1 var(--sans);text-decoration:none;white-space:nowrap;
+  border:1px solid transparent;cursor:pointer;
+  transition:background-color .18s var(--ease), border-color .18s var(--ease), transform .18s var(--ease), color .18s var(--ease);
+}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--ink);color:var(--paper)}
+.btn-primary:hover{background:#000}
+.btn-primary .arr{transition:transform .2s var(--ease)}
+.btn-primary:hover .arr{transform:translateX(3px)}
+.btn-ghost{border-color:var(--rule);background:transparent}
+.btn-ghost:hover{border-color:var(--ink-3);background:var(--card)}
+.btn-sm{height:38px;padding:0 14px;font-size:14px}
+
+/* Nav */
+.nav{position:sticky;top:0;z-index:20;background:rgba(246,243,236,.86);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid transparent;transition:border-color .2s}
+.nav.scrolled{border-bottom-color:var(--rule-soft)}
+.nav .wrap{display:flex;align-items:center;height:68px;gap:40px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font:500 22px/1 var(--serif);letter-spacing:-.01em}
+.logo svg{width:22px;height:22px}
+.nav-links{display:flex;gap:28px;font-size:15px;color:var(--ink-2)}
+.nav-links a{text-decoration:none;transition:color .15s}
+.nav-links a:hover{color:var(--ink)}
+.nav-cta{margin-left:auto;display:flex;align-items:center;gap:18px;font-size:15px}
+.nav-cta .signin{text-decoration:none;color:var(--ink-2)}
+.nav-cta .signin:hover{color:var(--ink)}
+
+/* Hero */
+.hero{padding:clamp(56px, 9vw, 112px) 0 0}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:56px}
+.hero-copy{max-width:820px}
+.hero h1{
+  font:400 clamp(44px, 7vw, 88px)/1.0 var(--serif);
+  letter-spacing:-.028em;margin:22px 0 28px;text-wrap:balance;
+}
+.hero h1 em{font-style:italic;letter-spacing:-.02em}
+.hero .lede{font-size:clamp(18px, 1.6vw, 21px);max-width:33em}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:36px;align-items:center}
+.hero-fine{margin-top:18px;font-size:14px;color:var(--ink-3)}
+
+/* Product mock */
+.mock{
+  margin-top:8px;background:var(--card);border:1px solid var(--rule);border-radius:var(--r-lg);
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.mock-bar{display:flex;align-items:center;gap:14px;padding:12px 16px;border-bottom:1px solid var(--rule-soft);font-size:13px;color:var(--ink-3)}
+.mock-bar .dots{display:flex;gap:6px}
+.mock-bar .dots i{width:9px;height:9px;border-radius:50%;background:var(--rule)}
+.crumbs{font-family:var(--mono);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crumbs b{color:var(--ink);font-weight:500}
+.mock-body{display:grid;grid-template-columns:1.25fr 1fr}
+.transcript{padding:24px 28px 28px;border-right:1px solid var(--rule-soft)}
+.player{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.play{width:30px;height:30px;border-radius:50%;background:var(--ink);display:grid;place-items:center;flex:none}
+.play svg{width:10px;height:10px;margin-left:2px}
+.wave{flex:1;height:28px}
+.ptime{font:400 12px var(--mono);color:var(--ink-3);white-space:nowrap}
+.line{display:grid;grid-template-columns:56px 1fr;gap:12px;padding:9px 0;font-size:15px;line-height:1.6}
+.line + .line{border-top:1px dashed var(--rule-soft)}
+.ts{font:400 12px/1.6 var(--mono);color:var(--ink-3);padding-top:2px}
+.who{display:block;font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--ink-3);margin-bottom:1px}
+.who.cust{color:var(--accent)}
+.line.dim p{color:var(--ink-3)}
+.hl{
+  background-image:linear-gradient(var(--mark-soft),var(--mark-soft));background-repeat:no-repeat;
+  background-size:0% 100%;transition:background-size 1.1s var(--ease) .5s;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;padding:1px 2px;margin:0 -2px;border-radius:2px;
+}
+.loaded .hl{background-size:100% 100%}
+
+.notes{padding:24px 24px 28px;background:linear-gradient(var(--paper-2),var(--paper-2)) 0 0/100% 100%;display:flex;flex-direction:column;gap:14px}
+.notes-h{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--ink-3)}
+.notes-h strong{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.note{background:var(--card);border:1px solid var(--rule);border-radius:var(--r);padding:16px 16px 14px}
+.note.featured{border-color:#CDBF8A;box-shadow:0 0 0 3px rgba(243,222,107,.35)}
+.note h4{margin:0 0 8px;font:500 15px/1.35 var(--sans);letter-spacing:-.005em}
+.note blockquote{margin:0 0 12px;padding-left:12px;border-left:2px solid var(--mark);font:italic 400 16px/1.45 var(--serif);color:var(--ink-2)}
+.note-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tag{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:var(--r-sm);font:500 12px/1 var(--sans);white-space:nowrap}
+.tag.blue{background:var(--t-blue);color:var(--t-blue-ink)}
+.tag.rose{background:var(--t-rose);color:var(--t-rose-ink)}
+.tag.sage{background:var(--t-sage);color:var(--t-sage-ink)}
+.tag.sand{background:var(--t-sand);color:var(--t-sand-ink)}
+.src{margin-left:auto;font:400 12px var(--mono);color:var(--ink-3);text-decoration:none;white-space:nowrap}
+.src:hover{color:var(--ink)}
+.note.small h4{font-size:14px;margin:0}
+.note.small{padding:12px 14px}
+.note.small .row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.count{font:400 12px var(--mono);color:var(--ink-3);white-space:nowrap}
+
+/* Logos */
+.logos{padding:56px 0 0}
+.logos p{font-size:14px;color:var(--ink-3);margin-bottom:20px}
+.logo-row{display:flex;flex-wrap:wrap;gap:16px 44px;align-items:center;color:var(--ink-2)}
+.logo-row span{font-size:19px;opacity:.78;white-space:nowrap}
+.lw1{font:600 19px var(--sans);letter-spacing:-.03em}
+.lw2{font:italic 500 21px var(--serif)}
+.lw3{font:500 15px var(--mono);letter-spacing:.04em;text-transform:uppercase}
+.lw4{font:600 18px var(--sans);letter-spacing:.14em;text-transform:uppercase}
+.lw5{font:400 22px var(--serif);letter-spacing:-.02em}
+.lw6{font:500 19px var(--sans);letter-spacing:-.01em}
+
+/* Sections */
+section.block{padding:clamp(88px, 11vw, 144px) 0 0}
+.sec-head{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:24px 64px;align-items:end;margin-bottom:56px}
+.sec-head .h2{margin-top:18px}
+.sec-head .lede{justify-self:start}
+
+/* Problem */
+.problem{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:64px;align-items:start}
+.problem .h2{margin-top:18px}
+.problem-body{display:flex;flex-direction:column;gap:20px;color:var(--ink-2);font-size:18px;max-width:36em}
+.problem-body p:first-child{font:400 24px/1.4 var(--serif);color:var(--ink);letter-spacing:-.01em}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--ink);margin-top:72px}
+.stat{padding:24px 24px 0 0}
+.stat + .stat{padding-left:24px;border-left:1px solid var(--rule)}
+.stat .n{font:400 clamp(40px, 5vw, 60px)/1 var(--serif);letter-spacing:-.03em;font-variant-numeric:lining-nums tabular-nums}
+.stat .n small{font-size:.5em;letter-spacing:0;margin-left:2px;color:var(--ink-2)}
+.stat p{margin-top:12px;font-size:15px;color:var(--ink-2);max-width:22em}
+.footnote{margin-top:20px;font-size:13px;color:var(--ink-3)}
+
+/* Steps */
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.step{background:var(--card);border:1px solid var(--rule);border-radius:var(--r-lg);padding:28px;display:flex;flex-direction:column}
+.step-n{font:500 12px var(--mono);color:var(--ink-3);letter-spacing:.06em}
+.step h3{font:400 26px/1.15 var(--serif);letter-spacing:-.012em;margin:14px 0 10px}
+.step p{font-size:15.5px;color:var(--ink-2);line-height:1.6}
+.step .art{margin-top:auto;padding-top:28px}
+.art-box{height:150px;border-radius:var(--r);background:var(--paper);border:1px solid var(--rule-soft);padding:16px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.src-row{display:flex;align-items:center;gap:10px;font-size:13px;background:var(--card);border:1px solid var(--rule-soft);border-radius:6px;padding:7px 10px}
+.src-row .ic{width:18px;height:18px;border-radius:4px;flex:none;display:grid;place-items:center;font:600 10px var(--sans);color:#fff}
+.src-row .st{margin-left:auto;font:400 11px var(--mono);color:var(--ink-3)}
+.src-row .st.ok{color:var(--accent)}
+.struct{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13px;align-items:center}
+.struct dt{font:400 11px var(--mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
+.struct dd{margin:0;display:flex;gap:5px;flex-wrap:wrap}
+.share-card{background:var(--card);border:1px solid var(--rule-soft);border-radius:6px;padding:10px 12px;font-size:13px}
+.share-card .k{font:400 11px var(--mono);color:var(--ink-3)}
+.share-card b{font-weight:500;display:block;margin:3px 0 6px;line-height:1.35}
+
+/* Search demo */
+.search-wrap{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:64px;align-items:start}
+.search-copy .h2{margin-top:18px}
+.search-copy .lede{margin-top:22px;font-size:18px}
+.checks{list-style:none;padding:0;margin:32px 0 0;display:flex;flex-direction:column;gap:14px;font-size:15.5px;color:var(--ink-2)}
+.checks li{display:grid;grid-template-columns:20px 1fr;gap:10px}
+.checks svg{width:16px;height:16px;margin-top:4px;color:var(--accent)}
+.checks b{color:var(--ink);font-weight:500}
+.search{background:var(--card);border:1px solid var(--rule);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+.search-top{padding:18px 18px 14px;border-bottom:1px solid var(--rule-soft)}
+.qbox{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border:1px solid var(--rule);border-radius:var(--r);background:var(--paper);font-size:16px}
+.qbox svg{width:17px;height:17px;color:var(--ink-3);flex:none}
+.qtext{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.caret{display:inline-block;width:1px;height:18px;background:var(--ink);vertical-align:-3px;margin-left:1px;animation:blink 1.1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.kbd{font:400 11px var(--mono);color:var(--ink-3);border:1px solid var(--rule);border-radius:4px;padding:2px 6px;background:var(--card)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--rule);background:transparent;font-size:13px;color:var(--ink-2);cursor:pointer;transition:all .15s var(--ease)}
+.chip:hover{border-color:var(--ink-3);color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.answer{padding:20px 22px;border-bottom:1px solid var(--rule-soft);background:linear-gradient(180deg, rgba(243,222,107,.12), transparent)}
+.answer-k{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);display:flex;justify-content:space-between;gap:12px}
+.answer p{margin-top:8px;font:400 19px/1.45 var(--serif);letter-spacing:-.005em}
+.answer sup{font:500 10px var(--mono);color:var(--accent);margin-left:1px}
+.results{list-style:none;margin:0;padding:6px 0}
+.res{display:grid;grid-template-columns:1fr auto;gap:6px 16px;padding:14px 22px;border-top:1px solid var(--rule-soft);transition:background-color .15s}
+.res:first-child{border-top:0}
+.res:hover{background:var(--paper)}
+.res q{grid-column:1/-1;font:italic 400 16.5px/1.5 var(--serif);color:var(--ink);quotes:"\201C" "\201D"}
+.res .who2{font-size:13px;color:var(--ink-3)}
+.res .who2 b{color:var(--ink-2);font-weight:500}
+.res .at{font:400 12px var(--mono);color:var(--ink-3);text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.res .at:hover{color:var(--accent)}
+.res .at svg{width:10px;height:10px}
+.fade-swap{transition:opacity .22s var(--ease), transform .22s var(--ease)}
+.fade-swap.out{opacity:0;transform:translateY(4px)}
+
+/* Evidence */
+.evidence{background:var(--ink);color:var(--paper);border-radius:var(--r-lg);padding:clamp(36px,6vw,72px);display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:64px;align-items:center}
+.evidence .eyebrow{color:#A39E90}
+.evidence .h2{margin-top:18px}
+.evidence p.body{margin-top:20px;color:#C9C4B6;font-size:17px;max-width:30em}
+.trail{display:flex;flex-direction:column;gap:0;font-size:14px}
+.trail-item{display:grid;grid-template-columns:28px 1fr;gap:14px;position:relative;padding-bottom:22px}
+.trail-item:last-child{padding-bottom:0}
+.trail-item::before{content:"";position:absolute;left:13.5px;top:26px;bottom:2px;width:1px;background:#3D3B35}
+.trail-item:last-child::before{display:none}
+.dot{width:28px;height:28px;border-radius:50%;border:1px solid #4A473F;display:grid;place-items:center;font:500 11px var(--mono);color:#A39E90;background:var(--ink)}
+.trail-item.on .dot{background:var(--mark);border-color:var(--mark);color:var(--ink)}
+.trail-k{font:400 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#8C887B;margin-top:5px}
+.trail-v{margin-top:4px;color:var(--paper);line-height:1.5}
+.trail-v.q{font:italic 400 17px/1.45 var(--serif);color:#EDE8DC}
+.trail-v .tsl{font-family:var(--mono);font-size:12px;color:var(--mark)}
+
+/* Integrations */
+.integ{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--rule);border-left:1px solid var(--rule)}
+.integ div{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:22px 22px 20px;min-height:116px;display:flex;flex-direction:column;justify-content:space-between;gap:16px}
+.integ b{font-weight:500;font-size:16px}
+.integ span{font-size:13.5px;color:var(--ink-3);line-height:1.45}
+.integ .dir{font:400 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+
+/* Testimonial */
+.quote-block{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,10fr) minmax(0,1fr)}
+.quote-block figure{grid-column:2;margin:0;text-align:center}
+.quote-block blockquote{margin:0;font:400 clamp(28px, 3.6vw, 44px)/1.22 var(--serif);letter-spacing:-.016em;text-wrap:balance}
+.quote-block figcaption{margin-top:36px;display:inline-flex;align-items:center;gap:14px;text-align:left;font-size:15px}
+.avatar{width:44px;height:44px;border-radius:50%;background:var(--t-sage);color:var(--t-sage-ink);display:grid;place-items:center;font:500 16px var(--serif)}
+.quote-block figcaption span{display:block;color:var(--ink-3);font-size:14px}
+.quote-stats{display:flex;justify-content:center;gap:48px;margin-top:48px;padding-top:28px;border-top:1px solid var(--rule);flex-wrap:wrap}
+.quote-stats div{text-align:center}
+.quote-stats b{display:block;font:400 32px/1 var(--serif);letter-spacing:-.02em;font-variant-numeric:lining-nums}
+.quote-stats span{font-size:13.5px;color:var(--ink-3)}
+
+/* Security */
+.sec-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:40px 32px}
+.sec-item{border-top:1px solid var(--ink);padding-top:18px}
+.sec-item h3{font:500 16px/1.35 var(--sans);margin:0 0 8px}
+.sec-item p{font-size:15px;color:var(--ink-2);line-height:1.55}
+
+/* Pricing */
+.toggle{display:inline-flex;padding:3px;border:1px solid var(--rule);border-radius:999px;background:var(--card);margin-bottom:28px}
+.toggle button{border:0;background:transparent;height:32px;padding:0 14px;border-radius:999px;font-size:13.5px;color:var(--ink-2);cursor:pointer;transition:background-color .18s, color .18s}
+.toggle button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.toggle .save{font:500 11px var(--mono);color:var(--accent);margin-left:4px}
+.toggle button[aria-pressed="true"] .save{color:var(--mark)}
+.plans{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:stretch}
+.plan{background:var(--card);border:1px solid var(--rule);border-radius:var(--r-lg);padding:28px;display:flex;flex-direction:column}
+.plan.pop{border-color:var(--ink);box-shadow:var(--shadow);position:relative}
+.plan.pop .badge{position:absolute;top:-11px;left:28px;background:var(--mark);color:var(--ink);font:500 11px/22px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:0 8px;border-radius:var(--r-sm)}
+.plan h3{font:500 16px var(--sans)}
+.plan .for{font-size:14px;color:var(--ink-3);margin-top:4px}
+.price{margin:24px 0 4px;display:flex;align-items:baseline;gap:6px}
+.price b{font:400 52px/1 var(--serif);letter-spacing:-.03em;font-variant-numeric:lining-nums tabular-nums}
+.price span{font-size:14px;color:var(--ink-3)}
+.billed{font-size:13px;color:var(--ink-3);min-height:20px}
+.plan ul{list-style:none;padding:0;margin:24px 0 28px;display:flex;flex-direction:column;gap:10px;font-size:15px;color:var(--ink-2);border-top:1px solid var(--rule-soft);padding-top:22px}
+.plan li{display:grid;grid-template-columns:18px 1fr;gap:8px}
+.plan li svg{width:14px;height:14px;margin-top:5px;color:var(--ink-3)}
+.plan .btn{margin-top:auto;width:100%}
+
+/* FAQ */
+.faq-wrap{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:64px}
+.faq-wrap .h2{margin-top:18px}
+.faq-wrap .side p{margin-top:20px;color:var(--ink-2);font-size:16px}
+.faq{border-top:1px solid var(--rule)}
+.faq details{border-bottom:1px solid var(--rule)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;gap:24px;align-items:center;padding:22px 0;font:500 17px/1.4 var(--sans)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary:hover{color:var(--accent)}
+.pm{width:14px;height:14px;position:relative;flex:none}
+.pm::before,.pm::after{content:"";position:absolute;left:0;top:6.5px;width:14px;height:1px;background:currentColor;transition:transform .25s var(--ease)}
+.pm::after{transform:rotate(90deg)}
+details[open] .pm::after{transform:rotate(0)}
+.faq .ans{padding:0 48px 24px 0;color:var(--ink-2);font-size:16px;line-height:1.65}
+
+/* CTA */
+.cta{padding:clamp(96px,12vw,160px) 0 clamp(80px,10vw,128px);text-align:center}
+.cta .h2{font-size:clamp(40px, 6vw, 72px);line-height:1.02;letter-spacing:-.028em;max-width:14ch;margin:0 auto}
+.cta .lede{margin:24px auto 0;text-align:center}
+.cta .hero-actions{justify-content:center}
+
+/* Footer */
+footer{border-top:1px solid var(--rule);padding:56px 0 40px;font-size:14px;color:var(--ink-2)}
+.foot{display:grid;grid-template-columns:minmax(0,4fr) repeat(3,minmax(0,2fr));gap:32px}
+.foot h4{margin:0 0 14px;font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.foot ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px}
+.foot a{text-decoration:none}
+.foot a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.foot .about{max-width:24em;margin-top:14px;color:var(--ink-3)}
+.legal{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:56px;padding-top:24px;border-top:1px solid var(--rule-soft);font-size:13px;color:var(--ink-3)}
+
+/* Reveal */
+.rv{opacity:0;transform:translateY(14px);transition:opacity .7s var(--ease), transform .7s var(--ease)}
+.rv.in{opacity:1;transform:none}
+.no-js .rv{opacity:1;transform:none}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1040px){
+  .nav-links{display:none}
+  .integ{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sec-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .evidence, .search-wrap, .faq-wrap, .problem, .sec-head{grid-template-columns:minmax(0,1fr);gap:40px}
+  .sec-head{gap:20px}
+  .foot{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .foot > div:first-child{grid-column:1/-1}
+}
+@media (max-width: 860px){
+  .mock-body{grid-template-columns:minmax(0,1fr)}
+  .transcript{border-right:0;border-bottom:1px solid var(--rule-soft)}
+  .steps,.plans{grid-template-columns:minmax(0,1fr)}
+  .plans{gap:28px}
+  .quote-block{grid-template-columns:minmax(0,1fr)}
+  .quote-block figure{grid-column:1}
+}
+@media (max-width: 640px){
+  body{font-size:16px}
+  .nav .wrap{height:60px;gap:16px}
+  .nav-cta .signin{display:none}
+  .hero h1{margin:18px 0 22px}
+  .hero-actions .btn{flex:1 1 auto}
+  .transcript{padding:18px 16px 20px}
+  .notes{padding:18px 16px 20px}
+  .line{grid-template-columns:44px 1fr;gap:10px;font-size:14.5px}
+  .mock-bar .dots{display:none}
+  .stats{grid-template-columns:minmax(0,1fr)}
+  .stat,.stat + .stat{padding:22px 0;border-left:0;border-bottom:1px solid var(--rule)}
+  .integ, .sec-grid{grid-template-columns:minmax(0,1fr)}
+  .integ div{min-height:0}
+  .res{padding:14px 16px;grid-template-columns:minmax(0,1fr)}
+  .answer{padding:18px 16px}
+  .search-top{padding:14px}
+  .qbox .kbd{display:none}
+  .step,.plan{padding:22px}
+  .quote-stats{gap:24px 32px}
+  .faq .ans{padding-right:0}
+  .foot{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .logo-row{gap:14px 28px}
+  .logo-row span{font-size:17px}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  .rv{opacity:1;transform:none}
+  .hl{background-size:100% 100%}
+}
+</style>
+</head>
+<body class="no-js">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="check" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="jump" viewBox="0 0 10 10"><path d="M2 1.5l6 3.5-6 3.5z" fill="currentColor"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="logo" href="#" aria-label="Verbatim home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="1" width="22" height="22" rx="5" fill="#1B1A17"/><path d="M6.5 8.2c0-1.1.8-1.9 1.9-1.9.9 0 1.6.6 1.6 1.5 0 1.6-1.3 3-3 3.6l-.4-.6c1-.5 1.6-1.1 1.7-1.8-.9 0-1.8-.4-1.8-.8zm6 0c0-1.1.8-1.9 1.9-1.9.9 0 1.6.6 1.6 1.5 0 1.6-1.3 3-3 3.6l-.4-.6c1-.5 1.6-1.1 1.7-1.8-.9 0-1.8-.4-1.8-.8z" fill="#F6F3EC"/><rect x="6" y="14.5" width="12" height="3" rx="1" fill="#F3DE6B"/></svg>
+      Verbatim
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#how">How it works</a>
+      <a href="#search">Search</a>
+      <a href="#security">Security</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="signin" href="#">Sign in</a>
+      <a class="btn btn-primary btn-sm" href="#start">Try it free</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <div class="eyebrow">Research notes for product teams</div>
+          <h1>Every customer interview, <em>ready to&nbsp;quote.</em></h1>
+          <p class="lede">Verbatim listens to your recorded calls and turns them into structured research notes — themes, pains, requests, and the exact words behind each one — so your whole team can search what customers actually said.</p>
+          <div class="hero-actions" id="start">
+            <a class="btn btn-primary" href="#pricing">Start a 14-day trial <span class="arr" aria-hidden="true">→</span></a>
+            <a class="btn btn-ghost" href="#search">See it on a real study</a>
+          </div>
+          <p class="hero-fine">Free for your first 10 interviews. No credit card. Works with Zoom, Meet, and Teams.</p>
+        </div>
+
+        <div class="mock" role="img" aria-label="Verbatim workspace: a transcript with a highlighted customer quote on the left, and the structured notes extracted from it on the right.">
+          <div class="mock-bar">
+            <span class="dots"><i></i><i></i><i></i></span>
+            <span class="crumbs">Q4 Admin Onboarding Study / <b>Interview 07 · Priya N., Ops Lead at Halden Freight</b></span>
+          </div>
+          <div class="mock-body">
+            <div class="transcript">
+              <div class="player">
+                <span class="play"><svg viewBox="0 0 10 10" style="color:#F6F3EC"><use href="#jump"/></svg></span>
+                <svg class="wave" viewBox="0 0 300 28" preserveAspectRatio="none" aria-hidden="true" id="wave"></svg>
+                <span class="ptime">18:42 / 41:10</span>
+              </div>
+              <div class="line dim"><span class="ts">18:09</span><p><span class="who">Interviewer</span>Walk me through the last time you added someone to the workspace.</p></div>
+              <div class="line"><span class="ts">18:16</span><p><span class="who cust">Priya</span>So I invited three dispatchers on a Monday, and the third invite just… failed. No message. <span class="hl">I didn't know we'd hit a seat limit until finance forwarded me the overage invoice.</span></p></div>
+              <div class="line dim"><span class="ts">18:38</span><p><span class="who">Interviewer</span>What would you have expected to see?</p></div>
+              <div class="line"><span class="ts">18:42</span><p><span class="who cust">Priya</span>Honestly, just tell me before I click invite. Show me how many seats are left right there.</p></div>
+            </div>
+            <div class="notes">
+              <div class="notes-h"><strong>Notes · auto-drafted</strong><span>4 of 11</span></div>
+              <article class="note featured">
+                <h4>Seat limits are invisible until they cause a billing surprise</h4>
+                <blockquote>“I didn't know we'd hit a seat limit until finance forwarded me the overage invoice.”</blockquote>
+                <div class="note-meta">
+                  <span class="tag rose">Pain point</span>
+                  <span class="tag blue">Billing</span>
+                  <a class="src" href="#">▸ 18:16</a>
+                </div>
+              </article>
+              <article class="note small">
+                <div class="row"><h4>Show remaining seats inline at invite</h4><span class="count">Request</span></div>
+              </article>
+              <article class="note small">
+                <div class="row"><h4>Same pattern in 5 other interviews</h4><span class="count">6 / 14</span></div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="logos">
+        <p>Used by research and product teams at</p>
+        <div class="logo-row" aria-label="Customer logos">
+          <span class="lw1">northwind</span>
+          <span class="lw2">Halden Freight</span>
+          <span class="lw3">Parcelwise</span>
+          <span class="lw4">Orbit</span>
+          <span class="lw5">Lumen Health</span>
+          <span class="lw6">Fieldstack</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM -->
+  <section class="block">
+    <div class="wrap">
+      <div class="problem rv">
+        <div>
+          <div class="eyebrow">The problem</div>
+          <h2 class="h2">The insight was in call #14. <em>Nobody found it.</em></h2>
+        </div>
+        <div class="problem-body">
+          <p>Teams record hundreds of hours of customer conversation every quarter. Almost none of it gets watched twice.</p>
+          <p>Notes live in whoever ran the call. Highlights get pasted into a doc that stops being updated in March. When a PM asks “have we heard this before?”, the honest answer is usually “probably — let me dig.”</p>
+          <p>Verbatim makes every recording a durable, searchable source — without asking your researchers to tag a single line by hand.</p>
+        </div>
+      </div>
+      <div class="stats rv">
+        <div class="stat"><div class="n">4<small>min</small></div><p>Median time from call ending to a reviewed, shareable note. It used to take an afternoon.</p></div>
+        <div class="stat"><div class="n">92<small>%</small></div><p>Of auto-drafted notes kept by researchers without edits, across 38,000 interviews last quarter.</p></div>
+        <div class="stat"><div class="n">3.1<small>×</small></div><p>More interviews referenced in product specs after teams adopt Verbatim.</p></div>
+      </div>
+      <p class="footnote">Figures from Verbatim workspace data, July–September 2026. Spec references measured across 41 teams that link specs from Linear or Notion.</p>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="block" id="how">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <div>
+          <div class="eyebrow">How it works</div>
+          <h2 class="h2">From recording to research note, without the busywork.</h2>
+        </div>
+        <p class="lede">Connect where your calls already happen. Verbatim does the transcription, the first-pass synthesis, and the filing. Your researchers do the judgment.</p>
+      </div>
+      <div class="steps">
+        <article class="step rv">
+          <span class="step-n">01 — CAPTURE</span>
+          <h3>Bring in every conversation</h3>
+          <p>Calls sync from Zoom, Google Meet, and Teams automatically. Or drop in audio and video files from anywhere — up to four hours each, in 31 languages.</p>
+          <div class="art" aria-hidden="true">
+            <div class="art-box">
+              <div class="src-row"><span class="ic" style="background:#2D8CFF">Z</span>Discovery · Marco @ Parcelwise<span class="st ok">synced</span></div>
+              <div class="src-row"><span class="ic" style="background:#1E8E3E">M</span>Churn interview · Lumen Health<span class="st ok">synced</span></div>
+              <div class="src-row"><span class="ic" style="background:#7A7568">↑</span>usability-session-04.mp4<span class="st">62%</span></div>
+            </div>
+          </div>
+        </article>
+        <article class="step rv">
+          <span class="step-n">02 — STRUCTURE</span>
+          <h3>Get notes in your team's shape</h3>
+          <p>Verbatim drafts notes against your own research template — pains, jobs, requests, objections — and tags each one with themes you define, not generic ones.</p>
+          <div class="art" aria-hidden="true">
+            <div class="art-box">
+              <dl class="struct">
+                <dt>Type</dt><dd><span class="tag rose">Pain point</span></dd>
+                <dt>Theme</dt><dd><span class="tag blue">Billing</span><span class="tag sand">Admin setup</span></dd>
+                <dt>Segment</dt><dd><span class="tag sage">Mid-market</span></dd>
+                <dt>Source</dt><dd style="font:400 12px var(--mono);color:var(--ink-3)">Interview 07 · 18:16</dd>
+              </dl>
+            </div>
+          </div>
+        </article>
+        <article class="step rv">
+          <span class="step-n">03 — SHARE</span>
+          <h3>Put evidence where decisions happen</h3>
+          <p>Search across every study, then send a finding — with its playable clip — to Linear, Jira, Notion, or Slack. Anyone can check the source in one click.</p>
+          <div class="art" aria-hidden="true">
+            <div class="art-box">
+              <div class="share-card"><span class="k">LIN-2214 · linked evidence</span><b>Show seat count in invite modal</b><span class="tag rose">6 interviews</span> <span class="tag blue">Billing</span></div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEARCH DEMO -->
+  <section class="block" id="search">
+    <div class="wrap">
+      <div class="search-wrap">
+        <div class="search-copy rv">
+          <div class="eyebrow">Search</div>
+          <h2 class="h2">Ask your interviews a question. <em>Get receipts.</em></h2>
+          <p class="lede">Type the way you'd ask a colleague. Verbatim answers from your own recordings, and every sentence it writes is footnoted to a moment you can play.</p>
+          <ul class="checks">
+            <li><svg><use href="#check"/></svg><span><b>Searches meaning, not keywords.</b> “Pricing is confusing” finds “I couldn't tell what I'd pay next month.”</span></li>
+            <li><svg><use href="#check"/></svg><span><b>Filters by who said it.</b> Segment, plan, role, region, or any field from your CRM.</span></li>
+            <li><svg><use href="#check"/></svg><span><b>Won't invent an answer.</b> If your interviews don't cover it, Verbatim says so.</span></li>
+          </ul>
+        </div>
+
+        <div class="search rv" aria-live="polite">
+          <div class="search-top">
+            <div class="qbox">
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.6"/><path d="M13 13l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <span class="qtext"><span id="q">Why do admins hesitate to upgrade?</span><span class="caret" aria-hidden="true"></span></span>
+              <span class="kbd">⌘K</span>
+            </div>
+            <div class="chips" role="group" aria-label="Example questions">
+              <button class="chip" aria-pressed="true" data-k="upgrade">Upgrade hesitation</button>
+              <button class="chip" aria-pressed="false" data-k="onboarding">Onboarding friction</button>
+              <button class="chip" aria-pressed="false" data-k="reporting">Reporting needs</button>
+            </div>
+          </div>
+          <div id="swap" class="fade-swap">
+            <div class="answer">
+              <div class="answer-k"><span>Summary</span><span id="meta">From 9 interviews · 3 studies</span></div>
+              <p id="ans"></p>
+            </div>
+            <ul class="results" id="results"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EVIDENCE TRAIL -->
+  <section class="block">
+    <div class="wrap">
+      <div class="evidence rv">
+        <div>
+          <div class="eyebrow">Evidence trail</div>
+          <h2 class="h2">Every claim traces back to the second it was said.</h2>
+          <p class="body">AI summaries are only useful if you can check them. In Verbatim, nothing exists without a source: findings point to notes, notes point to quotes, quotes point to timestamps. Click through any layer and you're listening to the customer.</p>
+        </div>
+        <div class="trail" aria-label="Example evidence trail">
+          <div class="trail-item"><span class="dot">1</span><div><div class="trail-k">Finding · Q4 roadmap review</div><div class="trail-v">Mid-market admins discover seat limits through billing, not the product.</div></div></div>
+          <div class="trail-item"><span class="dot">2</span><div><div class="trail-k">Supported by 6 notes</div><div class="trail-v">Halden Freight, Parcelwise, Orbit, Fieldstack, +2</div></div></div>
+          <div class="trail-item on"><span class="dot">3</span><div><div class="trail-k">Quote</div><div class="trail-v q">“I didn't know we'd hit a seat limit until finance forwarded me the overage invoice.”</div></div></div>
+          <div class="trail-item"><span class="dot">4</span><div><div class="trail-k">Moment</div><div class="trail-v">Interview 07 · Priya N. · <span class="tsl">▸ 18:16–18:29</span></div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTEGRATIONS -->
+  <section class="block">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <div>
+          <div class="eyebrow">Integrations</div>
+          <h2 class="h2">Fits the tools you already&nbsp;use.</h2>
+        </div>
+        <p class="lede">Recordings come in from your meeting tools. Findings go out to wherever your team plans work. No new habit required.</p>
+      </div>
+      <div class="integ rv">
+        <div><span class="dir">In</span><span><b>Zoom</b><br>Cloud recordings sync when a call ends.</span></div>
+        <div><span class="dir">In</span><span><b>Google Meet</b><br>Recordings pulled from Drive automatically.</span></div>
+        <div><span class="dir">In</span><span><b>Microsoft Teams</b><br>Admin-approved, tenant-wide install.</span></div>
+        <div><span class="dir">In</span><span><b>File upload</b><br>MP4, MOV, M4A, WAV, and transcripts.</span></div>
+        <div><span class="dir">Out</span><span><b>Linear &amp; Jira</b><br>Attach evidence to issues, keep counts live.</span></div>
+        <div><span class="dir">Out</span><span><b>Notion &amp; Confluence</b><br>Embed findings that update as research grows.</span></div>
+        <div><span class="dir">Out</span><span><b>Slack</b><br>Share clips; ask Verbatim right in a thread.</span></div>
+        <div><span class="dir">Both</span><span><b>Salesforce &amp; HubSpot</b><br>Enrich speakers with account and plan data.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIAL -->
+  <section class="block">
+    <div class="wrap">
+      <div class="quote-block rv">
+        <figure>
+          <blockquote>“We stopped arguing about what customers want and started <span class="mark">arguing about what to build</span> — which is the argument you actually want a product team to have.”</blockquote>
+          <figcaption>
+            <span class="avatar" aria-hidden="true">DO</span>
+            <div><b style="font-weight:500">Dana Okafor</b><span>Head of Product Research, Parcelwise</span></div>
+          </figcaption>
+          <div class="quote-stats">
+            <div><b>1,240</b><span>interviews indexed</span></div>
+            <div><b>11 → 2 days</b><span>study synthesis time</span></div>
+            <div><b>140</b><span>people searching weekly</span></div>
+          </div>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECURITY -->
+  <section class="block" id="security">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <div>
+          <div class="eyebrow">Security &amp; privacy</div>
+          <h2 class="h2">Your customers trusted you with their words.</h2>
+        </div>
+        <p class="lede">We treat recordings like the sensitive data they are. Security reviews usually take a week, not a quarter — our full package is ready before you ask.</p>
+      </div>
+      <div class="sec-grid">
+        <div class="sec-item rv"><h3>SOC 2 Type II &amp; GDPR</h3><p>Audited annually. DPA, subprocessors list, and pen-test summary available on request.</p></div>
+        <div class="sec-item rv"><h3>Automatic PII redaction</h3><p>Emails, phone numbers, and card details are masked in transcripts and muted in clips.</p></div>
+        <div class="sec-item rv"><h3>Never used for training</h3><p>Your recordings and notes are never used to train any model — ours or a vendor's.</p></div>
+        <div class="sec-item rv"><h3>EU or US residency</h3><p>Choose where data lives. SSO, SCIM, audit logs, and custom retention on Enterprise.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="block" id="pricing">
+    <div class="wrap">
+      <div class="sec-head rv">
+        <div>
+          <div class="eyebrow">Pricing</div>
+          <h2 class="h2">Priced per researcher. <em>Readers are free.</em></h2>
+        </div>
+        <p class="lede">Pay for the people who run and synthesize interviews. Everyone else — PMs, designers, engineers, execs — can search and view at no cost.</p>
+      </div>
+      <div class="toggle" role="group" aria-label="Billing period">
+        <button type="button" aria-pressed="true" data-period="year">Annual <span class="save">−20%</span></button>
+        <button type="button" aria-pressed="false" data-period="month">Monthly</button>
+      </div>
+      <div class="plans">
+        <article class="plan rv">
+          <h3>Starter</h3>
+          <p class="for">For a solo researcher or a founder doing discovery.</p>
+          <div class="price"><b data-y="0" data-m="0">$0</b><span>forever</span></div>
+          <p class="billed">&nbsp;</p>
+          <ul>
+            <li><svg><use href="#check"/></svg>10 interviews per month</li>
+            <li><svg><use href="#check"/></svg>Transcripts and auto-drafted notes</li>
+            <li><svg><use href="#check"/></svg>Search across all your calls</li>
+            <li><svg><use href="#check"/></svg>Zoom and file upload</li>
+          </ul>
+          <a class="btn btn-ghost" href="#">Start for free</a>
+        </article>
+        <article class="plan pop rv">
+          <span class="badge">Most teams</span>
+          <h3>Team</h3>
+          <p class="for">For product and research teams running ongoing studies.</p>
+          <div class="price"><b data-y="48" data-m="60">$48</b><span>per researcher / month</span></div>
+          <p class="billed" data-y="Billed annually · unlimited free readers" data-m="Billed monthly · unlimited free readers">Billed annually · unlimited free readers</p>
+          <ul>
+            <li><svg><use href="#check"/></svg>Unlimited interviews</li>
+            <li><svg><use href="#check"/></svg>Custom templates and theme taxonomy</li>
+            <li><svg><use href="#check"/></svg>Cross-study search with cited answers</li>
+            <li><svg><use href="#check"/></svg>Linear, Jira, Notion, Slack</li>
+            <li><svg><use href="#check"/></svg>PII redaction</li>
+          </ul>
+          <a class="btn btn-primary" href="#">Start a 14-day trial</a>
+        </article>
+        <article class="plan rv">
+          <h3>Enterprise</h3>
+          <p class="for">For organizations with security, scale, or residency needs.</p>
+          <div class="price"><b>Custom</b></div>
+          <p class="billed">Annual contract</p>
+          <ul>
+            <li><svg><use href="#check"/></svg>Everything in Team</li>
+            <li><svg><use href="#check"/></svg>SSO, SCIM, and audit logs</li>
+            <li><svg><use href="#check"/></svg>EU data residency, custom retention</li>
+            <li><svg><use href="#check"/></svg>Salesforce and HubSpot enrichment</li>
+            <li><svg><use href="#check"/></svg>Dedicated research success lead</li>
+          </ul>
+          <a class="btn btn-ghost" href="#">Talk to us</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="block">
+    <div class="wrap">
+      <div class="faq-wrap">
+        <div class="side rv">
+          <div class="eyebrow">Questions</div>
+          <h2 class="h2">Things researchers ask us first.</h2>
+          <p>Something else? Email <a href="#">research@verbatim.app</a> — a researcher on our team will answer, usually the same day.</p>
+        </div>
+        <div class="faq rv">
+          <details open>
+            <summary>Will this replace our researchers?<span class="pm" aria-hidden="true"></span></summary>
+            <div class="ans">No, and it isn't designed to. Verbatim handles transcription, first-pass tagging, and filing — the parts that eat a researcher's week. Deciding what a pattern means, and what to do about it, stays with people. Every auto-drafted note is marked as a draft until someone reviews it.</div>
+          </details>
+          <details>
+            <summary>How accurate are the auto-drafted notes?<span class="pm" aria-hidden="true"></span></summary>
+            <div class="ans">Last quarter, researchers kept 92% of drafted notes without edits. Because every note is anchored to a quote and a timestamp, the other 8% are quick to catch: if the quote doesn't support the note, you'll see it immediately.</div>
+          </details>
+          <details>
+            <summary>We already use a research repository. Can we migrate?<span class="pm" aria-hidden="true"></span></summary>
+            <div class="ans">Yes. We import highlights, tags, and transcripts via CSV or API, and re-link them to recordings where the source files are available. Team and Enterprise plans include a guided migration.</div>
+          </details>
+          <details>
+            <summary>Do participants need to consent to recording?<span class="pm" aria-hidden="true"></span></summary>
+            <div class="ans">Yes — and Verbatim helps you track it. Each interview stores its consent record, and you can set retention rules that delete recordings automatically after a study closes while keeping anonymized notes.</div>
+          </details>
+          <details>
+            <summary>What counts as a “researcher” seat?<span class="pm" aria-hidden="true"></span></summary>
+            <div class="ans">Anyone who uploads interviews, edits notes, or manages templates. People who only search, read, play clips, or comment are free and unlimited on every plan.</div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="wrap rv">
+      <h2 class="h2">Stop losing what customers <em>already told you.</em></h2>
+      <p class="lede">Connect your meeting tool and your last ten interviews are searchable before lunch.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#pricing">Start a 14-day trial <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-ghost" href="#">Book a 20-minute demo</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="logo" href="#" aria-label="Verbatim home">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="1" width="22" height="22" rx="5" fill="#1B1A17"/><path d="M6.5 8.2c0-1.1.8-1.9 1.9-1.9.9 0 1.6.6 1.6 1.5 0 1.6-1.3 3-3 3.6l-.4-.6c1-.5 1.6-1.1 1.7-1.8-.9 0-1.8-.4-1.8-.8zm6 0c0-1.1.8-1.9 1.9-1.9.9 0 1.6.6 1.6 1.5 0 1.6-1.3 3-3 3.6l-.4-.6c1-.5 1.6-1.1 1.7-1.8-.9 0-1.8-.4-1.8-.8z" fill="#F6F3EC"/><rect x="6" y="14.5" width="12" height="3" rx="1" fill="#F3DE6B"/></svg>
+          Verbatim
+        </a>
+        <p class="about">Structured, searchable research notes from every customer interview. Built in Lisbon and Toronto.</p>
+      </div>
+      <div><h4>Product</h4><ul><li><a href="#how">How it works</a></li><li><a href="#search">Search</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#">Changelog</a></li></ul></div>
+      <div><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Customers</a></li><li><a href="#">Careers</a></li><li><a href="#">Contact</a></li></ul></div>
+      <div><h4>Trust</h4><ul><li><a href="#security">Security</a></li><li><a href="#">Privacy</a></li><li><a href="#">DPA</a></li><li><a href="#">Status</a></li></ul></div>
+    </div>
+    <div class="legal"><span>© 2026 Verbatim Labs, Inc.</span><span>Terms · Privacy · Cookie settings</span></div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  document.body.classList.remove('no-js');
+
+  // Nav border on scroll
+  var nav = document.getElementById('nav');
+  var onScroll = function(){ nav.classList.toggle('scrolled', window.scrollY > 8); };
+  window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+  // Highlight sweep on load
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ document.body.classList.add('loaded'); }); });
+
+  // Waveform (deterministic pseudo-random)
+  var wave = document.getElementById('wave');
+  if (wave){
+    var bars = 75, w = 300/bars, out = '', seed = 7;
+    var rnd = function(){ seed = (seed*9301+49297)%233280; return seed/233280; };
+    for (var i=0;i<bars;i++){
+      var h = 4 + Math.round((0.35 + 0.65*Math.abs(Math.sin(i*0.37)))*rnd()*22);
+      var played = i < bars*0.455;
+      out += '<rect x="'+(i*w+0.6).toFixed(1)+'" y="'+((28-h)/2)+'" width="'+(w-1.6).toFixed(1)+'" height="'+h+'" rx="1" fill="'+(played?'#1B1A17':'#DCD5C6')+'"/>';
+    }
+    wave.innerHTML = out;
+  }
+
+  // Scroll reveal
+  var rv = document.querySelectorAll('.rv');
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+    }, {rootMargin:'0px 0px -8% 0px', threshold:0.08});
+    rv.forEach(function(el){ io.observe(el); });
+  } else { rv.forEach(function(el){ el.classList.add('in'); }); }
+
+  // Search demo
+  var data = {
+    upgrade:{
+      q:'Why do admins hesitate to upgrade?',
+      meta:'From 9 interviews · 3 studies',
+      a:'Admins hesitate because they can’t predict the next invoice<sup>1</sup>, and seat limits only surface after they’ve been exceeded<sup>2</sup>. Two mentioned needing finance sign-off for any variable cost<sup>3</sup>.',
+      r:[
+        ['I couldn’t tell what I’d pay next month, so I just didn’t click it.','Tomás R.','Admin · Orbit','Interview 03','24:51'],
+        ['I didn’t know we’d hit a seat limit until finance forwarded me the overage invoice.','Priya N.','Ops Lead · Halden Freight','Interview 07','18:16'],
+        ['Anything that isn’t a flat number goes to our CFO. That’s a two-week wait.','Grace L.','IT Manager · Lumen Health','Interview 12','09:03']
+      ]
+    },
+    onboarding:{
+      q:'Where do new teams get stuck in the first week?',
+      meta:'From 12 interviews · 2 studies',
+      a:'Most stalls happen at importing existing data<sup>1</sup>, where errors don’t say which rows failed. Teams also wait on a single admin to set permissions<sup>2</sup> before anyone else can start<sup>3</sup>.',
+      r:[
+        ['The import said “3 errors” and nothing else. Three out of four thousand rows. Which three?','Marco D.','Analyst · Parcelwise','Interview 02','11:37'],
+        ['Everyone was waiting on me to set up roles, and I was on vacation.','Sam K.','Eng Manager · Fieldstack','Interview 05','06:20'],
+        ['We basically lost the first week. People logged in, saw nothing, logged out.','Ana P.','Product Lead · Northwind','Interview 09','14:02']
+      ]
+    },
+    reporting:{
+      q:'What do managers want from reporting?',
+      meta:'From 7 interviews · 2 studies',
+      a:'Managers want a weekly view they can forward without editing<sup>1</sup>. Exports are mainly used to rebuild charts in slides<sup>2</sup>, which suggests the built-in charts aren’t presentation-ready<sup>3</sup>.',
+      r:[
+        ['If I could just forward the Monday summary to my VP as-is, that’s the whole job.','Leah W.','Director · Orbit','Interview 04','31:15'],
+        ['I export to CSV every Friday and remake the same three charts in Google Slides.','Ji-woo H.','Ops Manager · Halden Freight','Interview 08','22:48'],
+        ['The dashboards are fine for me. I’d never put them in front of the board.','Ravi S.','COO · Lumen Health','Interview 11','40:09']
+      ]
+    }
+  };
+  var qEl = document.getElementById('q'), ansEl = document.getElementById('ans'),
+      metaEl = document.getElementById('meta'), resEl = document.getElementById('results'),
+      swap = document.getElementById('swap'), chips = document.querySelectorAll('.chip');
+  var esc = function(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); };
+  function render(k){
+    var d = data[k];
+    qEl.textContent = d.q; metaEl.textContent = d.meta; ansEl.innerHTML = d.a;
+    resEl.innerHTML = d.r.map(function(r,i){
+      return '<li class="res"><q>'+esc(r[0])+'</q><span class="who2"><b>'+esc(r[1])+'</b> · '+esc(r[2])+'</span>'+
+             '<a class="at" href="#" aria-label="Play '+esc(r[3])+' at '+r[4]+'"><svg><use href="#jump"/></svg>'+r[3]+' · '+r[4]+'<sup style="color:var(--accent)">'+(i+1)+'</sup></a></li>';
+    }).join('');
+  }
+  var current = 'upgrade'; render(current);
+  chips.forEach(function(c){
+    c.addEventListener('click', function(){
+      var k = c.getAttribute('data-k'); if (k === current) return;
+      chips.forEach(function(x){ x.setAttribute('aria-pressed', x===c ? 'true':'false'); });
+      current = k; swap.classList.add('out');
+      setTimeout(function(){ render(k); swap.classList.remove('out'); }, 200);
+    });
+  });
+
+  // Pricing toggle
+  var tbtns = document.querySelectorAll('.toggle button');
+  tbtns.forEach(function(b){
+    b.addEventListener('click', function(){
+      var p = b.getAttribute('data-period'), key = p==='year' ? 'data-y' : 'data-m';
+      tbtns.forEach(function(x){ x.setAttribute('aria-pressed', x===b ? 'true':'false'); });
+      document.querySelectorAll('.price b[data-y]').forEach(function(el){ el.textContent = '$'+el.getAttribute(key); });
+      document.querySelectorAll('.billed[data-y]').forEach(function(el){ el.textContent = el.getAttribute(key); });
+    });
+  });
+})();
+</script>
+</body>
+</html>

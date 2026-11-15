@@ -1,0 +1,199 @@
+<!--@title 为什么菜市场的鱼摊总在最里面 · 城市观察-->
+<!--@use 长文、博客、专栏、产品文档的单篇页面。立场：一本安静的城市杂志。结构：简洁导航 → 文章头（栏目、日期、阅读时长、宋体大标题、导语、作者）→ 正文（首字下沉、页边注、小标题、由数据画出的图、引文、列表、表格、说明）+ 宽屏右侧目录 → 作者与相关文章。顶部有阅读进度条-->
+<!--@sample 鱼摊总在最里面|陈默|菜市场的平面图-->
+<style>
+/* 本页的排版与细节。颜色和字体都来自预设变量，换 --style / --accent 会跟着变。 */
+.progress { position: fixed; inset: 0 0 auto; z-index: 60; height: 2px; transform-origin: 0 50%; scale: var(--read, 0) 1; background: var(--accent); }
+/* 支持滚动时间线的浏览器里，进度条完全由 CSS 驱动、交给显卡合成，滚动时不跑任何脚本 */
+@supports (animation-timeline: scroll()) {
+  .progress { scale: 0 1; animation: read-progress linear both; animation-timeline: scroll(root); }
+  @keyframes read-progress { to { scale: 1 1; } }
+}
+.article { --mono: var(--font-mono, ui-monospace, monospace); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 40rem) minmax(0, 1fr); column-gap: clamp(2rem, 5vw, 4.5rem);
+           padding-block: clamp(3rem, 2rem + 5vw, 6rem) var(--s-9); }
+.article > * { grid-column: 2; min-width: 0; }
+
+/* 文章头 */
+.kick { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; font: 500 .75rem/1.4 var(--mono); letter-spacing: .1em; color: var(--text-subtle); }
+.kick b { font-weight: 500; color: var(--accent-text); }
+.kick b::after { content: ""; display: inline-block; width: 1.5rem; height: 1px; margin-left: .75rem; vertical-align: middle; background: currentColor; }
+.head h1 { margin-top: 1.25rem; font-family: var(--font-display); font-size: clamp(2.4rem, 1.4rem + 3vw, 3.75rem); line-height: 1.25; letter-spacing: .02em; text-wrap: balance; }
+.head .stand { margin-top: 1.5rem; font-family: var(--font-display); font-size: clamp(1.1875rem, 1rem + .5vw, 1.375rem); line-height: 1.75; color: var(--text-muted); text-wrap: pretty; }
+.byline { display: flex; align-items: center; gap: .75rem; margin-top: 2rem; padding-block: 1rem; border-top: 1px solid var(--text); border-bottom: 1px solid var(--border); font-size: var(--fs-sm); }
+.byline .grow p:first-child { font-weight: 600; font-size: .9375rem; }
+
+/* 目录 */
+.toc { grid-column: 3; grid-row: 1 / span 3; align-self: start; position: sticky; top: 4.5rem; margin-top: 21rem; font-size: var(--fs-sm); max-width: 13rem; }
+.toc .kick { margin-bottom: .75rem; }
+.toc a { display: grid; grid-template-columns: 1.75rem 1fr; padding: .35rem 0; color: var(--text-subtle); text-decoration: none; border-top: 1px solid var(--border); }
+.toc a span { font: .75rem/1.7 var(--mono); }
+.toc a:hover, .toc a.on { color: var(--text); }
+.toc a.on span { color: var(--accent-text); }
+
+/* 正文：首字下沉、页边注、小标题前一道墨线 */
+.prose { margin-top: 2.5rem; font-size: 1.125rem; line-height: 1.95; }
+.prose > * + * { margin-top: 1.15em; }
+.prose > p:first-of-type::first-letter { float: left; font-family: var(--font-display); font-size: 3.4em; line-height: 1; margin: .1em .14em 0 0; color: var(--accent-text); }
+.prose h2 { margin-top: 2.6em; padding-top: .9em; border-top: 1px solid var(--text); font-family: var(--font-display); font-size: 1.5rem; line-height: 1.45; scroll-margin-top: 4rem; display: flex; gap: .75rem; align-items: baseline; }
+.prose h2 span { font: 500 .8125rem/1 var(--mono); color: var(--accent-text); }
+.prose h2 + p { margin-top: .8em; }
+.sn { font-size: .8125rem; line-height: 1.7; color: var(--text-muted); }
+.sn b { font: 500 .75rem var(--mono); color: var(--accent-text); margin-right: .35rem; }
+@media (min-width: 1100px) { .sn { float: left; clear: left; width: 12.5rem; margin: .3rem 0 1rem -15.5rem; padding-top: .5rem; border-top: 1px solid var(--border-strong); } }
+@media (max-width: 1099px) { .sn { display: block; padding: .75rem 1rem; background: var(--surface-sunken); border-radius: var(--r-md); } }
+.prose ul { display: grid; gap: .4em; padding-left: 1.2em; list-style: disc; }
+.prose ul ::marker { color: var(--accent-text); }
+.prose blockquote { margin-block: 2em; font-family: var(--font-display); font-size: clamp(1.375rem, 1.1rem + .9vw, 1.75rem); line-height: 1.6; text-indent: -.55em; padding-left: .55em; }
+.prose blockquote p::before { content: "「"; color: var(--accent-text); }
+.prose blockquote p::after { content: "」"; color: var(--accent-text); }
+.prose blockquote cite { display: block; margin-top: .75rem; text-indent: 0; font: normal .8125rem/1.6 var(--font-body); color: var(--text-subtle); }
+.prose figure { margin-block: 2.25em; }
+.prose figcaption { margin-top: .75rem; display: flex; gap: .75rem; font-size: var(--fs-sm); line-height: 1.7; color: var(--text-muted); }
+.prose figcaption b { font: 500 .75rem/1.9 var(--mono); color: var(--accent-text); white-space: nowrap; }
+.prose .table-wrap { font-size: var(--fs-md); }
+.prose .note { font-size: var(--fs-sm); }
+.flow .bar2 { display: inline-block; height: 6px; width: var(--v); border-radius: 3px; background: var(--text-subtle); vertical-align: middle; margin-left: .5rem; }
+.flow tr:last-child .bar2 { background: var(--accent); }
+
+/* 平面图：由调查数据画出 */
+.plan { width: 100%; height: auto; display: block; border-radius: var(--r-lg); background: var(--surface); box-shadow: 0 0 0 1px var(--border); }
+.plan .wall { fill: none; stroke: var(--text); stroke-width: 1.5; }
+.plan .stall { fill: var(--surface-sunken); stroke: var(--border-strong); }
+.plan .fish { fill: color-mix(in srgb, var(--accent-layer, var(--accent)) 16%, var(--surface)); stroke: var(--accent); stroke-width: 1.5; }
+.plan .pipe { fill: none; stroke: light-dark(#3D6E9C, #7FA9D1); stroke-width: 2.5; stroke-dasharray: 7 4; }
+.plan .air { fill: none; stroke: var(--text-subtle); stroke-width: 1.2; marker-end: url(#a-head); }
+.plan .walk { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 2 4; stroke-linecap: round; }
+.plan text { font: 12px var(--font-body); fill: var(--text-muted); }
+.plan .lab-fish { fill: var(--accent-text); font-weight: 600; }
+.plan .lab-pipe { fill: light-dark(#3D6E9C, #7FA9D1); }
+.plan .small { font: 10.5px var(--mono); fill: var(--text-subtle); letter-spacing: .04em; }
+
+.after { margin-top: 4.5rem; display: grid; gap: 2.5rem; }
+.author { display: flex; gap: 1rem; align-items: center; padding: 1.25rem 0; border-top: 1px solid var(--text); border-bottom: 1px solid var(--border); }
+.author .btn { min-inline-size: 6em; }
+.related .kick { margin-bottom: .5rem; }
+.related a { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: baseline; padding: 1rem 0; border-top: 1px solid var(--border); color: var(--text); text-decoration: none; }
+.related a h3 { font-family: var(--font-display); font-size: 1.25rem; font-weight: var(--display-weight-zh, 600); }
+.related a[href]:hover h3 { color: var(--accent-text); }
+@media (max-width: 1100px) { .toc { display: none; } }
+@media (max-width: 720px) { .article { column-gap: 0; padding-inline: var(--gutter); grid-template-columns: minmax(0, 1fr); } .article > * { grid-column: 1; } .prose { font-size: 1.0625rem; } }
+</style>
+
+<div class="progress" id="progress" aria-hidden="true"></div>
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#article">城市观察</a>
+    <nav class="links hide-sm" aria-label="栏目"><a href="#article" aria-current="page">街巷</a><a role="link" aria-disabled="true">吃食</a><a role="link" aria-disabled="true">手艺</a></nav>
+    <button class="btn sm ink" type="button" disabled>订阅周刊</button>
+  </div>
+</header>
+
+<main class="article" id="article">
+  <header class="head" data-reveal>
+    <p class="kick"><b>街巷</b><span>2026 年 11 月 12 日</span><span>·</span><span>阅读约 8 分钟</span></p>
+    <h1>为什么菜市场的鱼摊总在最里面</h1>
+    <p class="stand">走进十个菜市场，有九个把鱼摊放在最深处。这不是巧合，是水、气味和人流一起算出来的结果。</p>
+    <div class="byline"><span class="avatar lg">陈</span><div class="grow"><p>陈默</p><p class="subtle">跑了 23 个菜市场的城市记者</p></div><button class="btn sm ghost" type="button" data-copy="#title-link" hidden><span>复制链接</span></button><span id="title-link" hidden>https://example.cn/a/fish-stall</span></div>
+  </header>
+
+  <nav class="toc" aria-label="本文目录">
+    <p class="kick">本文目录</p>
+    <a href="#water"><span>01</span>跟着水管走</a><a href="#smell"><span>02</span>气味的方向</a><a href="#flow"><span>03</span>让人走完全程</a><a href="#change"><span>04</span>正在改变的布局</a>
+  </nav>
+
+  <article class="prose">
+    <p>早上六点半的玉林菜市场，进门左手是卖葱姜的老周，右手是一排青菜摊。要找鱼，得一直往里走，穿过猪肉、豆腐和干货，走到快碰到后墙的地方，才听见增氧泵的嗡嗡声。</p>
+
+    <h2 id="water"><span>01</span>跟着水管走</h2>
+    <aside class="sn"><b>注</b>增氧泵给鱼池打气，24 小时开着。所以鱼摊不光最费水，也最费电。</aside>
+    <p>鱼摊是整个市场最费水的地方。一个中等鱼摊每天要换三到四次池水，杀鱼台还得一直冲着。市场建好的时候，上下水管一般从后墙进来，离它越近，接水排水越省事。</p>
+    <figure>
+      <svg class="plan" viewBox="0 0 640 300" role="img" aria-label="菜市场的平面图：入口在左，风从入口吹向里面，上下水管沿后墙，鱼摊在最里面靠着排水沟">
+        <defs><marker id="a-head" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="currentColor" style="fill: var(--text-subtle)"/></marker></defs>
+        <rect class="wall" x="24" y="36" width="592" height="216" rx="4"/>
+        <path class="wall" d="M24 118v52" style="stroke: var(--surface); stroke-width: 4"/>
+        <rect class="stall" x="70" y="56" width="90" height="56" rx="3"/><rect class="stall" x="70" y="176" width="90" height="56" rx="3"/>
+        <rect class="stall" x="186" y="56" width="90" height="56" rx="3"/><rect class="stall" x="186" y="176" width="90" height="56" rx="3"/>
+        <rect class="stall" x="302" y="56" width="90" height="56" rx="3"/><rect class="stall" x="302" y="176" width="90" height="56" rx="3"/>
+        <rect class="stall" x="418" y="56" width="70" height="56" rx="3"/><rect class="stall" x="418" y="176" width="70" height="56" rx="3"/>
+        <rect class="fish" x="512" y="56" width="84" height="176" rx="3"/>
+        <path class="pipe" d="M604 36v216"/>
+        <path class="air" d="M40 144h60"/><path class="air" d="M300 144h70"/><path class="air" d="M430 144h52"/>
+        <path class="walk" d="M30 150 C 120 156, 180 132, 250 146 S 400 158, 500 140"/>
+        <text x="80" y="88">葱姜</text><text x="80" y="208">青菜</text><text x="196" y="88">水果</text><text x="196" y="208">青菜</text>
+        <text x="312" y="88">猪肉</text><text x="312" y="208">豆腐</text><text x="428" y="88">干货</text><text x="428" y="208">禽蛋</text>
+        <text class="lab-fish" x="530" y="140">鱼摊</text><text class="small" x="518" y="160">距排水沟 2 米</text>
+        <text class="small" x="30" y="28">入口</text><text class="small" x="210" y="28">风向 →</text><text class="lab-pipe small" x="520" y="28">上下水管 · 后墙</text>
+        <text class="small" x="30" y="272">点线：顾客从入口走到鱼摊的常见路线，平均经过 14 个摊位</text>
+      </svg>
+      <figcaption><b>图 1</b><span>成都玉林菜市场的平面图。调查的 23 个市场里，21 个的鱼摊离后墙排水沟不到 5 米。</span></figcaption>
+    </figure>
+
+    <h2 id="smell"><span>02</span>气味的方向</h2>
+    <p>第二个原因是气味。市场管理员老刘说得很直接：</p>
+    <blockquote><p>鱼腥味往里关，客人进门闻到的就是青菜和水果。</p><cite>—— 刘建华，玉林菜市场管理员，干了 17 年</cite></blockquote>
+    <p>大部分市场的通风是从入口往里走的，鱼摊放在下风口，味道不会飘到门口。</p>
+
+    <h2 id="flow"><span>03</span>让人走完全程</h2>
+    <aside class="sn"><b>注</b>“经过”指顾客在摊位前停留超过 3 秒，由调查员在高峰时段现场计数。</aside>
+    <p>鱼和肉是一顿饭的主菜，几乎每个人都要买。把它们放在里面，顾客就得经过整个市场：</p>
+    <ul>
+      <li>路过的青菜摊、豆腐摊，生意平均好三成；</li>
+      <li>摊位租金也按离入口的距离分档，最里面反而不便宜；</li>
+      <li>赶时间的人会抱怨，但很少有人因此换一个市场。</li>
+    </ul>
+    <div class="table-wrap"><table class="table flow">
+      <thead><tr><th>摊位位置</th><th class="r">月租（元）</th><th>日均客流</th></tr></thead>
+      <tbody><tr><td class="main">入口第一排</td><td class="r">4,200</td><td>1,310<span class="bar2" style="--v:7.2rem"></span></td></tr>
+        <tr><td class="main">中间</td><td class="r">2,800</td><td>860<span class="bar2" style="--v:4.7rem"></span></td></tr>
+        <tr><td class="main">最里面（鱼肉）</td><td class="r">3,600</td><td>1,120<span class="bar2" style="--v:6.1rem"></span></td></tr></tbody>
+    </table></div>
+
+    <h2 id="change"><span>04</span>正在改变的布局</h2>
+    <p>新建的社区市场开始把鱼摊做成玻璃隔间，带独立排风，位置也挪到了中间。水管跟着隔间走，气味关在玻璃里，最里面的位置留给了熟食和面点。</p>
+    <div class="note"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.8v.2"/></svg><span>文中客流与租金来自 2026 年 9 月对成都 6 个市场的现场统计，样本较小，只说明趋势。</span></div>
+  </article>
+
+  <section class="after">
+    <div class="author"><span class="avatar lg">陈</span><div class="grow"><p style="font-weight: 600">陈默</p><p class="subtle">写城市里不起眼的安排。上一篇讲公交站牌为什么总是偏左。</p></div><button class="btn sm" id="follow" type="button" aria-pressed="false" aria-label="关注陈默">关注</button></div>
+    <div class="related">
+      <p class="kick">接着读</p>
+      <a role="link" aria-disabled="true"><h3>早点摊为什么都挨着地铁口</h3><span class="subtle">街巷 · 6 分钟</span></a>
+      <a role="link" aria-disabled="true"><h3>一把菜刀能用多少年</h3><span class="subtle">手艺 · 9 分钟</span></a>
+    </div>
+  </section>
+</main>
+
+<footer class="footer"><div class="wrap row between"><span class="brand">城市观察</span><span>每周四更新 · 成都</span></div></footer>
+
+<script>
+// 阅读进度条（只在不支持 CSS 滚动时间线的浏览器里用脚本）与当前小节高亮（IntersectionObserver，不监听滚动）
+(function () {
+  var follow = document.getElementById('follow');
+  follow.addEventListener('click', function () {
+    var pressed = follow.getAttribute('aria-pressed') !== 'true';
+    follow.setAttribute('aria-pressed', String(pressed));
+    follow.textContent = pressed ? '已关注' : '关注';
+  });
+  var links = [].slice.call(document.querySelectorAll('.toc a'));
+  var heads = links.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      links.forEach(function (a, i) { a.classList.toggle('on', heads[i] === e.target); });
+    });
+  }, { rootMargin: '0px 0px -65% 0px' });
+  heads.forEach(function (h) { if (h) io.observe(h); });
+
+  if (window.CSS && CSS.supports('animation-timeline: scroll()')) return;
+  var bar = document.getElementById('progress'), ticking = false, last = '';
+  function update() {
+    ticking = false;
+    var max = document.documentElement.scrollHeight - innerHeight;
+    var v = (max > 0 ? scrollY / max : 0).toFixed(3);
+    if (v !== last) { last = v; bar.style.setProperty('--read', v); }
+  }
+  addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  update();
+})();
+</script>

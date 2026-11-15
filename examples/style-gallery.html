@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>风格预设画廊 · ui-craft</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..600&family=Noto+Serif+SC:wght@600&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400..700&family=Inter+Tight:wght@500..700&family=Fraunces:opsz,wght,SOFT@9..144,500..700,100&family=Plus+Jakarta+Sans:wght@400..700&family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400..700&family=Young+Serif&family=Figtree:wght@400..700&family=Schibsted+Grotesk:wght@400..800&family=Bricolage+Grotesque:opsz,wght@12..96,500..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/motion.css?v=3">
+<link rel="stylesheet" href="../assets/styles.css?v=3">
+<style>
+  :root { color-scheme: light; }
+  :root[data-theme="dark"] { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #E9E7E2; font: 14px/1.5 system-ui, "Microsoft YaHei UI", sans-serif; color: #222; }
+  :root[data-theme="dark"] body { background: #0A0A0A; color: #ddd; }
+  .bar { display: flex; align-items: center; justify-content: space-between; padding: 20px 28px 0; }
+  .bar h1 { margin: 0; font-size: 15px; font-weight: 600; }
+  .bar button { font: inherit; padding: 6px 12px; border-radius: 6px; border: 1px solid #0003; background: transparent; color: inherit; cursor: pointer; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(560px, 100%), 1fr)); gap: 24px; padding: 20px 28px 40px; }
+
+  /* ---------------- 每一张样张只用角色变量 */
+  .spec { background: var(--bg); color: var(--text); font-family: var(--font-body); font-feature-settings: var(--font-features, normal);
+          border-radius: 14px; overflow: hidden; box-shadow: 0 1px 2px #0002, 0 20px 40px -24px #0004; }
+  .tag { display: flex; justify-content: space-between; padding: 12px 18px; font: 500 12px/1 var(--font-mono); color: var(--text-subtle);
+         border-bottom: 1px solid var(--border); letter-spacing: .02em; }
+  .stage { position: relative; margin: 14px; padding: 26px 24px 0; border-radius: var(--r-xl); background: var(--stage-bg); color: var(--stage-ink);
+           overflow: hidden; isolation: isolate; display: grid; grid-template-columns: 1.15fr 1fr; gap: 16px; min-height: 250px; }
+  .stage::after { content: ""; position: absolute; inset: 0; z-index: -1; opacity: .28; mix-blend-mode: overlay; pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  .eyebrow { font-size: 12px; letter-spacing: .06em; color: var(--stage-muted); }
+  .display { margin: 10px 0 0; font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: var(--display-tracking);
+             font-variation-settings: var(--display-variation, normal); font-size: 34px; line-height: 1.08; text-wrap: balance; }
+    /* 中文：不用负字距、不用斜体；--display-tracking 只给西文与数字 */
+  .display { letter-spacing: .02em; }
+  .display em { font-style: normal; color: var(--stage-muted); }
+  .num { margin-top: 14px; font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: var(--display-tracking);
+         font-variation-settings: var(--display-variation, normal); font-size: 64px; line-height: .9; font-variant-numeric: proportional-nums lining-nums; }   /* 单个静态大数字用比例数字，逗号不被撑开 */
+  .num small { font-size: .38em; letter-spacing: 0; opacity: .7; margin-left: 4px; }
+  .acts { display: flex; gap: 8px; margin: 18px 0 24px; }
+  .btn { height: 36px; padding: 0 14px; border-radius: var(--r-md); border: 0; font: 600 13px/1 var(--font-body); cursor: pointer; }
+  .btn.primary { background: var(--stage-btn); color: var(--stage-btn-fg); box-shadow: inset 0 1px 0 rgb(255 255 255 / .25), 0 8px 18px -8px rgb(0 0 0 / .45); }
+  .btn.ghost { background: rgb(255 255 255 / .1); color: var(--stage-ink); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .25); }
+  /* 舞台上的物件：一张浮起的卡 */
+  .obj { align-self: end; margin-bottom: -18px; background: var(--surface-raised); color: var(--text); border-radius: var(--r-lg);
+         padding: 14px 14px 26px; box-shadow: var(--shadow-pop); rotate: 3deg; translate: 6px 0; }
+  .obj .k { font-size: 11px; color: var(--text-subtle); letter-spacing: .04em; }
+  .obj .v { font-family: var(--font-display); font-weight: var(--display-weight); font-variation-settings: var(--display-variation, normal); font-size: 24px; letter-spacing: var(--display-tracking); margin-top: 2px; }
+  .obj svg { display: block; width: 100%; height: 54px; margin-top: 8px; }
+  .obj .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
+  .obj .area { fill: var(--accent-subtle); }
+  .obj .chips { display: flex; gap: 6px; margin-top: 10px; }
+  .chip { font-size: 11px; padding: 3px 8px; border-radius: 999px; background: var(--accent-subtle); color: var(--accent-text); font-weight: 600; }
+  .chip.n { background: var(--surface-sunken); color: var(--text-muted); }
+
+  .below { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 4px 14px 16px; }
+  .card { background: var(--surface); border-radius: var(--r-lg); box-shadow: var(--shadow-card); padding: 14px 16px; }
+  .card h3 { margin: 0 0 8px; font-family: var(--font-display); font-weight: var(--display-weight); font-variation-settings: var(--display-variation, normal);
+             letter-spacing: calc(var(--display-tracking) / 2); font-size: 17px; }
+  .row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-top: 1px solid var(--border); font-size: 13px; }
+  .row:first-of-type { border-top: 0; }
+  .row span:last-child { color: var(--text-subtle); font-variant-numeric: tabular-nums; font-size: 12px; }
+  .row .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); margin-right: 8px; }
+  .muted { color: var(--text-muted); font-size: 13px; line-height: 1.65; margin: 0; }
+  .field { margin-top: 10px; height: 34px; border-radius: var(--r-md); border: 1px solid var(--border-strong); background: var(--surface);
+           display: flex; align-items: center; padding: 0 10px; font-size: 13px; color: var(--text-subtle); }
+  .field.focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); color: var(--text); }
+</style>
+</head>
+<body>
+<div class="bar"><h1>风格预设 · 同一组内容</h1><button type="button" onclick="var r=document.documentElement;r.dataset.theme=r.dataset.theme==='dark'?'light':'dark'">切换明暗</button></div>
+<div class="grid" id="grid"></div>
+
+<template id="tpl">
+  <article class="spec">
+    <div class="tag"><span class="name"></span><span class="mood"></span></div>
+    <section class="stage">
+      <div>
+        <p class="eyebrow">11 月 · 第 46 周</p>
+        <p class="display">把一周过成<br><em>想要的样子</em></p>
+        <p class="num">1,284<small>分钟</small></p>
+        <div class="acts"><button class="btn primary">开始今天</button><button class="btn ghost">看本周</button></div>
+      </div>
+      <div class="obj">
+        <p class="k">专注时长 · 近 7 天</p>
+        <p class="v">3 小时 12 分</p>
+        <svg viewBox="0 0 200 54" preserveAspectRatio="none"><path class="area" d="M0 44 C25 40 35 30 55 33 S90 18 110 22 S150 8 170 14 S195 6 200 6 V54 H0Z"/><path class="line" d="M0 44 C25 40 35 30 55 33 S90 18 110 22 S150 8 170 14 S195 6 200 6"/></svg>
+        <div class="chips"><span class="chip">+18%</span><span class="chip n">较上周</span></div>
+      </div>
+    </section>
+    <div class="below">
+      <div class="card">
+        <h3>今天</h3>
+        <div class="row"><span><i class="dot"></i>写完季度复盘</span><span>09:30</span></div>
+        <div class="row"><span>和设计组过评审</span><span>14:00</span></div>
+        <div class="row"><span>跑步 5 公里</span><span>19:15</span></div>
+      </div>
+      <div class="card">
+        <h3>一句话记录</h3>
+        <p class="muted">把最难的那件事放在上午，下午只做能被打断的事。</p>
+        <div class="field focus">今天最想完成的一件事…</div>
+      </div>
+    </div>
+  </article>
+</template>
+
+<script>
+  var styles = [
+    ['paper-ink', '纸墨 · 印刷品、安静、有温度'], ['graphite', '石墨 · 精密、冷静、高密度'],
+    ['midnight', '午夜舞台 · 发布会、高级、有光'], ['sunlit', '晴日 · 明亮、友好、圆润'],
+    ['editorial', '刊物 · 杂志、强对比、大字'], ['botanical', '植物 · 自然、柔和、可信'],
+    ['swiss', '瑞士信号 · 理性、锋利、网格'], ['dusk', '暮光 · 温暖的光、柔焦'],
+    ['studio', '摄影棚 · 清晰轮廓与材质特写']
+  ];
+  var grid = document.getElementById('grid'), tpl = document.getElementById('tpl');
+  styles.forEach(function (s) {
+    var n = tpl.content.firstElementChild.cloneNode(true);
+    n.classList.add('style-' + s[0]);
+    n.querySelector('.name').textContent = '.style-' + s[0];
+    n.querySelector('.mood').textContent = s[1];
+    grid.appendChild(n);
+  });
+</script>
+</body>
+</html>

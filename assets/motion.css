@@ -1,0 +1,218 @@
+/* ==========================================================================
+   motion.css · 动效基础层
+   --------------------------------------------------------------------------
+   复制到项目里（或内联进 <style>），配合 assets/motion.js 使用。
+   - 弹簧缓动由 scripts/springs.py 从物理参数算出，不是手调的贝塞尔。
+   - 默认不理会系统的"减少动态效果"，动效照常播放。需要遵守时在 <html> 上加 data-respect-reduced-motion，
+     系统请求减弱时直接呈现内容和交互终态。
+   - 没有 JS 时，所有内容直接可见（入场类只在 html.js 下才生效）；
+     JS 出错时，head 里的计时器在 1.5 秒后加 .no-motion，同样直接可见。
+   ========================================================================== */
+
+:root {
+  /* snappy: k=520 c=38，455ms，过冲 0.8%。按压回弹、开关、小元素进入 */
+  --spring-snappy: linear(0, 0.0312, 0.1015, 0.1984, 0.3055, 0.4131, 0.5109, 0.604, 0.686, 0.7563, 0.8128, 0.8614, 0.9004, 0.9298, 0.9537, 0.9716, 0.9847, 0.9937, 1.0001, 1.0042, 1.0066, 1.0078, 1.0082, 1.0079, 1.0074, 1.0066, 1.0057, 1.0048, 1.004, 1.0033, 1.0026, 1.002, 1.0016, 1.0012, 1.0008, 1.0006, 1.0004, 1.0002, 1.0001, 1.0001, 1);
+  --spring-snappy-dur: 455ms;
+  /* smooth: k=260 c=32，620ms，无过冲。面板、弹窗、卡片、布局变化 */
+  --spring-smooth: linear(0, 0.0275, 0.0921, 0.176, 0.2676, 0.3592, 0.4464, 0.5265, 0.5985, 0.6619, 0.717, 0.7644, 0.8048, 0.8389, 0.8675, 0.8914, 0.9113, 0.9277, 0.9412, 0.9523, 0.9614, 0.969, 0.975, 0.9799, 0.9838, 0.987, 0.9896, 0.9917, 0.9933, 0.9947, 0.9957, 0.9966, 0.9973, 0.9978, 0.9983, 0.9986, 0.9989, 0.9991, 0.9993, 0.9995, 1);
+  --spring-smooth-dur: 620ms;
+  /* bouncy: k=340 c=22，640ms，过冲 9.6%。落位、点赞、完成——有意的愉悦时刻 */
+  --spring-bouncy: linear(0, 0.0399, 0.1381, 0.2702, 0.4162, 0.5615, 0.6955, 0.8119, 0.9073, 0.9811, 1.0343, 1.0691, 1.0885, 1.0956, 1.0936, 1.0853, 1.0733, 1.0595, 1.0455, 1.0323, 1.0207, 1.011, 1.0034, 0.9978, 0.9941, 0.9919, 0.9909, 0.9909, 0.9916, 0.9927, 0.994, 0.9953, 0.9966, 0.9978, 0.9987, 0.9995, 1.0001, 1.0005, 1.0007, 1.0009, 1);
+  --spring-bouncy-dur: 640ms;
+  /* gentle: k=120 c=20，681ms，几乎无过冲。大面积入场、首屏编排 */
+  --spring-gentle: linear(0, 0.016, 0.0563, 0.1128, 0.179, 0.2502, 0.3229, 0.3944, 0.4631, 0.5277, 0.5876, 0.6437, 0.6929, 0.7369, 0.7759, 0.8102, 0.8402, 0.8662, 0.8886, 0.9078, 0.9242, 0.938, 0.9497, 0.9595, 0.9676, 0.9744, 0.9799, 0.9844, 0.9881, 0.9911, 0.9934, 0.9954, 0.9968, 0.9979, 0.9988, 0.9995, 0.9999, 1.0003, 1.0005, 1.0007, 1);
+  --spring-gentle-dur: 681ms;
+
+  /* 弹簧以外的曲线 */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);   /* 颜色、透明度 */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);    /* 快速到位的小位移 */
+  --ease-in-quart: cubic-bezier(0.5, 0, 0.75, 0);    /* 退出 */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);     /* 屏内往返 */
+
+  --stagger: 55ms;   /* 入场交错的步长 */
+}
+
+/* ---------------------------------------------------------------- 入场编排
+   给元素加 data-reveal（可选值 up / fade / scale / left / right / blur / mask），
+   用 style="--i:n" 或 motion.js 的 reveal() 自动编号控制先后，--delay 加固定延迟。
+   实现用 animation 而不是 transition：入场结束后不留下任何 transform / filter / transition，
+   元素自己的过渡（导航背景）、变换（被抽出的书）、滤镜（物件投影）都不会被吞掉。
+   html 没有 .js 类时内容直接可见——不会因为脚本失败而一片空白。 */
+.js [data-reveal]:not(.is-in) { opacity: 0; }
+.js [data-reveal].is-in {
+  animation: rv-up var(--spring-gentle-dur) var(--spring-gentle) backwards;
+  animation-delay: calc(var(--i, 0) * var(--stagger) + var(--delay, 0ms));
+}
+.js [data-reveal="fade"].is-in  { animation-name: rv-fade; animation-duration: 500ms; animation-timing-function: var(--ease-out-quart); }
+.js [data-reveal="scale"].is-in { animation-name: rv-scale; }
+.js [data-reveal="left"].is-in  { animation-name: rv-left; }
+.js [data-reveal="right"].is-in { animation-name: rv-right; }
+.js [data-reveal="blur"].is-in  { animation-name: rv-blur; animation-duration: 700ms; animation-timing-function: var(--ease-out-quart); }
+.js [data-reveal="mask"]:not(.is-in) { opacity: 1; clip-path: inset(0 0 100% 0); }
+.js [data-reveal="mask"].is-in  { animation-name: rv-mask; animation-duration: 900ms; animation-timing-function: var(--ease-out-expo); }
+@keyframes rv-up    { from { opacity: 0; translate: 0 18px; } 40% { opacity: 1; } }
+@keyframes rv-fade  { from { opacity: 0; } }
+@keyframes rv-scale { from { opacity: 0; scale: .94; } 40% { opacity: 1; } }
+@keyframes rv-left  { from { opacity: 0; translate: -24px 0; } 40% { opacity: 1; } }
+@keyframes rv-right { from { opacity: 0; translate: 24px 0; } 40% { opacity: 1; } }
+@keyframes rv-blur  { from { opacity: 0; translate: 0 8px; filter: blur(8px); } }
+@keyframes rv-mask  { from { clip-path: inset(0 0 100% 0); translate: 0 .25em; } to { clip-path: inset(0 0 0 0); } }
+/* 失败保护：head 里的计时器发现 motion.js 没跑起来时加 .no-motion，一切直接显示 */
+.no-motion [data-reveal], .no-motion [data-split] .line > span, .no-motion .draw {
+  opacity: 1 !important; translate: none !important; clip-path: none !important; stroke-dashoffset: 0 !important; animation: none !important;
+}
+
+/* 逐行（或逐字）揭开的大标题：<h1 data-split> 由 motion.js 拆成 .line > span */
+.js [data-split] .line { display: block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.js [data-split]:not(.is-in) .line > span { display: inline-block; translate: 0 105%; }
+.js [data-split].is-in .line > span {
+  display: inline-block; animation: rv-line 900ms var(--ease-out-expo) backwards;
+  animation-delay: calc(var(--i, 0) * 80ms + var(--delay, 0ms));
+}
+@keyframes rv-line { from { translate: 0 105%; } }
+
+/* ---------------------------------------------------------------- 微交互 */
+
+/* 可按压：所有按钮、可点卡片 */
+.pressable {
+  transition: transform var(--spring-snappy-dur) var(--spring-snappy),
+              background-color 160ms var(--ease-out-quart),
+              box-shadow 240ms var(--ease-out-quart);
+}
+.pressable:active { filter: brightness(.94); transition-duration: 60ms; }
+.pressable > [data-press-face] { display: inline-block; transition: scale 160ms var(--ease-out-quart); }
+.pressable:active > [data-press-face] { scale: .97; transition-duration: 45ms; }
+
+/* 悬浮抬起：可点击的卡片。阴影与位移一起变，像被拿起来 */
+.liftable {
+  transition: transform var(--spring-smooth-dur) var(--spring-smooth),
+              box-shadow 300ms var(--ease-out-quart),
+              border-color 200ms var(--ease-out-quart);
+}
+@media (hover: hover) {
+  .liftable:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift, 0 1px 2px rgb(0 0 0 / .05), 0 12px 28px -8px rgb(0 0 0 / .18)); }
+}
+
+/* 跟随指针的光斑：卡片、按钮的高光。motion.js 的 spotlight() 写入 --mx / --my */
+.spotlight { position: relative; isolation: isolate; }
+.spotlight::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, -20%),
+              color-mix(in srgb, var(--spot, #fff) 16%, transparent), transparent 70%);
+  opacity: 0; transition: opacity 300ms var(--ease-out-quart);
+}
+@media (hover: hover) { .spotlight:hover::before { opacity: 1; } }
+
+/* 下划线从左向右长出 */
+.ink-link { background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+            text-decoration: none; transition: background-size 400ms var(--ease-out-expo); }
+.ink-link:hover { background-size: 100% 1px; }
+
+/* 骨架屏微光 */
+.skeleton {
+  background: linear-gradient(100deg, var(--sk-base, #0000000d) 40%, var(--sk-hi, #00000005) 50%, var(--sk-base, #0000000d) 60%) 0 0 / 200% 100%;
+  animation: shimmer 1.4s linear infinite; border-radius: var(--r-sm, 6px);
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* SVG 线条描绘：给 path 加 class="draw"，motion.js 会写入 --len */
+.js .draw { stroke-dasharray: var(--len, 1000); stroke-dashoffset: var(--len, 1000);
+            transition: stroke-dashoffset 1400ms var(--ease-out-expo); transition-delay: var(--delay, 0ms); }
+.js .draw.is-in, .js .is-in .draw { stroke-dashoffset: 0; }
+
+/* ---------------------------------------------------------------- 浮层：从 display:none 也能过渡 */
+[popover], dialog {
+  transition: opacity 180ms var(--ease-out-quart), transform var(--spring-smooth-dur) var(--spring-smooth),
+              overlay 200ms allow-discrete, display 200ms allow-discrete;
+  opacity: 0; transform: translateY(6px) scale(0.97);
+}
+[popover]:popover-open, dialog[open] {
+  opacity: 1; transform: none;
+  @starting-style { opacity: 0; transform: translateY(6px) scale(0.97); }
+}
+dialog::backdrop { background: rgb(0 0 0 / 0); transition: background-color 240ms, overlay 240ms allow-discrete, display 240ms allow-discrete; }
+dialog[open]::backdrop { background: rgb(10 8 6 / 0.45); @starting-style { background: rgb(0 0 0 / 0); } }
+
+/* ---------------------------------------------------------------- 滚动驱动（渐进增强） */
+@supports (animation-timeline: view()) {
+  /* 进入视口时随滚动淡入——不需要 JS；适合长页里的图与区块 */
+  .scroll-in { animation: scroll-in linear both; animation-timeline: view(); animation-range: entry 0% cover 30%; }
+  @keyframes scroll-in { from { opacity: 0; transform: translateY(32px) scale(0.98); } }
+  /* 阅读进度条 */
+  .scroll-progress { transform-origin: 0 50%; animation: grow-x linear both; animation-timeline: scroll(root); }
+  @keyframes grow-x { from { transform: scaleX(0); } }
+}
+
+/* ---------------------------------------------------------------- View Transitions */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 260ms; }
+::view-transition-group(*) { animation-timing-function: var(--spring-smooth); animation-duration: var(--spring-smooth-dur); }
+
+/* ---------------------------------------------------------------- 视差与倾斜（motion.js 写入 --py / --rx / --ry） */
+/* 这些变量只在写入它的元素自己身上用：注册成不继承，滚动时改它不会让整棵子树重算样式 */
+@property --py { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --rx { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@property --ry { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@property --ink-x { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --ink-w { syntax: "<length>"; inherits: false; initial-value: 0px; }
+/* --mx / --my 给 .spotlight 的伪元素用，伪元素要从本体继承，所以不注册 */
+[data-parallax], [data-tilt] {
+  transform: perspective(1100px) translate3d(0, var(--py, 0px), 0) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  will-change: transform;
+}
+[data-tilt] { transition: transform 280ms cubic-bezier(.2, .8, .2, 1); transform-style: preserve-3d; }
+
+/* 环境运动：只给主视觉物件，一页最多一处 */
+.float { animation: float 7s ease-in-out infinite; }
+@keyframes float { 50% { translate: 0 -10px; } }
+.spin-slow { animation: spin-slow 80s linear infinite; }
+@keyframes spin-slow { to { rotate: 360deg; } }
+
+/* 滑动的选中块：.seg / role=tablist 上由 motion.js 插入 .tab-ink */
+.has-ink { position: relative; isolation: isolate; }
+.has-ink > :not(.tab-ink) { position: relative; z-index: 1; }
+.has-ink > .tab-ink { position: absolute; left: 0; z-index: 0; width: var(--ink-w, 0); height: auto; min-width: 0; padding: 0; border: 0;
+                      translate: var(--ink-x, 0) 0; pointer-events: none; }
+.tab-ink.ready { transition: translate var(--spring-snappy-dur, 455ms) var(--spring-snappy, ease), width var(--spring-snappy-dur, 455ms) var(--spring-snappy, ease), opacity 160ms ease; }
+.seg.has-ink > .tab-ink { top: 3px; bottom: 3px; border-radius: calc(var(--r-md, 8px) - 3px); background: var(--surface);
+                  box-shadow: 0 0 0 1px var(--border), 0 1px 2px rgb(var(--shade, 0 0 0) / .08); }
+.seg.has-ink > [aria-pressed="true"], .seg.has-ink > [aria-selected="true"], .seg.has-ink > .on { background: transparent; box-shadow: none; }
+.tabs.has-ink > .tab-ink { top: auto; bottom: -1px; height: 2px; border-radius: 1px; background: var(--accent); }
+.tabs.has-ink > [aria-selected="true"]::after { display: none; }
+.pills.has-ink > .tab-ink { top: 4px; bottom: 4px; border-radius: 999px; background: var(--surface-raised, var(--surface));
+                    box-shadow: inset 0 1px 0 var(--hi, rgb(255 255 255 / .1)), 0 0 0 1px var(--border-strong), 0 6px 16px -8px rgb(var(--shade, 0 0 0) / .4); }
+
+/* 进度条进入视口时生长 */
+.js .bar:not(.is-in) > i { scale: 0 1; }
+
+/* 章节默认是静态终帧。运行库确认用户偏好与画面高度后才吸附。 */
+[data-scroll-scene] { --scene-progress: 1; }
+/* 动效默认开启（不理会系统的减少动态效果） */
+  [data-scroll-scene][data-scene-active] {
+    min-height: calc(100svh + var(--scene-travel, 88svh));
+  }
+  [data-scene-active] > [data-scene-pin] {
+    position: sticky;
+    top: 0;
+    min-height: 100svh;
+  }
+
+
+/* ---------------------------------------------------------------- 减弱动效 */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-respect-reduced-motion] [data-parallax], :root[data-respect-reduced-motion] [data-tilt] { transform: none; }
+  :root[data-respect-reduced-motion] .float, :root[data-respect-reduced-motion] .spin-slow { animation: none; }
+  :root[data-respect-reduced-motion] .tab-ink.ready { transition: none; }
+  :root[data-respect-reduced-motion].js .bar:not(.is-in) > i { scale: 1 1; }
+  :root[data-respect-reduced-motion].js [data-reveal],
+  :root[data-respect-reduced-motion].js [data-split].is-in .line > span { opacity: 1; animation: none !important; }
+  :root[data-respect-reduced-motion] .scroll-in { animation: none; opacity: 1; transform: none; }
+  :root[data-respect-reduced-motion] :is(dialog, [popover]) { transition: none; }
+  :root[data-respect-reduced-motion] .spotlight::before { opacity: 0; transition: none; }
+  :root[data-respect-reduced-motion] .ink-link { transition: none; }
+  :root[data-respect-reduced-motion].js [data-split]:not(.is-in) .line > span { translate: none; }
+  :root[data-respect-reduced-motion] .pressable:active, :root[data-respect-reduced-motion] .liftable:hover { transform: none; }
+  :root[data-respect-reduced-motion] .pressable > [data-press-face], :root[data-respect-reduced-motion] .pressable:active > [data-press-face] { scale: none; transition: none; }
+  :root[data-respect-reduced-motion] .skeleton { animation: none; }
+  :root[data-respect-reduced-motion].js .draw { stroke-dashoffset: 0; transition: none; }
+  :root[data-respect-reduced-motion] *, :root[data-respect-reduced-motion] *::before, :root[data-respect-reduced-motion] *::after { scroll-behavior: auto !important; }
+}

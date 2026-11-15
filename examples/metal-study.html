@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>叠片胸针 · 折面工房</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f4f2ea;color:#252b27;font:16px/1.65 "Microsoft YaHei","PingFang SC",sans-serif}main{max-width:1380px;margin:auto;padding:clamp(18px,4vw,58px)}header{border-bottom:1px solid #94998d;padding-bottom:12px;font-weight:650;letter-spacing:.1em}.layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(210px,.7fr);gap:clamp(24px,4vw,68px);align-items:end;padding-top:22px}.plate{background:#465c4c;position:relative;aspect-ratio:1.34;overflow:hidden}.plate svg{width:100%;height:100%;display:block}.copy{padding-bottom:3px}h1{font-family:"Noto Serif SC","Songti SC",SimSun,serif;font-size:clamp(36px,4.4vw,68px);line-height:1.15;font-weight:650;letter-spacing:.02em;margin:0 0 14px}p{color:#515a51;margin:0 0 24px}dl{margin:0 0 23px}dl div{display:flex;gap:20px;justify-content:space-between;border-top:1px solid #a3a99d;padding:7px 0;font-size:14px}dt{color:#535e54}dd{margin:0}nav{display:flex;gap:3px;flex-wrap:wrap}button{background:transparent;color:#2b362c;border:1px solid #808a7d;border-radius:0;font:inherit;font-size:14px;font-weight:600;padding:9px 14px;min-height:42px;cursor:pointer}button[aria-pressed=true]{background:#263c31;border-color:#263c31;color:#fff}button:focus-visible{outline:2px solid #9e4932;outline-offset:3px}
+@media(max-width:700px){main{padding:22px 18px}.layout{grid-template-columns:1fr;gap:20px;padding-top:15px}.plate{aspect-ratio:1.27}h1{font-size:36px;margin-bottom:5px}p{margin:0 0 13px}dl{margin-bottom:13px}button{min-height:44px}}
+</style></head><body><main><header>折面工房</header><div class="layout"><div class="plate">
+<svg id="object" viewBox="0 0 640 480" role="img" aria-label="两片银板合拢成一枚有铰链的胸针，内侧为红铜">
+<defs>
+ <linearGradient id="wall" x2=".2" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#536d58"/><stop offset="1" stop-color="#344b40"/></linearGradient>
+ <linearGradient id="silver" x1="0" x2=".7" y1="0" y2="1"><stop stop-color="#f0eee1"/><stop offset=".19" stop-color="#b6bab0"/><stop offset=".42" stop-color="#969e96"/><stop offset=".67" stop-color="#cbd0c2"/><stop offset="1" stop-color="#858d84"/></linearGradient>
+ <linearGradient id="side" x2="1" y2=".28"><stop stop-color="#747e75"/><stop offset=".48" stop-color="#f3f2e6"/><stop offset=".58" stop-color="#a6aea1"/><stop offset="1" stop-color="#787e73"/></linearGradient>
+ <linearGradient id="copper" x1=".05" y1=".9" x2="1" y2=".05"><stop stop-color="#743f31"/><stop offset=".53" stop-color="#b57953"/><stop offset=".68" stop-color="#d39a71"/><stop offset="1" stop-color="#8d5841"/></linearGradient>
+ <pattern id="brush" width="13" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-27)"><path d="M0 1h8m2 3h5M2 6h3" stroke="#fff7db" stroke-opacity=".23" stroke-width=".5"/></pattern>
+ <filter id="shadow" x="-.3" y="-.5" width="1.8" height="2.1"><feGaussianBlur stdDeviation="9"/></filter>
+ <path id="upper" d="M139 259 Q167 240 207 182 Q234 150 272 154 L368 176 Q387 179 410 167 Q380 206 363 227 Q343 250 310 253 L250 246 Q201 243 162 263Z"/>
+ <path id="lower" d="M249 269 Q278 255 305 224 Q323 204 352 208 L420 222 Q455 229 494 200 Q468 261 439 286 Q419 304 383 305 L313 294 Q276 286 249 283Z"/>
+</defs>
+<rect x="-600" y="-600" width="2000" height="1650" fill="url(#wall)"/>
+<g transform="rotate(-8 320 240)">
+ <path d="M133 295 Q180 249 292 184 L414 200 L498 235 Q457 332 367 329Z" fill="#102b21" opacity=".65" filter="url(#shadow)"/>
+ <use href="#lower" fill="#523d33" transform="translate(2 8)"/><use href="#lower" fill="url(#copper)" transform="translate(0 4)"/><use href="#lower" fill="url(#side)"/><use href="#lower" fill="url(#brush)"/>
+ <path d="M257 277 Q292 266 314 240 Q334 220 354 226 L423 240 Q461 242 484 216" fill="none" stroke="#e9ede0" stroke-width="1.5"/>
+ <g id="leaf">
+ <use href="#upper" fill="#464b43" transform="translate(2 8)"/><use href="#upper" fill="url(#copper)" transform="translate(1 5)"/><use href="#upper" fill="url(#silver)"/><use href="#upper" fill="url(#brush)"/>
+ <path d="M149 258 Q187 236 213 188 Q237 157 271 158 L364 178 Q390 184 406 171" fill="none" stroke="#f7f6e9" stroke-width="2.6"/>
+ <path d="M183 253 Q224 218 243 195 Q258 180 276 180 L364 195" fill="none" stroke="#a2aaa0" stroke-width=".8"/>
+ </g>
+ <g transform="translate(315 247) rotate(-29)"><rect x="-18" y="-5" width="38" height="11" rx="4" fill="#533e32"/><rect x="-19" y="-7" width="38" height="10" rx="3" fill="url(#copper)"/>
+ <path d="M-15 -5.5h30" stroke="#e9b894" stroke-width="1.2"/><path d="M-6 -7v10m14 -10V3" stroke="#6d4737" stroke-width="1.7"/><circle cx="18" cy="-2" r="4.1" fill="#a36e4f" stroke="#e4af86" stroke-width="1"/><circle cx="18" cy="-2" r="1.6" fill="#543c32"/></g>
+</g></svg></div><section class="copy"><h1>叠片胸针</h1><p>两片拉丝银板由铜轴连接。收拢时，红铜只在折边露出一线。</p><dl><div><dt>材质</dt><dd>银、红铜</dd></div><div><dt>尺寸</dt><dd>48 × 19 毫米</dd></div></dl><nav aria-label="作品视角"><button data-view="full" aria-pressed="true">全貌</button><button data-view="hinge" aria-pressed="false">铰链细节</button><button data-view="open" aria-pressed="false">展开</button></nav></section></div></main>
+<script>
+const object=document.querySelector("#object");const buttons=[...document.querySelectorAll("[data-view]")];
+for(const b of buttons)b.addEventListener("click",()=>{
+ const view=b.dataset.view,detail=view==="hinge",open=view==="open";
+ object.setAttribute("viewBox",detail?"245 193 150 114":"0 0 640 480");
+ document.querySelector("#leaf").setAttribute("transform",open?"rotate(34 315 247)":"rotate(0 315 247)");
+ buttons.forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+ object.setAttribute("aria-label",detail?"铰链局部，两段银叶之间的分段铜轴和轴端孔":open?"胸针展开，上叶绕铜轴转动，露出下叶的完整轮廓":"两片拉丝银板与内侧红铜的完整胸针");
+});
+</script></body></html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light"><title>返修台账</title>
+<style>
+:root{--ink:#1c2731;--muted:#505e66;--line:#c9d1cf;--blue:#184f79;--sheet:#f5f6f1;--field:#ffffff;--sans:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;--mono:Consolas,ui-monospace,monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--sheet);color:var(--ink);font:15px/1.6 var(--sans)}button,input{font:inherit}button{cursor:pointer;color:inherit}button:focus-visible,input:focus-visible{outline:2px solid #175b89;outline-offset:3px}
+main{max-width:1140px;margin:auto;padding:clamp(30px,6.5vw,84px) clamp(18px,5vw,72px)}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;border-bottom:3px solid var(--ink);padding-bottom:15px}h1{margin:0;letter-spacing:.02em;font-size:clamp(32px,4vw,55px);line-height:1.1}#total{font:600 14px var(--mono);padding-bottom:4px;white-space:nowrap}
+.controls{display:flex;align-items:center;gap:18px;justify-content:space-between;padding:20px 0 12px}.tabs{display:flex;gap:8px}.tabs button,.clear{border:0;padding:6px 10px;background:transparent;border-radius:2px;font-weight:600}.tabs button[aria-pressed=true]{background:var(--ink);color:white}.search{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}input{width:212px;padding:6px 9px;border:1px solid #8e9c9f;background:#fff;border-radius:2px;color:var(--ink)}
+.head,.row{display:grid;grid-template-columns:94px minmax(0,1fr) 96px 90px 90px;gap:12px;align-items:center;text-align:left}.head{background:#e7ebe6;font-size:12px;font-weight:650;color:#45545b;padding:7px 12px}.row{border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;width:100%;padding:13px 12px;min-height:52px}.row:hover{background:#eaf0ed}.row[aria-pressed=true]{background:#e2eef2;box-shadow:inset 3px 0 var(--blue)}.id,.eta{font:14px var(--mono);font-variant-numeric:tabular-nums}.name{font-weight:615;overflow-wrap:anywhere}.state,.priority,.eta{white-space:nowrap}.priority{display:flex;align-items:center;gap:6px;font-size:13px}.priority b{font-size:13px;line-height:1}.priority.urgent{color:#9b3d25}.state{font-size:13px;color:#40535d}
+.detail{margin-top:28px;border-top:1px solid #7e9095;padding-top:14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 24px}.detail h2{font-size:21px;line-height:1.4;margin:0}.detail p{margin:0;color:var(--muted);max-width:65ch}.action{grid-column:2;grid-row:1/span 2;align-self:center;border:0;border-radius:2px;background:var(--blue);color:white;padding:8px 16px;min-height:41px;font-weight:650}#empty{padding:28px 12px;border-bottom:1px solid var(--line)}.clear{color:var(--blue);text-decoration:underline}
+[hidden]{display:none!important}
+@media(max-width:680px){main{padding:28px 15px}.controls{display:grid;gap:12px;padding:16px 0 10px}.tabs{gap:2px}.tabs button{min-height:40px}.search{width:100%}input{width:100%;min-height:40px}.head{display:none}.row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"id priority" "name name" "state eta";gap:3px 12px;padding:11px 9px}.id{grid-area:id;font-size:12px;color:var(--muted)}.name{grid-area:name}.priority{grid-area:priority;justify-self:end}.state{grid-area:state}.eta{grid-area:eta;justify-self:end;font-size:12px}.detail{display:block;margin-top:20px}.detail p{margin:5px 0 10px}.action{min-height:44px}header h1{font-size:33px}}
+</style></head><body>
+<main><header><h1>返修台账</h1><span id="total"></span></header>
+<section class="controls" aria-label="筛选工单"><div class="tabs" role="group" aria-label="状态"><button data-status="全部" aria-pressed="true">全部</button><button data-status="待修" aria-pressed="false">待修</button><button data-status="已修复" aria-pressed="false">已修复</button></div><label class="search">查找<input type="search" id="query" placeholder="工单号或设备" autocomplete="off"></label></section>
+<div class="head" aria-hidden="true"><span>工单号</span><span>设备与问题</span><span>优先级</span><span>状态</span><span>送达</span></div><div id="rows" aria-label="工单"></div><div id="empty" hidden><span id="zero-reason"></span> <button class="clear" id="reset">清除筛选</button></div>
+<section class="detail" id="detail" aria-label="当前工单详情"><h2></h2><p></p><button id="mark" class="action"></button></section></main>
+<script>
+const items=[
+ ["R-0218","台钻 · 升降手柄回程时打滑","紧急","09:05","夹紧套固定螺钉松动，回程时手柄有空转。"],
+ ["R-0217","放映机 · 倒片轴间歇性异响","普通","08:47","运行约两分钟后轴承开始发响，随转速加快。"],
+ ["R-0216","老式双镜头反光相机 · 取景器在逆光条件下难以合焦","优先","08:36","对焦屏右侧有雾状痕迹。需在斜光下检查反光镜与取景屏。"],
+ ["R-0215","裁纸台 · 压纸杆行程过短","普通","08:12","纸叠厚于八毫米时压杆不能完全锁住。"],
+ ["R-0214","投影灯 · 调光档位不连续","优先","07:56","低档转至中档时短暂熄灭。"],
+ ["R-0213","刻字机 · 导轨复位偏移","普通","07:40","清理轨道并重新校正归零挡块，已重复复位三次。"]
+].map(([id,name,priority,time,note],i)=>({id,name,priority,time,note,done:i===5}));
+const rows=document.querySelector("#rows"),detail=document.querySelector("#detail"),query=document.querySelector("#query");
+let status="全部",selected=items[0].id;
+const span=(c,v)=>{const n=document.createElement("span");n.className=c;n.textContent=v;return n};
+function display({focusRow=false}={}){
+ const term=query.value.trim().toLowerCase();
+ const visible=items.filter(i=>(status==="全部"||(i.done?"已修复":"待修")===status)&&(i.id+" "+i.name).toLowerCase().includes(term));
+ if(visible.length&&!visible.some(i=>i.id===selected))selected=visible[0].id;
+ const it=visible.find(i=>i.id===selected);
+ document.querySelector("#total").textContent=visible.length+" 项";
+ document.querySelectorAll("[data-status]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.status===status)));
+ rows.replaceChildren(...visible.map(i=>{
+   const b=document.createElement("button");b.type="button";b.className="row";b.dataset.id=i.id;b.setAttribute("aria-pressed",String(i===it));
+   const priority=span("priority"+(i.priority==="紧急"?" urgent":""),i.priority);
+   const icon=document.createElement("b");icon.setAttribute("aria-hidden","true");icon.textContent=i.priority==="紧急"?"▲":i.priority==="优先"?"↗":"–";priority.prepend(icon);
+   b.append(span("id",i.id),span("name",i.name),priority,span("state",i.done?"✓ 已修复":"待修"),span("eta",i.time));
+   b.addEventListener("click",()=>{selected=i.id;display({focusRow:true})});return b;
+ }));
+ document.querySelector("#empty").hidden=!!it;detail.hidden=!it;
+ if(!it){const scope=status==="全部"?"全部工单":status+"工单";
+   document.querySelector("#zero-reason").textContent=term?scope+"中没有包含“"+query.value.trim()+"”的记录。":scope+"中没有记录。"}
+ if(it){detail.querySelector("h2").textContent=it.name;detail.querySelector("p").textContent=it.note;document.querySelector("#mark").textContent=it.done?"重新开放":"标为已修复"}
+ if(focusRow)rows.querySelector('[aria-pressed=true]')?.focus();
+}
+document.querySelectorAll("[data-status]").forEach(b=>b.onclick=()=>{status=b.dataset.status;display()});
+query.oninput=()=>display();document.querySelector("#reset").onclick=()=>{query.value="";status="全部";display();query.focus()};
+document.querySelector("#mark").onclick=()=>{const i=items.find(i=>i.id===selected);i.done=!i.done;display();if(detail.hidden)document.querySelector("#reset").focus()};
+rows.onkeydown=e=>{if(!["ArrowDown","ArrowUp"].includes(e.key))return;e.preventDefault();const b=[...rows.children],n=b.indexOf(e.target);const to=b[Math.max(0,Math.min(b.length-1,n+(e.key==="ArrowDown"?1:-1)))];if(to){selected=to.dataset.id;display({focusRow:true})}};display();
+</script></body></html>

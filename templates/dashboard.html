@@ -1,0 +1,184 @@
+<!--@title 运营台 · 今日-->
+<!--@use 后台首页、dashboard、管理系统。立场：一份每天早上读一次的晨报，不是监控墙。结构：侧栏 + 主区（一句人话的结论 + 年度目标对时间进度 → 指标带（每格一条走势线）→ 标注过的趋势图与按影响排序的待办 → 带库存条的明细表）。不要把每个指标做成一张卡-->
+<!--@sample 早上好，苏禾|手冲壶 600ml|运营台|预售开启-->
+<style>
+/* 本页的版式与细节。颜色和字体都来自预设变量，换 --style / --accent 会跟着变。 */
+.db { --mono: var(--font-mono, ui-monospace, monospace); }
+.db-top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem); gap: var(--s-6) var(--s-8); align-items: end; }
+.db-top > * { min-width: 0; }
+.stamp { display: flex; align-items: center; gap: .5rem; font: .75rem/1.4 var(--mono); color: var(--text-subtle); letter-spacing: .02em; }
+.stamp::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 20%, transparent); }
+.db h1 { margin-top: .9rem; font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.5rem); line-height: 1.3; }
+.summary { margin-top: .9rem; max-width: 40em; color: var(--text-muted); line-height: 1.85; }
+.summary b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.summary mark { background: none; color: var(--accent-text); font-weight: 600; }
+
+/* 年度目标：完成度对时间进度，竖线是"今天该到哪" */
+.goal { padding-bottom: .25rem; }
+.goal-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; font-size: var(--fs-sm); color: var(--text-muted); }
+.goal-row .v { font-family: var(--font-display); font-size: 1.75rem; color: var(--text); letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.goal-row .v small { font-family: var(--font-body); font-size: .8125rem; color: var(--text-subtle); letter-spacing: 0; }
+.goal-bar { position: relative; height: 8px; margin: .7rem 0 .55rem; border-radius: 999px; background: var(--surface-sunken); box-shadow: inset 0 0 0 1px var(--border); }
+.goal-bar i { position: absolute; inset: 0 auto 0 0; width: var(--v); border-radius: inherit; background: var(--text); }
+.goal-bar b { position: absolute; top: -5px; bottom: -5px; left: var(--t); width: 2px; border-radius: 1px; background: var(--accent); }
+.goal-row.f { font-size: .75rem; } .goal-row.f em { font-style: normal; color: var(--accent-text); }
+
+/* 指标带：每格一个数、一个对比、一条走势 */
+.kpis { margin-top: var(--s-7); display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); background: var(--surface); border-radius: var(--r-lg); box-shadow: 0 0 0 1px var(--border); }
+.kpi { padding: 1.1rem 1.25rem 1rem; display: grid; gap: .35rem; min-width: 0; }
+.kpi + .kpi { border-left: 1px solid var(--border); }
+.kpi dt { display: flex; justify-content: space-between; font-size: var(--fs-xs); color: var(--text-muted); }
+.kpi dt span { color: var(--text-faint); }
+.kpi dd { margin: 0; font-family: var(--font-display); font-size: 1.875rem; line-height: 1.1; letter-spacing: -.02em; font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; }
+.kpi dd small { font-family: var(--font-body); font-size: .8125rem; color: var(--text-subtle); letter-spacing: 0; margin: 0 .15em; }
+.kpi .delta { font-size: .75rem; }
+.spark { width: 100%; height: 26px; margin-top: .25rem; overflow: visible; }
+.spark polyline { fill: none; stroke: var(--text-subtle); stroke-width: 1.25; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.spark circle { fill: var(--accent); }
+
+/* 趋势图：纵轴有刻度，峰值有注释，终点有点 */
+.cols { display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 5fr); gap: var(--s-4); margin-top: var(--s-4); }
+.cols > * { min-width: 0; }
+.card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.card-head h3 { font-size: 1rem; }
+.legend { display: flex; gap: var(--s-4); font-size: var(--fs-xs); color: var(--text-muted); margin-top: .9rem; }
+.legend i { display: inline-block; width: 16px; height: 2px; vertical-align: middle; margin-right: 6px; background: var(--accent); }
+.legend i.l { background: repeating-linear-gradient(90deg, var(--text-faint) 0 4px, transparent 4px 7px); }
+.plot { position: relative; margin-top: .75rem; padding-left: 2.25rem; }
+.plot svg { width: 100%; height: 14rem; display: block; overflow: visible; }
+.plot .gl { stroke: var(--border); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.plot .this { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }   /* 要描线动画就不能用 non-scaling-stroke：虚线长度会按屏幕像素算，线画不完 */
+.plot .last { fill: none; stroke: var(--text-faint); stroke-width: 1.25; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }
+.plot .area { fill: url(#db-fade); }
+.plot .yl { position: absolute; left: 0; font: 11px/1 var(--mono); color: var(--text-faint); translate: 0 -50%; }
+.pin { position: absolute; translate: -50% -50%; width: 9px; height: 9px; border-radius: 50%; background: var(--surface); box-shadow: 0 0 0 2px var(--accent); }
+.pin.end { background: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-layer, var(--accent)) 22%, transparent); }
+.pin-note { position: absolute; translate: .6rem -50%; font-size: .75rem; white-space: nowrap; color: var(--text); background: var(--surface); padding: .1rem .35rem; border-radius: var(--r-sm); box-shadow: 0 0 0 1px var(--border); }
+.axis { display: flex; justify-content: space-between; padding-left: 2.25rem; margin-top: .5rem; font: 11px var(--mono); color: var(--text-subtle); }
+.sums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 1rem; padding-top: .9rem; border-top: 1px solid var(--border); font-size: var(--fs-xs); color: var(--text-muted); }
+.sums b { display: block; margin-top: .2rem; font-family: var(--font-display); font-size: 1.25rem; font-weight: var(--display-weight, 600); color: var(--text); font-variant-numeric: tabular-nums; }
+.sums b.up { color: var(--ok); }
+
+/* 待办：类别、原因、下一步动作 */
+.todo2 { margin-top: .75rem; display: grid; }
+.todo2 > div { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr); gap: .25rem .75rem; padding: .9rem 0; }
+.todo2 > div + div { border-top: 1px solid var(--border); }
+.tag { align-self: start; margin-top: .15rem; justify-self: start; font-size: .6875rem; line-height: 1; padding: .3rem .4rem; border-radius: var(--r-sm); background: var(--surface-sunken); color: var(--text-muted); box-shadow: inset 0 0 0 1px var(--border); white-space: nowrap; }
+.tag.hot { background: var(--accent-subtle); color: var(--accent-text); box-shadow: none; }
+.todo2 .t { font-weight: 600; font-size: .9375rem; line-height: 1.5; }
+.todo2 .d { font-size: var(--fs-sm); color: var(--text-muted); line-height: 1.7; }
+.todo2 a { font-size: var(--fs-sm); font-weight: 500; text-decoration: none; justify-self: start; margin-top: .2rem; }
+.todo2 a::after { content: " →"; }
+.todo2 .t, .todo2 .d, .todo2 a { grid-column: 2; }
+
+/* 明细表：可售天数配一根库存条 */
+.days { display: grid; grid-template-columns: 2.6rem 4.5rem; gap: .6rem; align-items: center; justify-content: end; font-variant-numeric: tabular-nums; }
+.days i { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--c, var(--text-subtle)) var(--v), var(--surface-sunken) 0); }
+.days.bad { --c: var(--danger); } .days.mid { --c: var(--warn); } .days.ok { --c: var(--ok); }
+
+@media (max-width: 1180px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .kpi:nth-child(4) { border-left: 0; } .kpi:nth-child(n+4) { border-top: 1px solid var(--border); } }
+@media (max-width: 1000px) { .cols, .db-top { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kpi:nth-child(odd) { border-left: 0; } .kpi:nth-child(4) { border-left: 1px solid var(--border); } .kpi:nth-child(n+3) { border-top: 1px solid var(--border); } .sums { grid-template-columns: minmax(0, 1fr); gap: .6rem; } }
+</style>
+
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="#overview" style="padding: 0 var(--s-2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 4h12l-2 7a4 4 0 0 1-8 0zM12 15v5M8 20h8"/></svg>缓流器物</a>
+    <nav class="side-group" aria-label="主导航">
+      <a class="side-item" href="#overview" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 11l8-7 8 7v8a1 1 0 0 1-1 1h-4v-6h-6v6H5a1 1 0 0 1-1-1z"/></svg>今日概览</a>
+      <a class="side-item" href="#orders"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 7h14l-1.5 9h-11zM9 20h.01M16 20h.01"/></svg>订单<span class="count">46</span></a>
+      <a class="side-item" href="#h-sku"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 8l8-4 8 4-8 4zM4 8v8l8 4 8-4V8M12 12v8"/></svg>商品</a>
+      <a class="side-item" href="#h-sku"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 7h18v12H3zM3 7l3-3h12l3 3M10 11h4"/></svg>库存<span class="count">3</span></a>
+      <a class="side-item" role="link" aria-disabled="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M17 5.5a3 3 0 0 1 0 5.5M21.5 20a5 5 0 0 0-3.5-4.8"/></svg>顾客</a>
+    </nav>
+    <nav class="side-group" aria-label="分析"><p class="side-title">分析</p>
+      <a class="side-item" role="link" aria-disabled="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 18l5-6 4 3 7-9"/></svg>流量</a>
+      <a class="side-item" role="link" aria-disabled="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg>复购</a>
+    </nav>
+    <div class="row hide-sm" style="margin-top:auto; padding: 0 var(--s-2)"><span class="avatar">苏</span><div><p style="font-size: var(--fs-sm); font-weight: 600; line-height: 1.3">苏禾</p><p class="subtle" style="font-size: var(--fs-xs)">运营负责人 · 每 10 分钟同步</p></div></div>
+  </aside>
+
+  <main class="main db" id="overview">
+    <!-- 开头：一句人话的结论 + 今年走到哪了 -->
+    <div class="db-top">
+      <div>
+        <p class="stamp">11 月 12 日 周四 · 数据截至 08:30</p>
+        <h1>早上好，苏禾。有两款快断货了。</h1>
+        <p class="summary">昨天卖得不错：成交 <b>¥63,840</b>，比上周三多 12.4%，主要来自小程序的会员日。<mark>手冲壶 600ml</mark> 和 <mark>滤纸 V60</mark> 按现在的速度撑不过周六，今天要下单补货。</p>
+      </div>
+      <div class="goal" data-reveal>
+        <div class="goal-row"><span>2026 年度成交目标</span><span class="v">¥1,684 万<small> / 2,000 万</small></span></div>
+        <div class="goal-bar" role="img" aria-label="已完成 84.2%，时间已过 85.8%"><i style="--v:84.2%"></i><b style="--t:85.8%"></b></div>
+        <div class="goal-row f"><span>已完成 84.2%</span><span>时间进度 85.8% · <em>落后 ¥31 万</em></span></div>
+      </div>
+    </div>
+
+    <!-- 指标带：每格写明和谁比；颜色表示好坏，箭头表示方向 -->
+    <dl class="kpis" data-reveal>
+      <div class="kpi"><dt>成交额<span>昨日</span></dt><dd><small>¥</small><span data-count="63840">63,840</span></dd><span class="delta up">▲ 12.4%<small>较上周三</small></span>
+        <svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,18 10,16 20,19 30,13 40,15 50,10 60,14 70,9 80,11 90,7 100,5"/><circle cx="100" cy="5" r="2.2"/></svg></div>
+      <div class="kpi"><dt>支付订单<span>昨日</span></dt><dd><span data-count="297">297</span><small>单</small></dd><span class="delta up">▲ 9.6%<small>较上周三</small></span>
+        <svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,15 10,17 20,14 30,16 40,12 50,14 60,11 70,13 80,9 90,10 100,8"/><circle cx="100" cy="8" r="2.2"/></svg></div>
+      <div class="kpi"><dt>客单价<span>昨日</span></dt><dd><small>¥</small><span data-count="215">215</span></dd><span class="delta up">▲ 2.6%<small>较上周三</small></span>
+        <svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,13 10,14 20,12 30,15 40,13 50,12 60,14 70,11 80,13 90,12 100,11"/><circle cx="100" cy="11" r="2.2"/></svg></div>
+      <div class="kpi"><dt>支付转化<span>昨日</span></dt><dd><span data-count="2.71" data-decimals="2">2.71</span><small>%</small></dd><span class="delta down">▼ 0.18 点<small>较上周三</small></span>
+        <svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,8 10,9 20,7 30,10 40,9 50,12 60,11 70,13 80,14 90,15 100,17"/><circle cx="100" cy="17" r="2.2"/></svg></div>
+      <div class="kpi"><dt>退款率<span>近 7 天</span></dt><dd><span data-count="2.9" data-decimals="1">2.9</span><small>%</small></dd><span class="delta up">▼ 0.4 点<small>在变好</small></span>
+        <svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,7 10,8 20,9 30,8 40,11 50,12 60,12 70,14 80,15 90,16 100,18"/><circle cx="100" cy="18" r="2.2"/></svg></div>
+      <div class="kpi"><dt>复购占比<span>近 30 天</span></dt><dd><span data-count="31.5" data-decimals="1">31.5</span><small>%</small></dd><span class="delta up">▲ 1.2 点<small>较上月</small></span>
+        <svg class="spark" viewBox="0 0 100 26" preserveAspectRatio="none" aria-hidden="true"><polyline points="0,17 10,16 20,17 30,14 40,15 50,13 60,13 70,11 80,12 90,10 100,9"/><circle cx="100" cy="9" r="2.2"/></svg></div>
+    </dl>
+
+    <div class="cols">
+      <section class="card" aria-labelledby="h-trend">
+        <div class="card-head">
+          <div><h3 id="h-trend">每日成交额</h3><p class="subtle">全渠道，含预售定金；与去年同期按星期对齐</p></div>
+          <div class="seg" role="group" aria-label="时间范围"><button type="button">14 天</button><button type="button" aria-pressed="true">30 天</button><button type="button">90 天</button></div>
+        </div>
+        <div class="legend"><span><i></i>今年</span><span><i class="l"></i>去年同期</span></div>
+        <div class="plot">
+          <svg viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="近 30 天成交额：10 月 21 日预售开启冲到 9.9 万，之后稳定在 6 万上下">
+            <defs><linearGradient id="db-fade" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".16"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
+            <line class="gl" x1="0" x2="600" y1="0" y2="0"/><line class="gl" x1="0" x2="600" y1="50" y2="50"/><line class="gl" x1="0" x2="600" y1="100" y2="100"/><line class="gl" x1="0" x2="600" y1="150" y2="150"/><line class="gl" x1="0" x2="600" y1="200" y2="200"/>
+            <path class="last" d="M0 128 L21 136 L41 139 L62 134 L83 131 L103 131 L124 112 L145 112 L166 136 L186 77 L207 132 L228 130 L248 125 L269 121 L290 134 L310 129 L331 131 L352 127 L372 122 L393 117 L414 122 L434 131 L455 133 L476 129 L497 119 L517 114 L538 124 L559 120 L579 118 L600 117"/>
+            <path class="area" d="M0 120 L21 128 L41 130 L62 125 L83 121 L103 121 L124 104 L145 103 L166 126 L186 34 L207 124 L228 117 L248 112 L269 106 L290 121 L310 115 L331 111 L352 115 L372 108 L393 100 L414 106 L434 117 L455 119 L476 112 L497 104 L517 90 L538 112 L559 104 L579 96 L600 94 V200 H0Z"/>
+            <path class="this draw" d="M0 120 L21 128 L41 130 L62 125 L83 121 L103 121 L124 104 L145 103 L166 126 L186 34 L207 124 L228 117 L248 112 L269 106 L290 121 L310 115 L331 111 L352 115 L372 108 L393 100 L414 106 L434 117 L455 119 L476 112 L497 104 L517 90 L538 112 L559 104 L579 96 L600 94"/>
+          </svg>
+          <span class="yl" style="top:0%">12万</span><span class="yl" style="top:25%">9万</span><span class="yl" style="top:50%">6万</span><span class="yl" style="top:75%">3万</span><span class="yl" style="top:100%">0</span>
+          <span class="pin" style="left: calc(2.25rem + (100% - 2.25rem) * .31); top: 17%"></span>
+          <span class="pin-note" style="left: calc(2.25rem + (100% - 2.25rem) * .31); top: 17%">预售开启 ¥9.9 万</span>
+          <span class="pin end" style="left: 100%; top: 47%"></span>
+        </div>
+        <div class="axis" aria-hidden="true"><span>10/12</span><span>10/19</span><span>10/26</span><span>11/02</span><span>11/11</span></div>
+        <div class="sums"><span>区间成交<b>¥178 万</b></span><span>日均<b>¥59,377</b></span><span>较去年同期<b class="up">+11.2%</b></span></div>
+      </section>
+
+      <!-- 待办：按影响排序，每条写类别、原因和下一步 -->
+      <section class="card" aria-labelledby="h-todo">
+        <div class="card-head"><div><h3 id="h-todo">今天要处理</h3><p class="subtle">按影响排序 · 4 项</p></div><a class="btn sm ghost" role="link" aria-disabled="true">全部待办</a></div>
+        <div class="todo2">
+          <div><span class="tag hot">库存</span><p class="t">手冲壶 600ml 可售 2.3 天</p><p class="d">在库 96，预售锁定 41。工厂追加 300 件要 9 天，建议今天下单，并把详情页发货时间改为 11 月 20 日前。</p><a href="#kettle-stock">查看库存明细</a></div>
+          <div id="orders"><span class="tag">物流</span><p class="t">46 单超过 48 小时未揽收</p><p class="d">集中在华南仓，打包人手不够；已触发天猫延迟发货预警。</p><a role="link" aria-disabled="true">查看订单</a></div>
+          <div><span class="tag">口碑</span><p class="t">分享壶近 7 天 3 条差评提到"包装破损"</p><p class="d">同一批纸箱发出，可能是新换的蜂窝纸托。</p><a role="link" aria-disabled="true">看评价</a></div>
+          <div><span class="tag">投放</span><p class="t">抖音千川 ROI 掉到 1.8，目标 2.5</p><p class="d">"磨豆机开箱"素材连续 3 天衰减，昨日花费 ¥4,200。</p><a role="link" aria-disabled="true">调整计划</a></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top: var(--s-4)" aria-labelledby="h-sku">
+      <div class="card-head"><div><h3 id="h-sku">商品</h3><p class="subtle">可售天数 = 可用库存 ÷ 近 7 天日均销量，已扣预售锁定；条长按 14 天算满</p></div><a class="btn sm" role="link" aria-disabled="true">全部商品</a></div>
+      <div class="table-wrap" style="margin-top: var(--s-3)">
+        <table class="table">
+          <thead><tr><th>商品</th><th class="r">昨日销量</th><th class="r">成交额</th><th class="r">可用库存</th><th class="r">可售天数</th><th>状态</th></tr></thead>
+          <tbody>
+            <tr id="kettle-stock"><td class="main">手冲壶 600ml · 细口 · 哑光黑</td><td class="r">41</td><td class="r">¥12,259</td><td class="r">96</td><td class="r"><span class="days bad"><span>2.3</span><i style="--v:16%"></i></span></td><td><span class="badge danger">今天补货</span></td></tr>
+            <tr><td class="main">滤纸 V60 · 100 片</td><td class="r">118</td><td class="r">¥3,422</td><td class="r">540</td><td class="r"><span class="days mid"><span>4.6</span><i style="--v:33%"></i></span></td><td><span class="badge warn">本周补货</span></td></tr>
+            <tr><td class="main">陶瓷滤杯 · 雾白</td><td class="r">36</td><td class="r">¥6,084</td><td class="r">412</td><td class="r"><span class="days ok"><span>11.4</span><i style="--v:81%"></i></span></td><td><span class="badge ok">充足</span></td></tr>
+            <tr><td class="main">手摇磨豆机 C2</td><td class="r">22</td><td class="r">¥8,558</td><td class="r">310</td><td class="r"><span class="days ok"><span>14.1</span><i style="--v:100%"></i></span></td><td><span class="badge ok">充足</span></td></tr>
+            <tr><td class="main">分享壶 400ml</td><td class="r">29</td><td class="r">¥2,871</td><td class="r">655</td><td class="r"><span class="days"><span>22.6</span><i style="--v:100%"></i></span></td><td><span class="badge">偏多</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>

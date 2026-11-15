@@ -1,0 +1,1137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>守夜 · 第三夜</title>
+<script>document.documentElement.classList.add('js');setTimeout(function(){if(!window.Motion)document.documentElement.classList.add('no-motion')},1500)</script>
+<!--
+  原创游戏《守夜》的界面样例：你是雾港的守灯人，用灯光、雾笛和信号弹把夜里的渔船引进港。
+  立场：是一座灯塔里的仪表与航海日志，而不是一套发光蓝边的通用游戏 UI。
+  否掉：科幻发光边框 / 金色浮雕奇幻框 / 圆角泡泡糖手游按钮 / 满屏半透明黑块
+  贯穿装置：灯光。强调色是灯芯的暖黄；冷却是灯罩旋转一圈；灯油条像油壶的液面；
+            获得与消耗的数字从灯塔和船的位置飘出来。
+  HUD：左上自身（灯油、塔身），右上世界（时间、潮位、引航进度），下中行动（四个技能），中间留给海面。
+  缩放：画面铺满窗口，HUD 各自锚定在四角与边上，中间的海面吸收宽度变化（16:10 到 21:9 都成立）；
+        尺寸用 cqh（窗口高度的百分之一）等于"按高度缩放"，小字用 max(像素下限, cqh) 保底。
+  输入：1–4 直接用技能；← → 移动焦点、Enter 使用；"键盘 / 手柄"切换按键提示。
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   motion.css · 动效基础层
+   --------------------------------------------------------------------------
+   复制到项目里（或内联进 <style>），配合 assets/motion.js 使用。
+   - 弹簧缓动由 scripts/springs.py 从物理参数算出，不是手调的贝塞尔。
+   - 所有入场类在 prefers-reduced-motion 下退化为纯淡入。
+   - 没有 JS 时，所有内容直接可见（入场类只在 html.js 下才生效）；
+     JS 出错时，head 里的计时器在 1.5 秒后加 .no-motion，同样直接可见。
+   ========================================================================== */
+
+:root {
+  /* snappy: k=520 c=38，455ms，过冲 0.8%。按压回弹、开关、小元素进入 */
+  --spring-snappy: linear(0, 0.0312, 0.1015, 0.1984, 0.3055, 0.4131, 0.5109, 0.604, 0.686, 0.7563, 0.8128, 0.8614, 0.9004, 0.9298, 0.9537, 0.9716, 0.9847, 0.9937, 1.0001, 1.0042, 1.0066, 1.0078, 1.0082, 1.0079, 1.0074, 1.0066, 1.0057, 1.0048, 1.004, 1.0033, 1.0026, 1.002, 1.0016, 1.0012, 1.0008, 1.0006, 1.0004, 1.0002, 1.0001, 1.0001, 1);
+  --spring-snappy-dur: 455ms;
+  /* smooth: k=260 c=32，620ms，无过冲。面板、弹窗、卡片、布局变化 */
+  --spring-smooth: linear(0, 0.0275, 0.0921, 0.176, 0.2676, 0.3592, 0.4464, 0.5265, 0.5985, 0.6619, 0.717, 0.7644, 0.8048, 0.8389, 0.8675, 0.8914, 0.9113, 0.9277, 0.9412, 0.9523, 0.9614, 0.969, 0.975, 0.9799, 0.9838, 0.987, 0.9896, 0.9917, 0.9933, 0.9947, 0.9957, 0.9966, 0.9973, 0.9978, 0.9983, 0.9986, 0.9989, 0.9991, 0.9993, 0.9995, 1);
+  --spring-smooth-dur: 620ms;
+  /* bouncy: k=340 c=22，640ms，过冲 9.6%。落位、点赞、完成——有意的愉悦时刻 */
+  --spring-bouncy: linear(0, 0.0399, 0.1381, 0.2702, 0.4162, 0.5615, 0.6955, 0.8119, 0.9073, 0.9811, 1.0343, 1.0691, 1.0885, 1.0956, 1.0936, 1.0853, 1.0733, 1.0595, 1.0455, 1.0323, 1.0207, 1.011, 1.0034, 0.9978, 0.9941, 0.9919, 0.9909, 0.9909, 0.9916, 0.9927, 0.994, 0.9953, 0.9966, 0.9978, 0.9987, 0.9995, 1.0001, 1.0005, 1.0007, 1.0009, 1);
+  --spring-bouncy-dur: 640ms;
+  /* gentle: k=120 c=20，681ms，几乎无过冲。大面积入场、首屏编排 */
+  --spring-gentle: linear(0, 0.016, 0.0563, 0.1128, 0.179, 0.2502, 0.3229, 0.3944, 0.4631, 0.5277, 0.5876, 0.6437, 0.6929, 0.7369, 0.7759, 0.8102, 0.8402, 0.8662, 0.8886, 0.9078, 0.9242, 0.938, 0.9497, 0.9595, 0.9676, 0.9744, 0.9799, 0.9844, 0.9881, 0.9911, 0.9934, 0.9954, 0.9968, 0.9979, 0.9988, 0.9995, 0.9999, 1.0003, 1.0005, 1.0007, 1);
+  --spring-gentle-dur: 681ms;
+
+  /* 弹簧以外的曲线 */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);   /* 颜色、透明度 */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);    /* 快速到位的小位移 */
+  --ease-in-quart: cubic-bezier(0.5, 0, 0.75, 0);    /* 退出 */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);     /* 屏内往返 */
+
+  --stagger: 55ms;   /* 入场交错的步长 */
+}
+
+/* ---------------------------------------------------------------- 入场编排
+   给元素加 data-reveal（可选值 up / fade / scale / left / right / blur / mask），
+   用 style="--i:n" 或 motion.js 的 reveal() 自动编号控制先后，--delay 加固定延迟。
+   实现用 animation 而不是 transition：入场结束后不留下任何 transform / filter / transition，
+   元素自己的过渡（导航背景）、变换（被抽出的书）、滤镜（物件投影）都不会被吞掉。
+   html 没有 .js 类时内容直接可见——不会因为脚本失败而一片空白。 */
+.js [data-reveal]:not(.is-in) { opacity: 0; }
+.js [data-reveal].is-in {
+  animation: rv-up var(--spring-gentle-dur) var(--spring-gentle) backwards;
+  animation-delay: calc(var(--i, 0) * var(--stagger) + var(--delay, 0ms));
+}
+.js [data-reveal="fade"].is-in  { animation-name: rv-fade; animation-duration: 500ms; animation-timing-function: var(--ease-out-quart); }
+.js [data-reveal="scale"].is-in { animation-name: rv-scale; }
+.js [data-reveal="left"].is-in  { animation-name: rv-left; }
+.js [data-reveal="right"].is-in { animation-name: rv-right; }
+.js [data-reveal="blur"].is-in  { animation-name: rv-blur; animation-duration: 700ms; animation-timing-function: var(--ease-out-quart); }
+.js [data-reveal="mask"]:not(.is-in) { opacity: 1; clip-path: inset(0 0 100% 0); }
+.js [data-reveal="mask"].is-in  { animation-name: rv-mask; animation-duration: 900ms; animation-timing-function: var(--ease-out-expo); }
+@keyframes rv-up    { from { opacity: 0; translate: 0 18px; } 40% { opacity: 1; } }
+@keyframes rv-fade  { from { opacity: 0; } }
+@keyframes rv-scale { from { opacity: 0; scale: .94; } 40% { opacity: 1; } }
+@keyframes rv-left  { from { opacity: 0; translate: -24px 0; } 40% { opacity: 1; } }
+@keyframes rv-right { from { opacity: 0; translate: 24px 0; } 40% { opacity: 1; } }
+@keyframes rv-blur  { from { opacity: 0; translate: 0 8px; filter: blur(8px); } }
+@keyframes rv-mask  { from { clip-path: inset(0 0 100% 0); translate: 0 .25em; } to { clip-path: inset(0 0 0 0); } }
+/* 失败保护：head 里的计时器发现 motion.js 没跑起来时加 .no-motion，一切直接显示 */
+.no-motion [data-reveal], .no-motion [data-split] .line > span, .no-motion .draw {
+  opacity: 1 !important; translate: none !important; clip-path: none !important; stroke-dashoffset: 0 !important; animation: none !important;
+}
+
+/* 逐行（或逐字）揭开的大标题：<h1 data-split> 由 motion.js 拆成 .line > span */
+.js [data-split] .line { display: block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.js [data-split]:not(.is-in) .line > span { display: inline-block; translate: 0 105%; }
+.js [data-split].is-in .line > span {
+  display: inline-block; animation: rv-line 900ms var(--ease-out-expo) backwards;
+  animation-delay: calc(var(--i, 0) * 80ms + var(--delay, 0ms));
+}
+@keyframes rv-line { from { translate: 0 105%; } }
+
+/* ---------------------------------------------------------------- 微交互 */
+
+/* 可按压：所有按钮、可点卡片 */
+.pressable {
+  transition: transform var(--spring-snappy-dur) var(--spring-snappy),
+              background-color 160ms var(--ease-out-quart),
+              box-shadow 240ms var(--ease-out-quart);
+}
+.pressable:active { filter: brightness(.94); transition-duration: 60ms; }
+.pressable > [data-press-face] { display: inline-block; transition: scale 160ms var(--ease-out-quart); }
+.pressable:active > [data-press-face] { scale: .97; transition-duration: 45ms; }
+
+/* 悬浮抬起：可点击的卡片。阴影与位移一起变，像被拿起来 */
+.liftable {
+  transition: transform var(--spring-smooth-dur) var(--spring-smooth),
+              box-shadow 300ms var(--ease-out-quart),
+              border-color 200ms var(--ease-out-quart);
+}
+@media (hover: hover) {
+  .liftable:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift, 0 1px 2px rgb(0 0 0 / .05), 0 12px 28px -8px rgb(0 0 0 / .18)); }
+}
+
+/* 跟随指针的光斑：卡片、按钮的高光。motion.js 的 spotlight() 写入 --mx / --my */
+.spotlight { position: relative; isolation: isolate; }
+.spotlight::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, -20%),
+              color-mix(in srgb, var(--spot, #fff) 16%, transparent), transparent 70%);
+  opacity: 0; transition: opacity 300ms var(--ease-out-quart);
+}
+@media (hover: hover) { .spotlight:hover::before { opacity: 1; } }
+
+/* 下划线从左向右长出 */
+.ink-link { background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+            text-decoration: none; transition: background-size 400ms var(--ease-out-expo); }
+.ink-link:hover { background-size: 100% 1px; }
+
+/* 骨架屏微光 */
+.skeleton {
+  background: linear-gradient(100deg, var(--sk-base, #0000000d) 40%, var(--sk-hi, #00000005) 50%, var(--sk-base, #0000000d) 60%) 0 0 / 200% 100%;
+  animation: shimmer 1.4s linear infinite; border-radius: var(--r-sm, 6px);
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* SVG 线条描绘：给 path 加 class="draw"，motion.js 会写入 --len */
+.js .draw { stroke-dasharray: var(--len, 1000); stroke-dashoffset: var(--len, 1000);
+            transition: stroke-dashoffset 1400ms var(--ease-out-expo); transition-delay: var(--delay, 0ms); }
+.js .draw.is-in, .js .is-in .draw { stroke-dashoffset: 0; }
+
+/* ---------------------------------------------------------------- 浮层：从 display:none 也能过渡 */
+[popover], dialog {
+  transition: opacity 180ms var(--ease-out-quart), transform var(--spring-smooth-dur) var(--spring-smooth),
+              overlay 200ms allow-discrete, display 200ms allow-discrete;
+  opacity: 0; transform: translateY(6px) scale(0.97);
+}
+[popover]:popover-open, dialog[open] {
+  opacity: 1; transform: none;
+  @starting-style { opacity: 0; transform: translateY(6px) scale(0.97); }
+}
+dialog::backdrop { background: rgb(0 0 0 / 0); transition: background-color 240ms, overlay 240ms allow-discrete, display 240ms allow-discrete; }
+dialog[open]::backdrop { background: rgb(10 8 6 / 0.45); @starting-style { background: rgb(0 0 0 / 0); } }
+
+/* ---------------------------------------------------------------- 滚动驱动（渐进增强） */
+@supports (animation-timeline: view()) {
+  /* 进入视口时随滚动淡入——不需要 JS；适合长页里的图与区块 */
+  .scroll-in { animation: scroll-in linear both; animation-timeline: view(); animation-range: entry 0% cover 30%; }
+  @keyframes scroll-in { from { opacity: 0; transform: translateY(32px) scale(0.98); } }
+  /* 阅读进度条 */
+  .scroll-progress { transform-origin: 0 50%; animation: grow-x linear both; animation-timeline: scroll(root); }
+  @keyframes grow-x { from { transform: scaleX(0); } }
+}
+
+/* ---------------------------------------------------------------- View Transitions */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 260ms; }
+::view-transition-group(*) { animation-timing-function: var(--spring-smooth); animation-duration: var(--spring-smooth-dur); }
+
+/* ---------------------------------------------------------------- 视差与倾斜（motion.js 写入 --py / --rx / --ry） */
+[data-parallax], [data-tilt] {
+  transform: perspective(1100px) translate3d(0, var(--py, 0px), 0) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  will-change: transform;
+}
+[data-tilt] { transition: transform 280ms cubic-bezier(.2, .8, .2, 1); transform-style: preserve-3d; }
+
+/* 环境运动：只给主视觉物件，一页最多一处 */
+.float { animation: float 7s ease-in-out infinite; }
+@keyframes float { 50% { translate: 0 -10px; } }
+.spin-slow { animation: spin-slow 80s linear infinite; }
+@keyframes spin-slow { to { rotate: 360deg; } }
+
+/* 滑动的选中块：.seg / role=tablist 上由 motion.js 插入 .tab-ink */
+.has-ink { position: relative; isolation: isolate; }
+.has-ink > :not(.tab-ink) { position: relative; z-index: 1; }
+.has-ink > .tab-ink { position: absolute; left: 0; z-index: 0; width: var(--ink-w, 0); height: auto; min-width: 0; padding: 0; border: 0;
+                      translate: var(--ink-x, 0) 0; pointer-events: none; }
+.tab-ink.ready { transition: translate var(--spring-snappy-dur, 455ms) var(--spring-snappy, ease), width var(--spring-snappy-dur, 455ms) var(--spring-snappy, ease), opacity 160ms ease; }
+.seg.has-ink > .tab-ink { top: 3px; bottom: 3px; border-radius: calc(var(--r-md, 8px) - 3px); background: var(--surface);
+                  box-shadow: 0 0 0 1px var(--border), 0 1px 2px rgb(var(--shade, 0 0 0) / .08); }
+.seg.has-ink > [aria-pressed="true"], .seg.has-ink > [aria-selected="true"], .seg.has-ink > .on { background: transparent; box-shadow: none; }
+.tabs.has-ink > .tab-ink { top: auto; bottom: -1px; height: 2px; border-radius: 1px; background: var(--accent); }
+.tabs.has-ink > [aria-selected="true"]::after { display: none; }
+.pills.has-ink > .tab-ink { top: 4px; bottom: 4px; border-radius: 999px; background: var(--surface-raised, var(--surface));
+                    box-shadow: inset 0 1px 0 var(--hi, rgb(255 255 255 / .1)), 0 0 0 1px var(--border-strong), 0 6px 16px -8px rgb(var(--shade, 0 0 0) / .4); }
+
+/* 进度条进入视口时生长 */
+.js .bar:not(.is-in) > i { width: 0; }
+
+/* 章节默认是静态终帧。运行库确认用户偏好与画面高度后才吸附。 */
+[data-scroll-scene] { --scene-progress: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  [data-scroll-scene][data-scene-active] {
+    min-height: calc(100svh + var(--scene-travel, 88svh));
+  }
+  [data-scene-active] > [data-scene-pin] {
+    position: sticky;
+    top: 0;
+    min-height: 100svh;
+  }
+}
+
+/* ---------------------------------------------------------------- 减弱动效 */
+@media (prefers-reduced-motion: reduce) {
+  [data-parallax], [data-tilt] { transform: none; }
+  .float, .spin-slow { animation: none; }
+  .tab-ink.ready { transition: none; }
+  .js .bar:not(.is-in) > i { width: calc(var(--v, 0) * 1%); }
+  .js [data-reveal].is-in, .js [data-split].is-in .line > span { animation: rv-fade 300ms linear backwards !important; animation-delay: 0ms !important; }
+  .js [data-split]:not(.is-in) .line > span { translate: none; }
+  .pressable:active, .liftable:hover { transform: none; }
+  .pressable > [data-press-face], .pressable:active > [data-press-face] { scale: none; transition: none; }
+  .skeleton { animation: none; }
+  .js .draw { stroke-dashoffset: 0; transition: none; }
+  *, *::before, *::after { scroll-behavior: auto !important; }
+}
+
+
+:root {
+  --sea-deep: #070C1A;
+  --panel: rgb(10 16 32 / .62);
+  --panel-edge: rgb(255 236 200 / .14);
+  --ink: #F6EEDC;            /* 纸色文字 */
+  --ink-muted: #B8B2A4;
+  --lamp: #FFC861;           /* 灯芯的暖黄：唯一的强调色 */
+  --lamp-deep: #E89B2E;
+  --oil: #F0A33A;
+  --hull: #D9E4F2;           /* 塔身：冷白 */
+  --warn: #FF6B5A;
+  --gain: #9BE7B4;
+  --font-title: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  --font-ui: -apple-system, "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+  --font-num: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  /* 在任何画面上可读：文字描边 + 柔影 */
+  --legible: 0 1px 0 rgb(0 0 0 / .7), 0 0 .6cqh rgb(0 0 0 / .6);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+body { display: grid; place-items: center; font-family: var(--font-ui); color: var(--ink); -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+
+/* ================================================================ 画面：16:9，按高度缩放 */
+.game { position: relative; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; container-type: size;
+        background: radial-gradient(70% 60% at 50% 110%, #12203F, transparent 70%), linear-gradient(#0B1430, var(--sea-deep) 55%, #050913); }
+
+/* ---------------- 世界（示意的游戏画面） */
+.world { position: absolute; inset: 0; }
+.stars { position: absolute; inset: 0 0 45% 0; opacity: .55;
+         background-image: radial-gradient(1px 1px at 12% 20%, #fff, transparent), radial-gradient(1px 1px at 38% 12%, #fff, transparent),
+         radial-gradient(1.5px 1.5px at 61% 26%, #fff, transparent), radial-gradient(1px 1px at 82% 9%, #fff, transparent),
+         radial-gradient(1px 1px at 25% 35%, #fff, transparent), radial-gradient(1px 1px at 70% 40%, #fff, transparent); }
+.horizon { position: absolute; left: 0; right: 0; top: 58%; height: 1px; background: linear-gradient(90deg, transparent, rgb(255 220 160 / .25), transparent); }
+.sea { position: absolute; inset: 58% 0 0 0; background:
+        repeating-linear-gradient(180deg, rgb(120 150 210 / .07) 0 .25cqh, transparent .25cqh 2.4cqh), linear-gradient(#0B1734, #050913); }
+.fog { position: absolute; left: -20%; right: -20%; height: 30%; top: 46%; filter: blur(3cqh); opacity: .55;
+       background: radial-gradient(40% 50% at 30% 50%, rgb(150 170 210 / .35), transparent 70%), radial-gradient(35% 45% at 75% 60%, rgb(150 170 210 / .3), transparent 70%);
+       animation: drift 40s linear infinite alternate; }
+@keyframes drift { to { translate: 10% 0; } }
+/* 灯塔与光锥 */
+.tower { position: absolute; right: 13%; bottom: 38%; width: 3.6cqh; height: 26cqh;
+         background: linear-gradient(90deg, #2A3350, #4A5577 45%, #232B45); clip-path: polygon(22% 0, 78% 0, 100% 100%, 0 100%); }
+.tower::before { content: ""; position: absolute; left: 0; right: 0; top: 30%; height: 8%; background: #8E2E2A; }
+.tower::after { content: ""; position: absolute; left: 0; right: 0; top: 62%; height: 8%; background: #8E2E2A; }
+.lamp { position: absolute; right: calc(13% + .55cqh); bottom: calc(38% + 25.5cqh); width: 2.5cqh; height: 2.5cqh; border-radius: 50%;
+        background: radial-gradient(circle, #FFF6D8, var(--lamp) 50%, transparent 72%); box-shadow: 0 0 4cqh 1.5cqh rgb(255 200 97 / .45); }
+.beam { position: absolute; right: calc(13% + 1.8cqh); bottom: calc(38% + 26.6cqh); width: 140cqh; height: 140cqh; translate: 50% 50%;
+        background: conic-gradient(from 0deg, transparent 0 250deg, rgb(255 210 120 / .0) 252deg, rgb(255 210 120 / .22) 262deg, rgb(255 210 120 / .0) 272deg, transparent 272deg);
+        border-radius: 50%; animation: sweep 9s linear infinite; mix-blend-mode: screen; pointer-events: none;
+        mask-image: radial-gradient(circle, #000 20%, transparent 70%); }
+.beam.flare { animation-duration: 2.2s; filter: brightness(1.8); }
+@keyframes sweep { to { rotate: 360deg; } }
+.boat { position: absolute; width: 4cqh; height: 1.2cqh; border-radius: 0 0 1cqh 1cqh; background: #1B2440; }
+.boat::after { content: ""; position: absolute; left: 45%; top: -1.6cqh; width: .6cqh; height: .6cqh; border-radius: 50%;
+               background: #FFD27A; box-shadow: 0 0 1.4cqh .4cqh rgb(255 210 122 / .7); }
+.boat.b1 { left: 22%; top: 66%; } .boat.b2 { left: 43%; top: 72%; scale: .8; } .boat.b3 { left: 61%; top: 64%; scale: .6; }
+.boat.lost::after { background: var(--warn); box-shadow: 0 0 1.4cqh .4cqh rgb(255 107 90 / .7); animation: blink 1.2s steps(2) infinite; }
+@keyframes blink { 50% { opacity: .3; } }
+
+/* ================================================================ HUD 公共 */
+.hud { position: absolute; inset: 0; pointer-events: none; padding: 3.4cqh 3.6cqh; }   /* 约 5% 的电视安全区 */
+.hud > * { pointer-events: auto; }
+.plate { background: var(--panel); backdrop-filter: blur(.8cqh) saturate(1.3); border-radius: 1.2cqh;
+         box-shadow: inset 0 1px 0 rgb(255 255 255 / .08), 0 0 0 1px var(--panel-edge), 0 1.5cqh 3cqh -1.5cqh rgb(0 0 0 / .6); }
+.label { font-size: max(12px, 1.55cqh); letter-spacing: .14em; color: var(--ink-muted); text-shadow: var(--legible); }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; text-shadow: var(--legible); }
+
+/* ---------------- 左上：自身状态 */
+.self { position: absolute; left: 3.6cqh; top: 3.4cqh; width: 40cqh; padding: 1.6cqh 1.8cqh 1.8cqh; display: grid; gap: 1.4cqh; }
+.self .name { display: flex; justify-content: space-between; align-items: baseline; }
+.self .name b { font: 900 2.6cqh/1 var(--font-title); letter-spacing: .12em; text-shadow: var(--legible); }
+.self .name .num { font-size: 1.6cqh; color: var(--ink-muted); }
+.meter { display: grid; gap: .6cqh; }
+.meter .row { display: flex; justify-content: space-between; align-items: baseline; }
+.meter .row .num { font-size: 2.1cqh; }
+.meter .row .num small { font-size: .65em; color: var(--ink-muted); }
+.bar { position: relative; height: 1.6cqh; border-radius: .8cqh; background: rgb(0 0 0 / .45); overflow: hidden;
+       box-shadow: inset 0 0 0 1px rgb(255 255 255 / .12), inset 0 .3cqh .6cqh rgb(0 0 0 / .5); }
+.bar i { position: absolute; inset: 0 auto 0 0; width: calc(var(--v) * 1%); border-radius: inherit; }
+.bar .trail { background: #FFF3D6; transition: width var(--spring-smooth-dur) var(--spring-smooth) 320ms; }     /* 延迟层：等 0.32s 再追上 */
+.bar .fill { transition: width 120ms var(--ease-out-quart);
+             background: linear-gradient(180deg, rgb(255 255 255 / .35), transparent 45%), var(--c); }
+.bar .ticks { position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), rgb(0 0 0 / .45) calc(10% - 1px) 10%); }
+.meter.oil { --c: linear-gradient(90deg, var(--lamp-deep), var(--oil)); }
+.meter.hull { --c: var(--hull); }
+.meter.low .fill { --c: var(--warn); animation: pulse 1s ease-in-out infinite; }
+.meter.low .row .num { color: var(--warn); }
+@keyframes pulse { 50% { filter: brightness(1.5); } }
+
+/* ---------------- 右上：世界状态 */
+.world-state { position: absolute; right: 3.6cqh; top: 3.4cqh; display: flex; gap: 1cqh; align-items: stretch; }
+.world-state .plate { padding: 1.3cqh 1.8cqh; display: grid; gap: .3cqh; align-content: center; }
+.clock .num { font-size: 4cqh; line-height: 1; letter-spacing: -.02em; }
+.clock .label + .label { font-size: max(12px, 1.35cqh); letter-spacing: .06em; }
+.guide { min-width: 22cqh; }
+.guide .num { font-size: 3cqh; line-height: 1; }
+.guide .num small { font-size: .55em; color: var(--ink-muted); }
+.pips { display: flex; gap: .5cqh; margin-top: .4cqh; }
+.pips i { width: 2.4cqh; height: .8cqh; border-radius: .4cqh; background: rgb(255 255 255 / .15); }
+.pips i.on { background: var(--lamp); box-shadow: 0 0 1cqh rgb(255 200 97 / .6); }
+.pips i.lost { background: var(--warn); }
+
+/* ---------------- 下中：技能栏 */
+.skills { position: absolute; left: 50%; bottom: 3.4cqh; translate: -50% 0; display: flex; gap: 1.2cqh; padding: 1.2cqh; }
+.skill { position: relative; width: 9.6cqh; height: 9.6cqh; border: 0; padding: 0; border-radius: 1.4cqh; cursor: pointer; outline: none;
+         background: radial-gradient(80% 80% at 50% 20%, #2A3557, #121A33);
+         box-shadow: inset 0 1px 0 rgb(255 255 255 / .14), inset 0 0 0 1px rgb(255 236 200 / .16), 0 .8cqh 1.6cqh -.6cqh rgb(0 0 0 / .7);
+         transition: scale var(--spring-snappy-dur) var(--spring-snappy), box-shadow 160ms; }
+.skill svg { width: 52%; height: 52%; color: var(--ink); filter: drop-shadow(0 .2cqh .4cqh rgb(0 0 0 / .6)); }
+.skill .key { position: absolute; left: .6cqh; top: .5cqh; font: 700 max(11px, 1.4cqh)/1 var(--font-num); color: var(--ink-muted); }
+.skill .cost { position: absolute; right: .6cqh; bottom: .5cqh; font: 700 max(11px, 1.35cqh)/1 var(--font-num); color: var(--oil); text-shadow: var(--legible); }
+.skill .cd { position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+             background: conic-gradient(rgb(4 7 16 / .72) calc(var(--p, 0) * 1deg), transparent 0); }
+.skill .cdn { position: absolute; inset: 0; display: grid; place-items: center; font: 700 3cqh/1 var(--font-num); color: var(--ink); text-shadow: var(--legible); opacity: 0; }
+.skill.cooling .cdn { opacity: 1; }
+.skill.cooling svg { opacity: .35; }
+.skill.ready { animation: ready 260ms var(--ease-out-quart); }                       /* 冷却结束：亮一下 */
+@keyframes ready { 0% { filter: brightness(2.2); scale: 1.08; } }
+.skill:active { scale: .92; transition-duration: 60ms; }
+/* 焦点：全屏最醒目的状态——暖黄外框、放大、下方指示箭头 */
+.skill:focus-visible, .skill.focus { scale: 1.08; box-shadow: inset 0 1px 0 rgb(255 255 255 / .2), 0 0 0 .3cqh var(--lamp), 0 0 2.4cqh rgb(255 200 97 / .45); }
+.skill:focus-visible::after, .skill.focus::after { content: ""; position: absolute; left: 50%; bottom: -1.6cqh; translate: -50% 0;
+  border: .7cqh solid transparent; border-bottom-color: var(--lamp); border-top: 0; }
+.skill.lack .cost { color: var(--warn); }
+.skill-name { position: absolute; left: 50%; bottom: 15.6cqh; translate: -50% 0; padding: .7cqh 1.6cqh; white-space: nowrap;
+              font-size: max(13px, 1.9cqh); text-align: center; }
+.skill-name b { font-weight: 600; }
+.skill-name span { color: var(--ink-muted); margin-left: .8cqh; font-size: max(12px, 1.6cqh); }
+
+/* ---------------- 右下：输入设备与提示 */
+.prompts { position: absolute; right: 3.6cqh; bottom: 3.4cqh; display: flex; gap: 1.6cqh; align-items: center; font-size: max(12px, 1.6cqh); text-shadow: var(--legible); }
+.glyph { display: inline-grid; place-items: center; min-width: 2.8cqh; height: 2.8cqh; padding: 0 .6cqh; margin-right: .6cqh;
+         font: 700 1.4cqh/1 var(--font-num); color: #10162A; background: var(--ink); border-radius: .5cqh; box-shadow: 0 .25cqh 0 #8C8676; }
+.pad .glyph { border-radius: 50%; padding: 0; width: 2.8cqh; }
+.glyph.a { background: #8FD18F; } .glyph.b { background: #F08A7E; }
+.device { pointer-events: auto; padding: .6cqh 1.2cqh; border: 0; border-radius: .6cqh; background: var(--panel); color: var(--ink-muted); cursor: pointer;
+          box-shadow: 0 0 0 1px var(--panel-edge); font-size: 1.5cqh; }
+
+/* ================================================================ 浮动数字 */
+.pop { position: absolute; z-index: 5; pointer-events: none; font: 700 3.2cqh/1 var(--font-num); text-shadow: var(--legible); white-space: nowrap; }
+.pop.cost { color: var(--oil); }
+.pop.gain { color: var(--gain); }
+.pop.big { font-size: 5cqh; color: var(--lamp); }
+
+/* ================================================================ 结算 */
+.result { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; background: rgb(3 5 12 / 0); pointer-events: none;
+          transition: background-color 500ms var(--ease-out-quart); }
+.result.on { background: rgb(3 5 12 / .72); pointer-events: auto; }
+.result .card { width: 64cqh; padding: 4cqh 4.4cqh 3.6cqh; text-align: center; opacity: 0; translate: 0 4cqh;
+                background: linear-gradient(#F4EBD6, #E8DCC0); color: #2A2116; border-radius: 1cqh;
+                box-shadow: inset 0 0 0 .3cqh #CDB98F, 0 4cqh 8cqh -2cqh rgb(0 0 0 / .8);
+                transition: opacity 400ms, translate var(--spring-smooth-dur) var(--spring-smooth); }
+.result.on .card { opacity: 1; translate: 0 0; }
+.result .k { font-size: 1.6cqh; letter-spacing: .3em; color: #7A6A4E; }
+.result h2 { margin: 1cqh 0 0; font: 900 5.6cqh/1.1 var(--font-title); letter-spacing: .12em; }
+.rate { display: flex; justify-content: center; gap: 1.4cqh; margin: 2.4cqh 0 2.6cqh; }
+.rate svg { width: 6cqh; height: 6cqh; color: #CDBE9C; opacity: .5; scale: .4; }
+.rate svg.lit { color: var(--lamp-deep); opacity: 1; scale: 1; filter: drop-shadow(0 0 1cqh rgb(232 155 46 / .55)); }
+.ledger { display: grid; gap: 1cqh; text-align: left; font-size: 2cqh; border-top: 1px solid #CDB98F; padding-top: 1.8cqh; }
+.ledger div { display: flex; justify-content: space-between; opacity: 0; translate: 0 1cqh; transition: opacity 300ms, translate 400ms var(--ease-out-expo); }
+.ledger div.in { opacity: 1; translate: 0 0; }
+.ledger .num { text-shadow: none; }
+.ledger .total { margin-top: .6cqh; padding-top: 1.2cqh; border-top: 1px dashed #CDB98F; font-weight: 700; }
+.ledger .total .num { font-size: 3cqh; color: #A35F14; }
+.skip { margin-top: 2.4cqh; font-size: 1.5cqh; color: #7A6A4E; }
+
+@media (prefers-reduced-motion: reduce) { .fog, .beam, .boat.lost::after, .meter.low .fill { animation: none; } }
+</style>
+</head>
+<body>
+<main class="game" id="game" aria-label="守夜 第三夜">
+  <div class="world" aria-hidden="true">
+    <div class="stars"></div><div class="horizon"></div><div class="sea"></div>
+    <div class="beam" id="beam"></div><div class="tower"></div><div class="lamp" id="lampDot"></div>
+    <div class="boat b1" id="boat1"></div><div class="boat b2 lost" id="boat2"></div><div class="boat b3"></div>
+    <div class="fog"></div>
+  </div>
+
+  <div class="hud">
+    <section class="self plate" data-reveal="left" style="--delay:100ms" aria-label="灯塔状态">
+      <div class="name"><b>雾港灯塔</b><span class="num">第三夜</span></div>
+      <div class="meter oil" id="oilMeter">
+        <div class="row"><span class="label">灯 油</span><span class="num"><span id="oilN">72</span><small> / 100</small></span></div>
+        <div class="bar"><i class="trail" id="oilTrail" style="--v:72"></i><i class="fill" id="oilFill" style="--v:72"></i><i class="ticks"></i></div>
+      </div>
+      <div class="meter hull">
+        <div class="row"><span class="label">塔 身</span><span class="num">86<small> / 100</small></span></div>
+        <div class="bar"><i class="trail" style="--v:86"></i><i class="fill" style="--v:86"></i><i class="ticks"></i></div>
+      </div>
+    </section>
+
+    <section class="world-state" data-reveal="right" style="--delay:160ms">
+      <div class="plate clock"><span class="num">02:14</span><span class="label">离天亮 3 小时 40 分</span></div>
+      <div class="plate guide"><span class="label">引 航</span><span class="num"><span id="saved">3</span><small> / 5 艘</small></span>
+        <div class="pips" id="pips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="lost"></i><i></i></div></div>
+    </section>
+
+    <div class="skill-name plate" id="skillName" data-reveal style="--delay:320ms"><b>照亮航道</b><span>光锥扫过的船会跟着走 · 耗油 12</span></div>
+    <nav class="skills plate" id="skills" aria-label="技能" data-reveal style="--delay:240ms">
+      <button class="skill" data-cost="12" data-cd="4" data-name="照亮航道" data-desc="光锥扫过的船会跟着走" aria-label="照亮航道，耗油 12">
+        <span class="key" data-kb="1" data-pad="LB">1</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l-1 4h-4z"/><path d="M10 7h4v4h-4z"/><path d="M12 11v2"/><path d="m4 21 8-8 8 8"/></svg>
+        <span class="cost">12</span><span class="cd"></span><span class="cdn"></span></button>
+      <button class="skill" data-cost="6" data-cd="8" data-name="鸣雾笛" data-desc="附近迷航的船会朝灯塔转向" aria-label="鸣雾笛，耗油 6">
+        <span class="key" data-kb="2" data-pad="RB">2</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h5l5-4v12l-5-4H4z"/><path d="M17.5 9a4 4 0 0 1 0 6"/><path d="M20 6.5a8 8 0 0 1 0 11"/></svg>
+        <span class="cost">6</span><span class="cd"></span><span class="cdn"></span></button>
+      <button class="skill" data-cost="0" data-cd="12" data-gain="30" data-name="添灯油" data-desc="从库房补 30 灯油，补油时灯会暗 2 秒" aria-label="添灯油，补充 30">
+        <span class="key" data-kb="3" data-pad="X">3</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s5 6 5 10a5 5 0 0 1-10 0c0-4 5-10 5-10z"/><path d="M10 14a2 2 0 0 0 2 2"/></svg>
+        <span class="cost">+30</span><span class="cd"></span><span class="cdn"></span></button>
+      <button class="skill" data-cost="25" data-cd="20" data-flare="1" data-name="放信号弹" data-desc="照亮整片海面 6 秒，所有船都能看见港口" aria-label="放信号弹，耗油 25">
+        <span class="key" data-kb="4" data-pad="Y">4</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21V11"/><path d="m9 14 3-3 3 3"/><circle cx="12" cy="6" r="2.2"/><path d="M12 1.5v1M16.5 6h1M6.5 6h1M15.2 2.8l-.7.7M9.5 3.5l-.7-.7"/></svg>
+        <span class="cost">25</span><span class="cd"></span><span class="cdn"></span></button>
+    </nav>
+
+    <div class="prompts" id="prompts">
+      <span><span class="glyph" data-kb="← →" data-pad="◀▶">← →</span>选择</span>
+      <span><span class="glyph a" data-kb="Enter" data-pad="A">Enter</span>使用</span>
+      <span><span class="glyph b" data-kb="R" data-pad="B">R</span>结束这一夜</span>
+      <button class="device" id="device" type="button">键盘提示</button>
+    </div>
+  </div>
+
+  <section class="result" id="result" aria-live="polite" aria-hidden="true">
+    <div class="card">
+      <p class="k">航 海 日 志</p>
+      <h2>第三夜 · 天亮了</h2>
+      <div class="rate" id="stars" aria-label="三颗星中的两颗">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6z"/></svg>
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6z"/></svg>
+      </div>
+      <div class="ledger" id="ledger">
+        <div><span>引进港的船</span><span class="num" data-k="boats">0</span></div>
+        <div><span>剩余灯油</span><span class="num" data-k="oil">0</span></div>
+        <div><span>塔身完好</span><span class="num" data-k="hull">0</span></div>
+        <div class="total"><span>渔会的酬谢 <small style="color:#7A6A4E">每艘 250 + 每滴灯油 6</small></span><span class="num" data-k="pay">0</span></div>
+      </div>
+      <p class="skip">任意键跳过 · 再按一次回到海上</p>
+    </div>
+  </section>
+</main>
+
+<script>
+/* ==========================================================================
+   motion.js · 无依赖的小型动效运行库（约 4KB 压缩前）
+   --------------------------------------------------------------------------
+   配合 assets/motion.css。用法：
+
+   <head> 里尽早放这一行（避免内容先闪一下再被藏起来；1.5 秒内本库没跑起来就全部直接显示）：
+     document.documentElement.classList.add('js');
+     setTimeout(function(){ if(!window.Motion) document.documentElement.classList.add('no-motion') }, 1500);
+   <body> 末尾内联本文件。注意：本文件和它的注释里都不能出现字面的 script 结束标签。默认在 DOMContentLoaded 时自动执行 Motion.auto()；
+          若要手动控制，在本文件之前设 window.MOTION_MANUAL = true。
+
+   Motion.auto()                 一次装好下面所有能力
+   Motion.reveal(root?)          [data-reveal] [data-split] .draw 进入视口时加 .is-in；
+                                 同一个 [data-stagger] 容器里的子项自动编号 --i
+   Motion.split(el)              把标题按 <br> 拆成行（data-split），或 data-split="words" 按词
+   Motion.count(el, opts?)       数字滚动到目标值：<span data-count="4113.6" data-decimals="2" data-delay="600">
+   Motion.spring(el, kf, name?)  用弹簧缓动跑 WAAPI 动画，name = snappy|smooth|bouncy|gentle
+   Motion.flip(els, mutate, name?) 布局变化动画（FLIP）：先记位置→改 DOM→从旧位置弹到新位置
+   Motion.swap(fn)               用 View Transition 包住一次 DOM 更新，不支持时直接执行
+   Motion.spotlight(sel?)        .spotlight 元素跟随指针写入 --mx / --my
+   Motion.reduced                是否开启了"减弱动态效果"
+
+   下面这些只要写属性，auto() 会自动装好：
+   data-parallax="0.15"          随滚动轻微位移（系数 0.05–0.25；主视觉物件用）
+   data-tilt="6"                 指针移上去时朝指针方向倾斜（最大角度；放在主视觉或一张卡上）
+   [data-tabs]                   标签页：里面一个 role=tablist（按钮 role=tab）和同样多个 role=tabpanel；切换带过渡、支持方向键
+   .seg / role=tablist           选中项下面自动有一个会滑动的选中块
+   .bar                          进度条进入视口时从 0 长到 --v
+   data-copy="#id"               复制按钮：复制目标元素的文字，按钮上短暂显示"已复制"
+
+   所有函数在减弱动效时退化为直接到终态（或只做透明度）。
+   ========================================================================== */
+(function () {
+  'use strict';
+  var root = document.documentElement;
+  root.classList.add('js');
+  var mq = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+
+  function css(name, fallback) {
+    var v = getComputedStyle(root).getPropertyValue(name).trim();
+    return v || fallback;
+  }
+  function springOf(name) {
+    name = name || 'smooth';
+    return {
+      easing: css('--spring-' + name, 'cubic-bezier(0.2, 0.8, 0.2, 1)'),
+      duration: parseFloat(css('--spring-' + name + '-dur', '600')) || 600
+    };
+  }
+
+  /* ---------------------------------------------------------------- 拆行 */
+  function split(el) {
+    if (!el || el.dataset.splitDone) return;
+    el.dataset.splitDone = '1';
+    var mode = el.getAttribute('data-split');
+    var label = el.textContent.replace(/\s+/g, ' ').trim();
+    if (!el.getAttribute('aria-label')) el.setAttribute('aria-label', label);
+    var parts;
+    if (mode === 'words') {
+      // 中文按字、西文按词（有 Intl.Segmenter 时用它）
+      var text = el.textContent;
+      if (window.Intl && Intl.Segmenter) {
+        parts = Array.from(new Intl.Segmenter(undefined, { granularity: 'word' }).segment(text), function (s) { return s.segment; });
+      } else {
+        parts = text.split(/(\s+)/);
+      }
+      el.innerHTML = '';
+      var n = 0;
+      parts.forEach(function (p) {
+        if (/^\s+$/.test(p)) { el.appendChild(document.createTextNode(p)); return; }
+        var line = document.createElement('span'); line.className = 'line'; line.style.display = 'inline-block';
+        var inner = document.createElement('span'); inner.textContent = p; inner.style.setProperty('--i', n++);
+        line.appendChild(inner); el.appendChild(line);
+      });
+    } else {
+      var html = el.innerHTML.split(/<br\s*\/?>/i);
+      el.innerHTML = html.map(function (h, i) {
+        return '<span class="line" aria-hidden="true"><span style="--i:' + i + '">' + h.trim() + '</span></span>';
+      }).join('');
+    }
+  }
+
+  /* ---------------------------------------------------------------- 进入视口 */
+  var io = null;
+  function onEnter(entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var t = e.target;
+      t.classList.add('is-in');
+      if (t.hasAttribute('data-count')) count(t);
+      t.querySelectorAll && t.querySelectorAll('[data-count]').forEach(function (c) { count(c); });
+      io.unobserve(t);
+    });
+  }
+  function reveal(scope) {
+    scope = scope || document;
+    scope.querySelectorAll('[data-split]').forEach(split);
+    scope.querySelectorAll('[data-stagger]').forEach(function (box) {
+      var kids = box.querySelectorAll(':scope > [data-reveal], :scope > * > [data-reveal]');
+      kids.forEach(function (k, i) { if (!k.style.getPropertyValue('--i')) k.style.setProperty('--i', i); });
+    });
+    scope.querySelectorAll('.draw').forEach(function (p) {
+      if (p.getTotalLength) { try { p.style.setProperty('--len', Math.ceil(p.getTotalLength()) + 1); } catch (e) {} }
+    });
+    var targets = scope.querySelectorAll('[data-reveal], [data-split], [data-count], .draw, [data-observe], .bar');
+    if (!('IntersectionObserver' in window)) { targets.forEach(function (t) { t.classList.add('is-in'); }); return; }
+    // 阈值用 0 + 底部收进 6%：元素上沿一进入可视区下方 94% 就开始入场。
+    // 不用比例阈值——高的卡片要露出 12% 才触发，会在首屏留下一块空白。
+    io = io || new IntersectionObserver(onEnter, { rootMargin: '0px 0px -6% 0px', threshold: 0 });
+    targets.forEach(function (t) { io.observe(t); });
+  }
+
+  /* ---------------------------------------------------------------- 数字滚动 */
+  var counts = new WeakMap();
+  function stopCount(el) {
+    var pending = counts.get(el);
+    if (!pending) return;
+    clearTimeout(pending.timer);
+    cancelAnimationFrame(pending.frame);
+    counts.delete(el);
+  }
+  function count(el, opts) {
+    opts = opts || {};
+    if (el.dataset.counted && opts.to == null) return;
+    var to = parseFloat(opts.to != null ? opts.to : el.dataset.count);
+    if (!Number.isFinite(to)) return;
+    var previous = counts.get(el);
+    var from = parseFloat(opts.from != null ? opts.from : previous ? previous.value : el.dataset.from || 0);
+    var dec = opts.decimals != null ? opts.decimals : parseInt(el.dataset.decimals || '0', 10);
+    var dur = opts.duration != null ? opts.duration : parseInt(el.dataset.duration || '1100', 10);
+    var wait = opts.delay != null ? opts.delay : parseInt(el.dataset.delay || '0', 10);
+    var fmt = new Intl.NumberFormat(opts.locale || undefined, { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    stopCount(el);
+    el.dataset.counted = '1';
+    el.style.fontVariantNumeric = 'tabular-nums';
+    var job = { timer: 0, frame: 0, value: from };
+    counts.set(el, job);
+    if (mq.matches || !(dur > 0)) { job.value = to; el.textContent = fmt.format(to); return; }
+    function start() {
+      var t0 = performance.now();
+      function frame(now) {
+        if (counts.get(el) !== job) return;
+        var p = mq.matches ? 1 : Math.min(1, (now - t0) / dur);
+        job.value = from + (to - from) * (1 - Math.pow(1 - p, 4));
+        el.textContent = fmt.format(job.value);
+        if (p < 1) job.frame = requestAnimationFrame(frame);
+        else job.frame = 0;
+      }
+      frame(t0);
+    }
+    if (wait > 0) { job.timer = setTimeout(start, wait); return job.timer; }
+    start();
+  }
+
+  /* ---------------------------------------------------------------- 弹簧动画 */
+  function spring(el, keyframes, name, extra) {
+    if (!el || !el.animate) return null;
+    var s = springOf(name);
+    if (mq.matches) {
+      var last = Array.isArray(keyframes) ? keyframes[keyframes.length - 1] : keyframes;
+      return el.animate([last, last], { duration: 1, fill: 'forwards' });
+    }
+    var o = { duration: s.duration, easing: s.easing, fill: 'both' };
+    for (var k in extra || {}) o[k] = extra[k];
+    return el.animate(keyframes, o);
+  }
+
+  /* ---------------------------------------------------------------- FLIP 布局动画 */
+  var layoutAnimations = new WeakMap();
+  function flip(els, mutate, name) {
+    els = Array.prototype.slice.call(els);
+    var first = els.map(function (e) { return e.getBoundingClientRect(); });
+    // Measure the visible position before cancelling our previous layout pass.
+    els.forEach(function (el) {
+      var previous = layoutAnimations.get(el);
+      if (previous) { previous.cancel(); layoutAnimations.delete(el); }
+    });
+    mutate();
+    if (mq.matches) return;
+    els.forEach(function (e, i) {
+      if (!e.isConnected) return;
+      var last = e.getBoundingClientRect(), f = first[i];
+      var dx = f.left - last.left, dy = f.top - last.top;
+      var sx = last.width ? f.width / last.width : 1, sy = last.height ? f.height / last.height : 1;
+      if (!dx && !dy && sx === 1 && sy === 1) return;
+      var animation = spring(e, [
+        { transformOrigin: '0 0', transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')' },
+        { transformOrigin: '0 0', transform: 'none' }
+      ], name || 'smooth', { fill: 'none' });
+      if (animation) {
+        layoutAnimations.set(e, animation);
+        animation.finished.then(function () {
+          if (layoutAnimations.get(e) === animation) layoutAnimations.delete(e);
+        }, function () {});
+      }
+    });
+  }
+
+  /* ---------------------------------------------------------------- View Transition */
+  function swap(fn) {
+    if (document.startViewTransition && !mq.matches) return document.startViewTransition(fn);
+    fn(); return null;
+  }
+
+  /* ---------------------------------------------------------------- 指针光斑 */
+  function spotlight(sel) {
+    if (!matchMedia('(hover: hover)').matches) return;
+    document.querySelectorAll(sel || '.spotlight').forEach(function (el) {
+      el.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect();
+        el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
+  }
+
+  /* ---------------------------------------------------------------- 滚动视差：data-parallax="0.15" */
+  function parallax() {
+    var els = Array.prototype.slice.call(document.querySelectorAll('[data-parallax]'));
+    if (!els.length || mq.matches) return;
+    var ticking = false;
+    function update() {
+      ticking = false;
+      var vh = innerHeight;
+      els.forEach(function (el) {
+        var r = el.getBoundingClientRect();
+        if (r.bottom < -200 || r.top > vh + 200) return;
+        var k = parseFloat(el.getAttribute('data-parallax')) || 0.12;
+        el.style.setProperty('--py', ((r.top + r.height / 2 - vh / 2) * -k).toFixed(1) + 'px');
+      });
+    }
+    addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    addEventListener('resize', update);
+    update();
+  }
+
+  /* ---------------------------------------------------------------- 指针倾斜：data-tilt（可写最大角度，默认 6） */
+  function tilt() {
+    if (mq.matches || !matchMedia('(hover: hover)').matches) return;
+    document.querySelectorAll('[data-tilt]').forEach(function (el) {
+      var max = parseFloat(el.getAttribute('data-tilt')) || 6;
+      var area = el.closest('[data-tilt-area]') || el;
+      area.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect();
+        var x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+        el.style.setProperty('--ry', (x * max * 2).toFixed(2) + 'deg');
+        el.style.setProperty('--rx', (-y * max * 2).toFixed(2) + 'deg');
+      });
+      area.addEventListener('pointerleave', function () { el.style.setProperty('--rx', '0deg'); el.style.setProperty('--ry', '0deg'); });
+    });
+  }
+
+  /* ---------------------------------------------------------------- 滑动的选中块：.seg 与 [role=tablist] 自动获得 */
+  function ink() {
+    document.querySelectorAll('.seg, [role="tablist"]').forEach(function (bar) {
+      if (bar.querySelector(':scope > .tab-ink')) return;
+      var i = document.createElement('i'); i.className = 'tab-ink'; i.setAttribute('aria-hidden', 'true');
+      bar.insertBefore(i, bar.firstChild); bar.classList.add('has-ink');
+      function place() {
+        var on = bar.querySelector(':scope > [aria-selected="true"], :scope > [aria-pressed="true"], :scope > .on');
+        if (!on) { i.style.opacity = '0'; return; }
+        i.style.opacity = '1';
+        i.style.setProperty('--ink-x', on.offsetLeft + 'px');
+        i.style.setProperty('--ink-w', on.offsetWidth + 'px');
+      }
+      place();
+      requestAnimationFrame(function () { i.classList.add('ready'); });
+      new MutationObserver(place).observe(bar, { subtree: true, attributes: true, attributeFilter: ['aria-selected', 'aria-pressed', 'class'] });
+      addEventListener('resize', place);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+    });
+  }
+
+  /* ---------------------------------------------------------------- 标签页：[data-tabs] 里放 role=tablist 和若干 role=tabpanel */
+  function tabs() {
+    document.querySelectorAll('[data-tabs]').forEach(function (box, n) {
+      var list = box.querySelector('[role="tablist"]');
+      if (!list) return;
+      var btns = Array.prototype.slice.call(list.querySelectorAll('[role="tab"]'));
+      var panels = Array.prototype.slice.call(box.querySelectorAll('[role="tabpanel"]'));
+      btns.forEach(function (b, k) {
+        var p = panels[k]; if (!p) return;
+        b.id = b.id || 'tab-' + n + '-' + k; p.id = p.id || 'panel-' + n + '-' + k;
+        b.setAttribute('aria-controls', p.id); p.setAttribute('aria-labelledby', b.id);
+        if (b.tagName !== 'BUTTON') b.setAttribute('tabindex', '0');
+      });
+      function select(k, focus) {
+        btns.forEach(function (b, j) { b.setAttribute('aria-selected', String(j === k)); b.tabIndex = j === k ? 0 : -1; });
+        panels.forEach(function (p, j) {
+          var show = j === k;
+          if (show && p.hidden) { p.hidden = false; spring(p, [{ opacity: 0, translate: '0 10px' }, { opacity: 1, translate: '0 0' }], 'smooth', { fill: 'none' }); reveal(p); }
+          else p.hidden = !show;
+        });
+        if (focus) btns[k].focus();
+      }
+      var start = Math.max(0, btns.findIndex(function (b) { return b.getAttribute('aria-selected') === 'true'; }));
+      select(start);
+      btns.forEach(function (b, k) {
+        b.addEventListener('click', function (e) { e.preventDefault(); select(k); });
+        b.addEventListener('keydown', function (e) {
+          var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+          if (d) { e.preventDefault(); select((k + d + btns.length) % btns.length, true); }
+        });
+      });
+    });
+  }
+
+  /* ---------------------------------------------------------------- 复制按钮：data-copy="#元素id"，不写就复制紧挨着的上一个元素 */
+  function copy() {
+    document.querySelectorAll('[data-copy]').forEach(function (btn) {
+      btn.hidden = false;
+      btn.addEventListener('click', function () {
+        var sel = btn.getAttribute('data-copy');
+        var src = sel ? document.querySelector(sel) : btn.previousElementSibling;
+        var text = src ? (src.value != null && src.tagName !== 'BUTTON' ? src.value : src.innerText).trim() : '';
+        var label = btn.querySelector('span') || btn, old = label.textContent;
+        function done(ok) { label.textContent = ok ? '已复制' : '复制失败，请手动选中'; btn.classList.toggle('done', ok); setTimeout(function () { label.textContent = old; btn.classList.remove('done'); }, 1600); }
+        if (navigator.clipboard && text) navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+        else done(false);
+      });
+    });
+  }
+
+  /* Custom direct manipulation. Native buttons and sliders keep their own input
+     semantics. Attach this helper to a dedicated grip and supply model callbacks. */
+  function drag(handle, callbacks, options) {
+    var threshold = Math.max(0, options && options.threshold != null ? options.threshold : 5);
+    var gesture = null;
+    var suppressClick = false;
+    function sample(event) {
+      return { x: gesture.x, y: gesture.y, startX: gesture.startX, startY: gesture.startY,
+               dx: gesture.x - gesture.startX, dy: gesture.y - gesture.startY, event: event };
+    }
+    function finish(event, commit) {
+      if (!gesture) return;
+      var id = gesture.id, active = gesture.active, point = sample(event);
+      gesture = null;
+      handle.removeAttribute('data-dragging');
+      if (handle.hasPointerCapture(id)) handle.releasePointerCapture(id);
+      if (active) {
+        suppressClick = true;
+        var callback = commit ? callbacks.commit : callbacks.cancel;
+        if (callback) callback(point);
+      }
+    }
+    function down(event) {
+      if (gesture || !event.isPrimary || event.button !== 0) return;
+      suppressClick = false;
+      gesture = { id: event.pointerId, startX: event.clientX, x: event.clientX,
+                  startY: event.clientY, y: event.clientY, active: false };
+      handle.setPointerCapture(event.pointerId);
+    }
+    function move(event) {
+      if (!gesture || gesture.id !== event.pointerId) return;
+      gesture.x = event.clientX;
+      gesture.y = event.clientY;
+      var point = sample(event);
+      if (!gesture.active) {
+        if (Math.hypot(point.dx, point.dy) < threshold) return;
+        gesture.active = true;
+        handle.setAttribute('data-dragging', '');
+        if (callbacks.start) callbacks.start(point);
+      }
+      if (gesture && callbacks.move) callbacks.move(point);
+    }
+    function up(event) {
+      if (!gesture || gesture.id !== event.pointerId) return;
+      if (gesture.active && (event.clientX !== gesture.x || event.clientY !== gesture.y)) move(event);
+      finish(event, true);
+    }
+    function pointerCancel(event) {
+      if (gesture && gesture.id === event.pointerId) finish(event, false);
+    }
+    function lost(event) {
+      if (!handle.hasPointerCapture(event.pointerId)) pointerCancel(event);
+    }
+    function escape(event) {
+      if (gesture && event.key === 'Escape') {
+        event.preventDefault(); event.stopPropagation(); finish(event, false);
+      }
+    }
+    function blur(event) { finish(event, false); }
+    function visibility(event) { if (document.hidden) finish(event, false); }
+    function click(event) {
+      if (!suppressClick || event.detail === 0) return;
+      suppressClick = false;
+      event.preventDefault(); event.stopImmediatePropagation();
+    }
+    handle.addEventListener('pointerdown', down);
+    handle.addEventListener('pointermove', move);
+    handle.addEventListener('pointerup', up);
+    handle.addEventListener('pointercancel', pointerCancel);
+    handle.addEventListener('lostpointercapture', lost);
+    handle.addEventListener('click', click, true);
+    window.addEventListener('keydown', escape, true);
+    window.addEventListener('blur', blur);
+    document.addEventListener('visibilitychange', visibility);
+    function dispose() {
+      finish(null, false);
+      handle.removeEventListener('pointerdown', down);
+      handle.removeEventListener('pointermove', move);
+      handle.removeEventListener('pointerup', up);
+      handle.removeEventListener('pointercancel', pointerCancel);
+      handle.removeEventListener('lostpointercapture', lost);
+      handle.removeEventListener('click', click, true);
+      window.removeEventListener('keydown', escape, true);
+      window.removeEventListener('blur', blur);
+      document.removeEventListener('visibilitychange', visibility);
+    }
+    return { cancel: function () { finish(null, false); }, dispose: dispose };
+  }
+
+  /* A native scroll chapter. The document owns scrolling; CSS owns the artwork.
+     init returns a disposer so routed components can remove their listeners. */
+  var sceneDisposers = new WeakMap();
+  function scene(section) {
+    if (sceneDisposers.has(section)) return sceneDisposers.get(section);
+    if (section.hasAttribute('data-scene-still')) return;
+    var pin = section.querySelector(':scope > [data-scene-pin]');
+    if (!pin || !window.ResizeObserver || !window.IntersectionObserver || !window.matchMedia) return;
+    var eligible = matchMedia('(min-width: 48em) and (min-height: 32em), (min-width: 20em) and (min-height: 40em)');
+    var frame = 0;
+    var active = false;
+    var near = false;
+    var last = '';
+
+    function paint() {
+      frame = 0;
+      if (!active) return;
+      var span = section.offsetHeight - pin.offsetHeight;
+      var value = Math.max(0, Math.min(1, -section.getBoundingClientRect().top / Math.max(1, span))).toFixed(4);
+      if (value === last) return;
+      last = value;
+      section.style.setProperty('--scene-progress', value);
+    }
+    function schedule() {
+      if (!frame && active) frame = requestAnimationFrame(paint);
+    }
+    function listen() {
+      window.removeEventListener('scroll', schedule);
+      if (active && near) window.addEventListener('scroll', schedule, { passive: true });
+    }
+    function layout() {
+      // Zoom, larger text, and landscape phones can make a pinned frame too tall.
+      active = eligible.matches && !mq.matches && pin.scrollHeight <= document.documentElement.clientHeight + 2;
+      section.toggleAttribute('data-scene-active', active);
+      listen();
+      if (active) paint();
+      else {
+        last = '';
+        section.style.removeProperty('--scene-progress');
+      }
+    }
+    var visibility = new IntersectionObserver(function (entries) {
+      near = entries[0].isIntersecting;
+      listen();
+      // Also settle the endpoint after a large jump out of the chapter.
+      schedule();
+    }, { rootMargin: '20% 0px' });
+    var geometry = new ResizeObserver(layout);
+    visibility.observe(section);
+    geometry.observe(pin);
+    window.addEventListener('resize', layout);
+    window.addEventListener('pageshow', layout);
+    eligible.addEventListener('change', layout);
+    mq.addEventListener('change', layout);
+    layout();
+    function dispose() {
+      active = false;
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', layout);
+      window.removeEventListener('pageshow', layout);
+      eligible.removeEventListener('change', layout);
+      mq.removeEventListener('change', layout);
+      visibility.disconnect();
+      geometry.disconnect();
+      cancelAnimationFrame(frame);
+      section.removeAttribute('data-scene-active');
+      section.style.removeProperty('--scene-progress');
+      sceneDisposers.delete(section);
+    }
+    sceneDisposers.set(section, dispose);
+    return dispose;
+  }
+
+  // A native range keeps pointer, touch and keyboard behavior in sync with the
+  // divider. Until the listener is ready, CSS shows an unambiguous 50/50 still.
+  var compareDisposers = new WeakMap();
+  function compare(board) {
+    if (compareDisposers.has(board)) return compareDisposers.get(board);
+    var slider = board.querySelector(':scope > input[type="range"]');
+    if (!slider || !board.querySelector(':scope > [data-compare-before]') ||
+        !board.querySelector(':scope > [data-compare-after]')) return;
+    var previousText = slider.getAttribute('aria-valuetext');
+    function update() {
+      var min = Number(slider.min || 0), max = Number(slider.max || 100);
+      var percent = Math.min(100, Math.max(0, (slider.valueAsNumber - min) * 100 / (max - min || 1)));
+      board.style.setProperty('--split', percent + '%');
+      if (board.dataset.beforeLabel && board.dataset.afterLabel) {
+        slider.setAttribute('aria-valuetext', board.dataset.beforeLabel + ' ' + Math.round(percent) + '% · ' +
+          board.dataset.afterLabel + ' ' + Math.round(100 - percent) + '%');
+      }
+    }
+    update();
+    slider.addEventListener('input', update);
+    window.addEventListener('pageshow', update);
+    board.setAttribute('data-compare-ready', '');
+    function dispose() {
+      slider.removeEventListener('input', update);
+      window.removeEventListener('pageshow', update);
+      board.removeAttribute('data-compare-ready');
+      board.style.removeProperty('--split');
+      if (previousText === null) slider.removeAttribute('aria-valuetext');
+      else slider.setAttribute('aria-valuetext', previousText);
+      compareDisposers.delete(board);
+    }
+    compareDisposers.set(board, dispose);
+    return dispose;
+  }
+
+  function auto() {
+    reveal(); spotlight(); parallax(); tilt(); tabs(); ink(); copy();
+    document.querySelectorAll('[data-scroll-scene]').forEach(scene);
+    document.querySelectorAll('[data-compare]').forEach(compare);
+  }
+
+  window.Motion = { auto: auto, reveal: reveal, split: split, count: count, stopCount: stopCount, spring: spring, flip: flip, drag: drag,
+                    swap: swap, spotlight: spotlight, parallax: parallax, tilt: tilt, tabs: tabs, ink: ink, scene: scene, compare: compare,
+                    get reduced() { return mq.matches; } };
+
+  if (!window.MOTION_MANUAL) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auto);
+    else auto();
+  }
+})();
+
+</script>
+<script>
+(function () {
+  var game = document.getElementById('game');
+  var oil = 72, rescuedBoats = 3, skills = [].slice.call(document.querySelectorAll('.skill')), focusI = 0, pad = false;
+  var oilN = document.getElementById('oilN'), oilFill = document.getElementById('oilFill'), oilTrail = document.getElementById('oilTrail'), oilMeter = document.getElementById('oilMeter');
+  var nameBox = document.getElementById('skillName'), beam = document.getElementById('beam');
+  Motion.count(oilN, { to: oil, duration: 0 });
+
+  function setOil(v) {
+    oil = Math.max(0, Math.min(100, v));
+    oilFill.style.setProperty('--v', oil);
+    oilTrail.style.setProperty('--v', oil);          /* 延迟层在 CSS 里等 320ms 再追 */
+    Motion.count(oilN, { to: oil, duration: 500 });
+    oilMeter.classList.toggle('low', oil < 25);
+    skills.forEach(function (s) { s.classList.toggle('lack', +s.dataset.cost > oil); });
+  }
+
+  function pop(text, cls, el) {                     /* 从世界里的位置飘出来的数字 */
+    var g = game.getBoundingClientRect(), r = el.getBoundingClientRect();
+    var p = document.createElement('span'); p.className = 'pop ' + cls; p.textContent = text;
+    p.style.left = (r.left + r.width / 2 - g.left) + 'px'; p.style.top = (r.top - g.top) + 'px';
+    game.appendChild(p);
+    var a = Motion.spring(p, [{ transform: 'translate(-50%, 0) scale(.6)', opacity: 0 }, { transform: 'translate(-50%, -2cqh) scale(1.15)', opacity: 1, offset: .35 },
+                              { transform: 'translate(-50%, -6cqh) scale(1)', opacity: 0 }], 'gentle', { duration: 900, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    (a ? a.finished : Promise.resolve()).then(function () { p.remove(); }, function () { p.remove(); });
+  }
+
+  function shake() {
+    if (Motion.reduced) return;
+    game.animate([{ translate: '0 0' }, { translate: '.4cqh -.3cqh' }, { translate: '-.35cqh .25cqh' }, { translate: '.2cqh .1cqh' }, { translate: '0 0' }], { duration: 220 });
+  }
+
+  function cooldown(s) {
+    var total = +s.dataset.cd * 1000, t0 = performance.now(), cd = s.querySelector('.cd'), n = s.querySelector('.cdn');
+    s.classList.add('cooling'); s.disabled = false;
+    (function frame(now) {
+      var left = Math.max(0, total - (now - t0));
+      cd.style.setProperty('--p', 360 * left / total);
+      n.textContent = Math.ceil(left / 1000);
+      if (left > 0) requestAnimationFrame(frame);
+      else { s.classList.remove('cooling'); s.classList.remove('ready'); void s.offsetWidth; s.classList.add('ready'); }
+    })(t0);
+  }
+
+  function use(i) {
+    var s = skills[i]; if (!s || s.classList.contains('cooling')) return;
+    var cost = +s.dataset.cost;
+    if (cost > oil) {                                /* 不够：拒绝的反馈——左右晃一下，数字变红 */
+      Motion.spring(s, [{ translate: '-.6cqh 0' }, { translate: '.6cqh 0' }, { translate: '0 0' }], 'snappy', { duration: 260 });
+      pop('灯油不够', 'cost', s); return;
+    }
+    Motion.spring(s, [{ scale: .88 }, { scale: 1 }], 'bouncy');
+    if (s.dataset.gain) { setOil(oil + +s.dataset.gain); pop('+' + s.dataset.gain + ' 灯油', 'gain', document.getElementById('lampDot')); }
+    else { setOil(oil - cost); pop('−' + cost, 'cost', document.getElementById('lampDot')); }
+    if (s.dataset.flare) { beam.classList.add('flare'); shake(); setTimeout(function () { beam.classList.remove('flare'); }, 6000); }
+    if (i === 1) guideBoat();
+    cooldown(s);
+  }
+
+  function guideBoat() {                              /* 雾笛：迷航的船转向，引航进度 +1 */
+    var b = document.getElementById('boat2'); if (!b.classList.contains('lost')) return;
+    b.classList.remove('lost');
+    var pips = document.querySelectorAll('#pips i'); pips[3].className = 'on';
+    Motion.spring(pips[3], [{ scale: 1.8 }, { scale: 1 }], 'bouncy');
+    rescuedBoats += 1;
+    Motion.count(document.getElementById('saved'), { from: rescuedBoats - 1, to: rescuedBoats, duration: 500 });
+    setTimeout(function () { pop('+1 渔船', 'gain big', b); }, 250);
+  }
+
+  function focus(i) {
+    focusI = (i + skills.length) % skills.length;
+    skills.forEach(function (s, k) { s.classList.toggle('focus', k === focusI); });
+    skills[focusI].focus({ preventScroll: true });
+    var s = skills[focusI];
+    nameBox.innerHTML = '<b>' + s.dataset.name + '</b><span>' + s.dataset.desc + (s.dataset.gain ? ' · 补油 ' + s.dataset.gain : ' · 耗油 ' + s.dataset.cost) + '</span>';
+  }
+
+  /* ---------------- 结算：编排好的揭晓，任意键跳过到终态 */
+  var result = document.getElementById('result'), state = 'play', timers = [];
+  function reveal() {
+    /* 结算数字从当前状态算出，与 HUD 一致 */
+    if (state !== 'play') return;
+    var boats = rescuedBoats, v = { boats: boats, oil: Math.round(oil), hull: 86, pay: boats * 250 + Math.round(oil) * 6 };
+    document.querySelectorAll('#ledger .num').forEach(function (n) { n.dataset.to = v[n.dataset.k]; n.textContent = '0'; });
+    state = 'result'; result.classList.add('on'); result.setAttribute('aria-hidden', 'false');
+    var stars = document.querySelectorAll('#stars svg'), rows = document.querySelectorAll('#ledger div');
+    [0, 1].forEach(function (k) { timers.push(setTimeout(function () { stars[k].classList.add('lit'); Motion.spring(stars[k], [{ scale: .4, rotate: '-30deg' }, { scale: 1, rotate: '0deg' }], 'bouncy'); }, 600 + k * 380)); });
+    rows.forEach(function (r, k) { timers.push(setTimeout(function () { r.classList.add('in'); var n = r.querySelector('.num'); delete n.dataset.counted;
+      Motion.count(n, { to: +n.dataset.to, duration: k === 3 ? 1400 : 700 }); }, 1500 + k * 320)); });
+  }
+  function finish() {
+    timers.forEach(clearTimeout); timers = []; state = 'done';
+    document.querySelectorAll('#stars svg').forEach(function (s, k) { if (k < 2) s.classList.add('lit'); });
+    document.querySelectorAll('#ledger div').forEach(function (r) { r.classList.add('in'); var n = r.querySelector('.num'); Motion.count(n, { to: +n.dataset.to, duration: 0 }); });
+  }
+  function close() { state = 'play'; result.classList.remove('on'); result.setAttribute('aria-hidden', 'true'); focus(focusI); }
+
+  /* ---------------- 输入 */
+  document.getElementById('device').addEventListener('click', function () {
+    pad = !pad; this.textContent = pad ? '手柄提示' : '键盘提示';
+    document.querySelectorAll('[data-kb]').forEach(function (g) { g.textContent = pad ? g.dataset.pad : g.dataset.kb; });
+    document.getElementById('prompts').classList.toggle('pad', pad);
+  });
+  skills.forEach(function (s, i) {
+    s.addEventListener('click', function () { focus(i); use(i); });
+    s.addEventListener('mouseenter', function () { focus(i); });
+  });
+  addEventListener('keydown', function (e) {
+    if (e.repeat && !['ArrowRight', 'ArrowLeft'].includes(e.key)) { e.preventDefault(); return; }
+    if (state === 'result') { e.preventDefault(); if (!e.repeat) finish(); return; }
+    if (state === 'done') { e.preventDefault(); if (!e.repeat) close(); return; }
+    if (e.key >= '1' && e.key <= '4') { focus(+e.key - 1); use(+e.key - 1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); focus(focusI + 1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); focus(focusI - 1); }
+    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); use(focusI); }
+    else if (e.key === 'r' || e.key === 'R') reveal();
+  });
+  result.addEventListener('click', function () { state === 'result' ? finish() : close(); });
+  window.__game = { use: use, reveal: reveal, finish: finish, focus: focus, setOil: setOil };
+  focus(0);
+})();
+</script>
+</body>
+</html>

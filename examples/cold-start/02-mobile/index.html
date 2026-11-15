@@ -1,0 +1,1481 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>爪印 · 宠物医院预约</title>
+<meta name="description" content="宠物医院预约小程序首页：下一次去医院、两只毛孩子的免疫本、今天附近医生的排班与快速预约。">
+<script>document.documentElement.classList.add('js');setTimeout(function(){if(!window.Motion)document.documentElement.classList.add('no-motion')},1500);</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   motion.css · 动效基础层
+   --------------------------------------------------------------------------
+   复制到项目里（或内联进 <style>），配合 assets/motion.js 使用。
+   - 弹簧缓动由 scripts/springs.py 从物理参数算出，不是手调的贝塞尔。
+   - 所有入场类在 prefers-reduced-motion 下退化为纯淡入。
+   - 没有 JS 时，所有内容直接可见（入场类只在 html.js 下才生效）；
+     JS 出错时，head 里的计时器在 1.5 秒后加 .no-motion，同样直接可见。
+   ========================================================================== */
+
+:root {
+  /* snappy: k=520 c=38，455ms，过冲 0.8%。按压回弹、开关、小元素进入 */
+  --spring-snappy: linear(0, 0.0312, 0.1015, 0.1984, 0.3055, 0.4131, 0.5109, 0.604, 0.686, 0.7563, 0.8128, 0.8614, 0.9004, 0.9298, 0.9537, 0.9716, 0.9847, 0.9937, 1.0001, 1.0042, 1.0066, 1.0078, 1.0082, 1.0079, 1.0074, 1.0066, 1.0057, 1.0048, 1.004, 1.0033, 1.0026, 1.002, 1.0016, 1.0012, 1.0008, 1.0006, 1.0004, 1.0002, 1.0001, 1.0001, 1);
+  --spring-snappy-dur: 455ms;
+  /* smooth: k=260 c=32，620ms，无过冲。面板、弹窗、卡片、布局变化 */
+  --spring-smooth: linear(0, 0.0275, 0.0921, 0.176, 0.2676, 0.3592, 0.4464, 0.5265, 0.5985, 0.6619, 0.717, 0.7644, 0.8048, 0.8389, 0.8675, 0.8914, 0.9113, 0.9277, 0.9412, 0.9523, 0.9614, 0.969, 0.975, 0.9799, 0.9838, 0.987, 0.9896, 0.9917, 0.9933, 0.9947, 0.9957, 0.9966, 0.9973, 0.9978, 0.9983, 0.9986, 0.9989, 0.9991, 0.9993, 0.9995, 1);
+  --spring-smooth-dur: 620ms;
+  /* bouncy: k=340 c=22，640ms，过冲 9.6%。落位、点赞、完成——有意的愉悦时刻 */
+  --spring-bouncy: linear(0, 0.0399, 0.1381, 0.2702, 0.4162, 0.5615, 0.6955, 0.8119, 0.9073, 0.9811, 1.0343, 1.0691, 1.0885, 1.0956, 1.0936, 1.0853, 1.0733, 1.0595, 1.0455, 1.0323, 1.0207, 1.011, 1.0034, 0.9978, 0.9941, 0.9919, 0.9909, 0.9909, 0.9916, 0.9927, 0.994, 0.9953, 0.9966, 0.9978, 0.9987, 0.9995, 1.0001, 1.0005, 1.0007, 1.0009, 1);
+  --spring-bouncy-dur: 640ms;
+  /* gentle: k=120 c=20，681ms，几乎无过冲。大面积入场、首屏编排 */
+  --spring-gentle: linear(0, 0.016, 0.0563, 0.1128, 0.179, 0.2502, 0.3229, 0.3944, 0.4631, 0.5277, 0.5876, 0.6437, 0.6929, 0.7369, 0.7759, 0.8102, 0.8402, 0.8662, 0.8886, 0.9078, 0.9242, 0.938, 0.9497, 0.9595, 0.9676, 0.9744, 0.9799, 0.9844, 0.9881, 0.9911, 0.9934, 0.9954, 0.9968, 0.9979, 0.9988, 0.9995, 0.9999, 1.0003, 1.0005, 1.0007, 1);
+  --spring-gentle-dur: 681ms;
+
+  /* 弹簧以外的曲线 */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);   /* 颜色、透明度 */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);    /* 快速到位的小位移 */
+  --ease-in-quart: cubic-bezier(0.5, 0, 0.75, 0);    /* 退出 */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);     /* 屏内往返 */
+
+  --stagger: 55ms;   /* 入场交错的步长 */
+}
+
+/* ---------------------------------------------------------------- 入场编排
+   给元素加 data-reveal（可选值 up / fade / scale / left / right / blur / mask），
+   用 style="--i:n" 或 motion.js 的 reveal() 自动编号控制先后。
+   html 没有 .js 类时内容直接可见——不会因为脚本失败而一片空白。 */
+.js [data-reveal] {
+  opacity: 0;
+  transition:
+    opacity 500ms var(--ease-out-quart),
+    transform var(--spring-gentle-dur) var(--spring-gentle),
+    filter 600ms var(--ease-out-quart),
+    clip-path 900ms var(--ease-out-expo);
+  transition-delay: calc(var(--i, 0) * var(--stagger) + var(--delay, 0ms));
+}
+.js [data-reveal=""], .js [data-reveal="up"] { transform: translateY(18px); }
+.js [data-reveal="scale"] { transform: scale(0.94); }
+.js [data-reveal="left"]  { transform: translateX(-24px); }
+.js [data-reveal="right"] { transform: translateX(24px); }
+.js [data-reveal="blur"]  { transform: translateY(8px); filter: blur(8px); }
+.js [data-reveal="mask"]  { opacity: 1; clip-path: inset(0 0 100% 0); transform: translateY(0.25em); }
+.js [data-reveal].is-in   { opacity: 1; transform: none; filter: none; clip-path: inset(0 0 0 0); }
+/* 失败保护：head 里的计时器发现 motion.js 没跑起来时加 .no-motion，一切直接显示 */
+.no-motion [data-reveal], .no-motion [data-split] .line > span, .no-motion .draw {
+  opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important; stroke-dashoffset: 0 !important;
+}
+
+/* 逐行（或逐字）揭开的大标题：<h1 data-split> 由 motion.js 拆成 .line > span */
+.js [data-split] .line { display: block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.js [data-split] .line > span {
+  display: inline-block; transform: translateY(105%);
+  transition: transform 900ms var(--ease-out-expo);
+  transition-delay: calc(var(--i, 0) * 80ms + var(--delay, 0ms));
+}
+.js [data-split].is-in .line > span { transform: none; }
+
+/* ---------------------------------------------------------------- 微交互 */
+
+/* 可按压：所有按钮、可点卡片 */
+.pressable {
+  transition: transform var(--spring-snappy-dur) var(--spring-snappy),
+              background-color 160ms var(--ease-out-quart),
+              box-shadow 240ms var(--ease-out-quart);
+}
+.pressable:active { transform: scale(0.97); transition-duration: 80ms; }
+
+/* 悬浮抬起：可点击的卡片。阴影与位移一起变，像被拿起来 */
+.liftable {
+  transition: transform var(--spring-smooth-dur) var(--spring-smooth),
+              box-shadow 300ms var(--ease-out-quart),
+              border-color 200ms var(--ease-out-quart);
+}
+@media (hover: hover) {
+  .liftable:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift, 0 1px 2px rgb(0 0 0 / .05), 0 12px 28px -8px rgb(0 0 0 / .18)); }
+}
+
+/* 跟随指针的光斑：卡片、按钮的高光。motion.js 的 spotlight() 写入 --mx / --my */
+.spotlight { position: relative; isolation: isolate; }
+.spotlight::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, -20%),
+              color-mix(in srgb, var(--spot, #fff) 16%, transparent), transparent 70%);
+  opacity: 0; transition: opacity 300ms var(--ease-out-quart);
+}
+@media (hover: hover) { .spotlight:hover::before { opacity: 1; } }
+
+/* 下划线从左向右长出 */
+.ink-link { background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+            text-decoration: none; transition: background-size 400ms var(--ease-out-expo); }
+.ink-link:hover { background-size: 100% 1px; }
+
+/* 骨架屏微光 */
+.skeleton {
+  background: linear-gradient(100deg, var(--sk-base, #0000000d) 40%, var(--sk-hi, #00000005) 50%, var(--sk-base, #0000000d) 60%) 0 0 / 200% 100%;
+  animation: shimmer 1.4s linear infinite; border-radius: 6px;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* SVG 线条描绘：给 path 加 class="draw"，motion.js 会写入 --len */
+.js .draw { stroke-dasharray: var(--len, 1000); stroke-dashoffset: var(--len, 1000);
+            transition: stroke-dashoffset 1400ms var(--ease-out-expo); transition-delay: var(--delay, 0ms); }
+.js .draw.is-in, .js .is-in .draw { stroke-dashoffset: 0; }
+
+/* ---------------------------------------------------------------- 浮层：从 display:none 也能过渡 */
+[popover], dialog {
+  transition: opacity 180ms var(--ease-out-quart), transform var(--spring-smooth-dur) var(--spring-smooth),
+              overlay 200ms allow-discrete, display 200ms allow-discrete;
+  opacity: 0; transform: translateY(6px) scale(0.97);
+}
+[popover]:popover-open, dialog[open] {
+  opacity: 1; transform: none;
+  @starting-style { opacity: 0; transform: translateY(6px) scale(0.97); }
+}
+dialog::backdrop { background: rgb(0 0 0 / 0); transition: background-color 240ms, overlay 240ms allow-discrete, display 240ms allow-discrete; }
+dialog[open]::backdrop { background: rgb(10 8 6 / 0.45); @starting-style { background: rgb(0 0 0 / 0); } }
+
+/* ---------------------------------------------------------------- 滚动驱动（渐进增强） */
+@supports (animation-timeline: view()) {
+  /* 进入视口时随滚动淡入——不需要 JS；适合长页里的图与区块 */
+  .scroll-in { animation: scroll-in linear both; animation-timeline: view(); animation-range: entry 0% cover 30%; }
+  @keyframes scroll-in { from { opacity: 0; transform: translateY(32px) scale(0.98); } }
+  /* 阅读进度条 */
+  .scroll-progress { transform-origin: 0 50%; animation: grow-x linear both; animation-timeline: scroll(root); }
+  @keyframes grow-x { from { transform: scaleX(0); } }
+}
+
+/* ---------------------------------------------------------------- View Transitions */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 260ms; }
+::view-transition-group(*) { animation-timing-function: var(--spring-smooth); animation-duration: var(--spring-smooth-dur); }
+
+/* ---------------------------------------------------------------- 减弱动效 */
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal], .js [data-split] .line > span { transform: none !important; filter: none !important; clip-path: none !important; transition: opacity 300ms linear !important; transition-delay: 0ms !important; }
+  .js [data-split] .line > span { opacity: 1; }
+  .pressable:active, .liftable:hover { transform: none; }
+  .skeleton { animation: none; }
+  .js .draw { stroke-dashoffset: 0; transition: none; }
+  *, *::before, *::after { scroll-behavior: auto !important; }
+}
+
+
+/* ==========================================================================
+   爪印 · 首页
+   预设：botanical（柔和、可信、大圆角、暖影），强调色换成免疫证封皮的墨绿 #2E5E4E
+   （scripts/palette.py 生成，按钮与文字档位手调过对比度）。
+   ========================================================================== */
+html { color-scheme: light dark; -webkit-text-size-adjust: 100%; }
+html[data-theme="light"] { color-scheme: light; }
+html[data-theme="dark"]  { color-scheme: dark; }
+
+:root {
+  --font-display: "Young Serif", "Iowan Old Style", Georgia, "Noto Serif SC", "Songti SC", serif;
+  --font-body: "Figtree", -apple-system, "PingFang SC", "HarmonyOS Sans SC", "MiSans", "Noto Sans SC",
+               "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+
+  /* 中性色：暖纸 */
+  --desk:           light-dark(oklch(0.915 0.012 80), oklch(0.125 0.008 80));
+  --bg:             light-dark(oklch(0.972 0.007 80), oklch(0.170 0.010 80));
+  --surface:        light-dark(oklch(0.995 0.003 80), oklch(0.215 0.011 80));
+  --surface-sunken: light-dark(oklch(0.948 0.011 80), oklch(0.185 0.010 80));
+  --border:         light-dark(oklch(0.905 0.011 80), oklch(1 0 0 / 0.08));
+  --border-strong:  light-dark(oklch(0.800 0.016 80), oklch(1 0 0 / 0.22));
+  --text:           light-dark(oklch(0.230 0.015 80), oklch(0.935 0.010 80));
+  --text-muted:     light-dark(oklch(0.430 0.017 80), oklch(0.760 0.014 80));
+  --text-subtle:    light-dark(oklch(0.530 0.015 80), oklch(0.660 0.014 80));
+  --text-faint:     light-dark(oklch(0.720 0.014 80), oklch(0.470 0.014 80));
+
+  /* 强调色：免疫证封皮的墨绿。只给主操作、选中、焦点、"已约" */
+  --accent:         light-dark(oklch(0.500 0.070 170), oklch(0.760 0.060 170));
+  --accent-fg:      light-dark(oklch(0.990 0.005 170), oklch(0.180 0.030 170));
+  --accent-text:    light-dark(oklch(0.470 0.070 170), oklch(0.800 0.055 170));
+  --accent-subtle:  light-dark(oklch(0.945 0.020 170), oklch(0.280 0.030 170));
+
+  /* 提醒色：赭石。只给"逾期"——是提醒不是报警 */
+  --warn:           light-dark(oklch(0.500 0.120 58),  oklch(0.800 0.110 65));
+  --warn-subtle:    light-dark(oklch(0.950 0.035 70),  oklch(0.290 0.040 60));
+
+  /* 免疫证：封皮（舞台）与内页纸 */
+  --cover:          oklch(0.235 0.027 170);
+  --cover-ink:      oklch(0.965 0.012 80);
+  --cover-muted:    oklch(0.790 0.030 170);
+  --cover-line:     oklch(1 0 0 / 0.12);
+  --paper:          light-dark(oklch(0.984 0.012 88), oklch(0.235 0.012 80));
+  --paper-line:     light-dark(oklch(0.900 0.018 85), oklch(1 0 0 / 0.07));
+  --sticker:        light-dark(oklch(0.998 0.002 90), oklch(0.890 0.008 85));
+  --sticker-ink:    oklch(0.320 0.020 80);
+  --band-vax:       oklch(0.560 0.060 170);
+  --band-worm:      oklch(0.760 0.090 80);
+  --stamp:          oklch(0.540 0.170 27);   /* 医院印泥 */
+
+  /* 两只毛孩子 */
+  --fur-cat:   oklch(0.660 0.022 245);
+  --fur-cat-2: oklch(0.560 0.028 245);
+  --fur-dog:   oklch(0.320 0.012 60);
+  --fur-dog-2: oklch(0.250 0.010 60);
+  --pet-bg-cat: light-dark(oklch(0.930 0.012 245), oklch(0.340 0.020 245));
+  --pet-bg-dog: light-dark(oklch(0.900 0.022 75),  oklch(0.560 0.030 75));
+
+  --r-sm: 4px; --r-md: 14px; --r-lg: 24px;
+  --shade: 40 45 30;
+  --hi: light-dark(rgb(255 255 255 / .75), rgb(255 255 255 / .05));
+  --shadow-1: 0 1px 1px rgb(var(--shade) / .05), 0 1px 3px rgb(var(--shade) / .06);
+  --shadow-2: 0 1px 2px rgb(var(--shade) / .06), 0 6px 16px -6px rgb(var(--shade) / .14);
+  --shadow-4: 0 4px 8px rgb(var(--shade) / .06), 0 24px 48px -12px rgb(var(--shade) / .22);
+  --shadow-5: 0 8px 16px rgb(var(--shade) / .10), 0 40px 80px -20px rgb(var(--shade) / .40);
+
+  --fs-xs: .75rem;      /* 12 元数据、标签栏 */
+  --fs-sm: .8125rem;    /* 13 说明 */
+  --fs-md: .9375rem;    /* 15 正文 */
+  --fs-lg: 1.0625rem;   /* 17 名字、重点 */
+  --fs-xl: 1.375rem;    /* 22 区块标题、号源时间 */
+  --fs-hero: 4.75rem;   /* 76 下一次就诊的时间 */
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --shade: 0 0 0; } }
+:root[data-theme="dark"] { --shade: 0 0 0; }
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100dvh; background: var(--desk); color: var(--text);
+  font: 400 var(--fs-md)/1.6 var(--font-body);
+  -webkit-font-smoothing: antialiased; text-autospace: normal;
+}
+button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+h1, h2, h3, p { margin: 0; }
+::selection { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hero :focus-visible { outline-color: var(--cover-ink); }
+.nw { white-space: nowrap; }
+.num { font-variant-numeric: tabular-nums; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ---------------------------------------------------------------- 展台 */
+.desk {
+  min-height: 100dvh; display: grid; align-items: center; gap: 56px; padding: 28px 16px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  background: radial-gradient(60% 70% at 50% 45%, color-mix(in srgb, var(--surface) 55%, transparent), transparent 70%), var(--desk);
+}
+.placard { justify-self: end; width: 248px; color: var(--text-muted); font-size: var(--fs-sm); line-height: 1.7; }
+.placard .mark { display: flex; align-items: center; gap: 8px; color: var(--text); font-size: var(--fs-lg); font-weight: 600; }
+.placard .mark svg { width: 26px; height: 26px; color: var(--accent); }
+.placard h1 { margin: 18px 0 8px; color: var(--text); font-size: var(--fs-xl); font-weight: 600; line-height: 1.35; }
+.placard p + p { margin-top: 8px; }
+.theme { display: inline-flex; margin-top: 20px; padding: 3px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 70%, transparent); box-shadow: inset 0 0 0 1px var(--border); }
+.theme button { border: 0; background: none; padding: 6px 12px; border-radius: 999px; font-size: var(--fs-xs); color: var(--text-muted); min-height: 32px; }
+.theme button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow-1); }
+
+.phone {
+  grid-column: 2; position: relative; width: 414px; height: clamp(660px, calc(100dvh - 56px), 868px);
+  padding: 12px; border-radius: 60px; background: #171512;
+  box-shadow: inset 0 0 0 1.5px #3b372f, inset 0 0 0 3px #0c0b09,
+              0 2px 4px rgb(var(--shade) / .18), 0 18px 30px -18px rgb(var(--shade) / .35), 0 48px 90px -30px rgb(var(--shade) / .5);
+}
+.screen { position: relative; height: 100%; border-radius: 48px; overflow: hidden; background: var(--bg); isolation: isolate; }
+@media (max-width: 920px) {
+  .desk { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .placard { display: none; }
+  .phone { grid-column: 1; }
+}
+@media (max-width: 460px) {
+  .desk { display: block; padding: 0; }
+  .phone { width: 100%; height: 100dvh; padding: 0; border-radius: 0; background: none; box-shadow: none; }
+  .screen { border-radius: 0; }
+  .island { display: none; }
+}
+
+/* ---------------------------------------------------------------- 顶栏：状态栏 + 小程序导航栏（右上胶囊不可遮挡） */
+.top { position: absolute; inset: 0 0 auto; z-index: 20; padding-top: 47px; transition: background-color 240ms var(--ease-out-quart), box-shadow 240ms var(--ease-out-quart); }
+.top.scrolled { background: color-mix(in srgb, var(--bg) 76%, transparent); backdrop-filter: blur(16px) saturate(1.6); -webkit-backdrop-filter: blur(16px) saturate(1.6); box-shadow: 0 1px 0 var(--border); }
+.status { position: absolute; inset: 0 0 auto; height: 47px; display: flex; align-items: center; justify-content: space-between; padding: 6px 30px 0 44px; font: 600 var(--fs-md)/1 var(--font-body); font-variant-numeric: tabular-nums; }
+.status .icons { display: flex; gap: 6px; align-items: center; }
+.status svg { display: block; height: 12px; width: auto; }
+.island { position: absolute; top: 11px; left: 50%; translate: -50% 0; width: 122px; height: 35px; border-radius: 20px; background: #000; }
+.navbar { height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 7px 0 18px; }
+.brand { display: flex; align-items: center; gap: 6px; font-size: var(--fs-lg); font-weight: 600; letter-spacing: .02em; }
+.brand svg { width: 22px; height: 22px; color: var(--accent); }
+.loc { display: inline-flex; align-items: center; gap: 2px; padding: 4px 8px; margin-left: 2px; border: 0; background: none; border-radius: 999px; color: var(--text-muted); font-size: var(--fs-sm); min-height: 32px; }
+.loc svg { width: 12px; height: 12px; }
+.capsule { margin-left: auto; display: flex; align-items: center; width: 87px; height: 32px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 70%, transparent); box-shadow: inset 0 0 0 .5px var(--border-strong); }
+.capsule span { flex: 1; display: grid; place-items: center; height: 100%; }
+.capsule span + span { border-left: .5px solid var(--border-strong); height: 18px; }
+.capsule svg { width: 20px; height: 20px; }
+
+/* ---------------------------------------------------------------- 滚动区 */
+.scroll { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; padding: 91px 0 128px; scrollbar-width: none; }
+.scroll::-webkit-scrollbar { display: none; }
+
+/* ---------------------------------------------------------------- 首屏：免疫证封皮色的舞台，回答"下一次去医院是什么时候" */
+.hero {
+  position: relative; margin: 6px 8px 0; border-radius: var(--r-lg); overflow: hidden; isolation: isolate;
+  color: var(--cover-ink);
+  background:
+    radial-gradient(46% 46% at 84% 70%, oklch(0.44 0.05 170 / .95), transparent 72%),
+    radial-gradient(70% 60% at 0% 0%, oklch(0.31 0.035 170), transparent 70%),
+    var(--cover);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .09), var(--shadow-2);
+}
+.hero::after {   /* 封皮的颗粒 */
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .32; mix-blend-mode: overlay;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.hero-in { position: relative; padding: 20px 20px 18px; }
+.eyebrow { display: flex; align-items: center; gap: 8px; font-size: var(--fs-sm); color: var(--cover-muted); letter-spacing: .04em; }
+.eyebrow .rel { padding: 1px 8px; border-radius: 999px; background: rgb(255 255 255 / .12); color: var(--cover-ink); font-weight: 600; letter-spacing: .02em; }
+.big {
+  margin: 10px 0 2px; font: 400 var(--fs-hero)/.9 var(--font-display); letter-spacing: -.035em;
+  font-variant-numeric: lining-nums proportional-nums;
+}
+.big .colon { display: inline-block; translate: 0 -.06em; margin: 0 -.02em; opacity: .7; }
+.big .date { display: block; margin-bottom: 8px; font: 400 var(--fs-lg)/1.2 var(--font-body); letter-spacing: 0; color: var(--cover-muted); }
+.what { margin-top: 14px; font-size: var(--fs-lg); font-weight: 600; line-height: 1.4; letter-spacing: .01em; }
+.where { display: flex; flex-wrap: wrap; column-gap: .9em; margin-top: 2px; font-size: var(--fs-sm); color: var(--cover-muted); }
+.tip { display: flex; gap: 8px; max-width: 212px; margin-top: 12px; font-size: var(--fs-sm); line-height: 1.6; color: var(--cover-ink); }
+.tip svg { flex: none; width: 15px; height: 15px; margin-top: 3px; color: var(--cover-muted); }
+.acts { display: flex; gap: 8px; margin-top: 16px; }
+.btn-stage, .btn-ghost {
+  display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 14px; border-radius: var(--r-md);
+  border: 0; font-size: var(--fs-md); font-weight: 600; white-space: nowrap;
+}
+.btn-stage { background: var(--cover-ink); color: var(--cover); box-shadow: inset 0 1px 0 rgb(255 255 255 / .7), 0 6px 14px -6px rgb(0 0 0 / .45); }
+.btn-ghost { background: rgb(255 255 255 / .1); color: var(--cover-ink); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .16); }
+.btn-stage svg, .btn-ghost svg { width: 17px; height: 17px; }
+@media (hover: hover) { .btn-ghost:hover { background: rgb(255 255 255 / .16); } }
+
+.peek { position: absolute; right: 8px; bottom: 39px; width: 108px; height: 98px; z-index: 2; pointer-events: none; }
+.peek svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 10px 14px rgb(0 0 0 / .28)); }
+.hero[data-pet="nian"] .pet-dou, .hero[data-pet="dou"] .pet-nian { display: none; }
+.js .peek[data-reveal]:not(.is-in) { transform: translateY(56px); }
+.after {
+  position: relative; display: flex; align-items: center; gap: 10px; width: 100%; height: 48px; padding: 0 20px;
+  border: 0; border-top: 1px solid var(--cover-line); background: rgb(0 0 0 / .14); color: var(--cover-muted);
+  font-size: var(--fs-sm); text-align: left;
+}
+.after b { color: var(--cover-ink); font-weight: 600; }
+.after .t { font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- 区块标题 */
+.sec-h { padding: 32px 20px 14px; }
+.sec-h h2 { font-size: var(--fs-xl); font-weight: 600; line-height: 1.3; letter-spacing: .01em; }
+.sec-h p { margin-top: 4px; font-size: var(--fs-sm); color: var(--text-muted); }
+.sec-h p b { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+.sec-h p .warn { color: var(--warn); }
+
+/* ---------------------------------------------------------------- 免疫本：每只一本，左右翻 */
+.pet-tabs { display: flex; gap: 8px; padding: 0 20px 12px; }
+.pet-tab {
+  display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px 0 4px; border-radius: 999px; border: 0;
+  background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); color: var(--text-muted); font-size: var(--fs-md);
+  transition: background-color 200ms var(--ease-out-quart), color 200ms var(--ease-out-quart), box-shadow 200ms var(--ease-out-quart);
+}
+.pet-tab .ava { width: 32px; height: 32px; }
+.pet-tab[aria-current="true"] { color: var(--text); font-weight: 600; box-shadow: inset 0 0 0 1.5px var(--text); }
+.pet-tab .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); margin-left: -2px; transition: scale 300ms var(--spring-snappy); }
+.pet-tab .dot[hidden] { display: block; scale: 0; }
+
+.pages {
+  position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: calc(100% - 40px); gap: 12px; align-items: start;
+  overflow-x: auto; scroll-snap-type: x mandatory; padding: 2px 20px 14px; scroll-padding-inline: 20px; scrollbar-width: none;
+}
+.pages::-webkit-scrollbar { display: none; }
+.page {
+  position: relative; scroll-snap-align: start; border-radius: var(--r-sm) var(--r-lg) var(--r-lg) var(--r-sm);
+  background: var(--paper); border-left: 9px solid var(--cover);
+  box-shadow: inset 0 1px 0 var(--hi), var(--shadow-2);
+}
+.page::before {   /* 装订线 */
+  content: ""; position: absolute; left: -6px; top: 14px; bottom: 14px; width: 0;
+  border-left: 1.5px dashed oklch(1 0 0 / .32);
+}
+.page-h { display: flex; align-items: center; gap: 10px; padding: 14px 16px 12px 14px; border-bottom: 1.5px solid var(--text); margin: 0 0 0; }
+.page-h .ava { width: 40px; height: 40px; flex: none; }
+.page-h h3 { font-size: var(--fs-lg); font-weight: 600; line-height: 1.3; }
+.page-h p { font-size: var(--fs-xs); color: var(--text-subtle); }
+.page-h .no { margin-left: auto; align-self: start; font: 400 var(--fs-xs)/1.4 var(--font-display); color: var(--text-subtle); letter-spacing: .02em; }
+
+.rec { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name due" "strip act"; align-items: center; gap: 10px 8px; padding: 14px 14px 16px; }
+.rec + .rec { border-top: 1px solid var(--paper-line); }
+.rec .name { grid-area: name; font-size: var(--fs-md); font-weight: 600; line-height: 1.3; }
+.rec .name small { margin-left: 6px; font-size: var(--fs-xs); font-weight: 400; color: var(--text-subtle); }
+.rec .due { grid-area: due; font-size: var(--fs-sm); color: var(--text-muted); text-align: right; white-space: nowrap; }
+.rec[data-state="overdue"] .due { color: var(--warn); font-weight: 600; }
+.rec[data-state="booked"] .due { color: var(--accent-text); font-weight: 600; }
+.rec .strip { grid-area: strip; display: flex; align-items: center; min-height: 46px; padding-left: 2px; }
+.rec .act { grid-area: act; align-self: end; }
+
+.sticker {
+  position: relative; flex: none; width: 58px; height: 40px; border-radius: var(--r-sm); rotate: var(--r, 0deg);
+  background: var(--sticker); color: var(--sticker-ink); padding: 10px 0 0 6px;
+  box-shadow: 0 0 0 .5px rgb(60 50 30 / .2), 0 1px 1.5px rgb(60 50 30 / .2), inset 0 1px 0 rgb(255 255 255 / .8);
+  font: 600 var(--fs-xs)/1 var(--font-body); font-variant-numeric: tabular-nums; letter-spacing: -.01em;
+}
+.sticker::before { content: ""; position: absolute; inset: 0 0 auto; height: 6px; border-radius: var(--r-sm) var(--r-sm) 0 0; background: var(--band, var(--band-vax)); }
+.sticker::after {   /* 批号条码 */
+  content: ""; position: absolute; left: 6px; bottom: 6px; width: 26px; height: 6px; opacity: .5;
+  background: repeating-linear-gradient(90deg, currentColor 0 1px, transparent 1px 2px, currentColor 2px 4px, transparent 4px 5px, currentColor 5px 6px, transparent 6px 8px);
+}
+.sticker.worm { --band: var(--band-worm); }
+.sticker + .sticker { margin-left: -24px; }
+.stamp { position: absolute; right: -9px; bottom: -8px; width: 26px; height: 26px; rotate: var(--sr, -12deg); color: var(--stamp); opacity: .82; mix-blend-mode: multiply; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .stamp { mix-blend-mode: normal; opacity: .9; } }
+:root[data-theme="dark"] .stamp { mix-blend-mode: normal; opacity: .9; }
+.slot {
+  flex: none; display: grid; place-items: center; width: 58px; height: 40px; margin-left: 10px; border-radius: var(--r-sm);
+  border: 1.5px dashed var(--border-strong); color: var(--text-subtle);
+  font: 600 var(--fs-xs)/1 var(--font-body); font-variant-numeric: tabular-nums;
+}
+.strip .slot:first-child { margin-left: 0; }
+.slot.booked { border-color: color-mix(in srgb, var(--accent) 65%, transparent); background: var(--accent-subtle); color: var(--accent-text); }
+.slot.overdue { border-color: var(--warn); background: var(--warn-subtle); color: var(--warn); }
+
+.chip-btn {
+  position: relative; display: inline-flex; align-items: center; gap: 5px; height: 34px; padding: 0 12px; border-radius: 999px; border: 0;
+  background: var(--surface); color: var(--text); font-size: var(--fs-sm); font-weight: 600; white-space: nowrap;
+  box-shadow: inset 0 0 0 1px var(--border-strong), var(--shadow-1);
+}
+.chip-btn::before { content: ""; position: absolute; inset: -5px -2px; }   /* 触控区补到 44px */
+.chip-btn.solid { background: var(--accent); color: var(--accent-fg); box-shadow: inset 0 1px 0 rgb(255 255 255 / .22), 0 4px 10px -4px color-mix(in srgb, var(--accent) 60%, transparent); }
+.chip-btn.quiet { background: none; box-shadow: none; color: var(--text-muted); font-weight: 400; padding: 0 6px; }
+.chip-btn.quiet[aria-pressed="true"] { color: var(--accent-text); }
+.chip-btn svg { width: 15px; height: 15px; }
+@media (hover: hover) { .chip-btn:not(.solid):not(.quiet):hover { background: var(--surface-sunken); } }
+
+.book-foot { padding: 0 20px; font-size: var(--fs-xs); color: var(--text-subtle); }
+
+/* ---------------------------------------------------------------- 今天谁出诊：一把共用的时间尺 */
+.duty-tools { display: flex; align-items: center; justify-content: space-between; padding: 0 20px 10px; }
+.toggle { display: inline-flex; align-items: center; gap: 8px; height: 40px; border: 0; background: none; padding: 0; color: var(--text-muted); font-size: var(--fs-sm); }
+.toggle .sw { position: relative; width: 36px; height: 22px; border-radius: 999px; background: var(--border-strong); transition: background-color 200ms var(--ease-out-quart); }
+.toggle .sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / .2); transition: translate var(--spring-snappy-dur) var(--spring-snappy); }
+.toggle[aria-pressed="true"] .sw { background: var(--accent); }
+.toggle[aria-pressed="true"] .sw::after { translate: 14px 0; }
+.toggle[aria-pressed="true"] { color: var(--text); }
+.legend { display: flex; gap: 12px; font-size: var(--fs-xs); color: var(--text-subtle); }
+.legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-right: 5px; vertical-align: 1px; box-shadow: 0 0 0 2px var(--surface); }
+.legend i.sh { width: 14px; height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--accent) 32%, var(--surface)); box-shadow: none; }
+
+.duty { --pad: 16px; margin: 0 12px; padding: 4px 0 6px; border-radius: var(--r-lg); background: var(--surface); box-shadow: inset 0 1px 0 var(--hi), 0 0 0 1px var(--border), var(--shadow-1); }
+.axis { position: relative; height: 30px; margin: 0 var(--pad); font-size: var(--fs-xs); color: var(--text-subtle); font-variant-numeric: tabular-nums; }
+.axis span { position: absolute; bottom: 6px; left: var(--x); translate: -50% 0; }
+.axis span:first-child { translate: 0 0; }
+.axis .now { bottom: 4px; padding: 1px 6px; border-radius: 999px; background: var(--text); color: var(--bg); font-weight: 600; }
+.hosp-h { display: flex; align-items: baseline; gap: 8px; padding: 14px var(--pad) 4px; border-top: 1px solid var(--border); font-size: var(--fs-sm); color: var(--text-subtle); }
+#duty-list > .hosp-h:first-child { border-top: 0; padding-top: 6px; }
+.hosp-h b { color: var(--text); font-size: var(--fs-md); font-weight: 600; }
+.hosp-h .d { margin-left: auto; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.doc-wrap { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 320ms var(--ease-out-quart), opacity 220ms var(--ease-out-quart); }
+.doc-wrap > * { min-height: 0; overflow: hidden; }
+.doc-wrap.gone { grid-template-rows: 0fr; opacity: 0; }
+.doc {
+  position: relative; display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; grid-template-areas: "ava who meta" "bar bar bar";
+  align-items: center; gap: 10px 12px; width: 100%; padding: 12px var(--pad) 14px; border: 0; background: none; text-align: left;
+  transition: background-color 160ms var(--ease-out-quart);
+}
+.doc:not([aria-disabled="true"]):active { background: var(--surface-sunken); }
+@media (hover: hover) { .doc:not([aria-disabled="true"]):hover { background: color-mix(in srgb, var(--surface-sunken) 60%, transparent); } }
+.doc .ini { grid-area: ava; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--surface-sunken); font-size: var(--fs-md); font-weight: 600; color: var(--text-muted); }
+.doc .who { grid-area: who; min-width: 0; }
+.doc .who b { font-size: var(--fs-lg); font-weight: 600; }
+.doc .who span { display: flex; flex-wrap: wrap; column-gap: .75em; font-size: var(--fs-xs); color: var(--text-subtle); }
+.doc .meta { grid-area: meta; text-align: right; font-size: var(--fs-xs); color: var(--text-subtle); line-height: 1.4; }
+.doc .meta .left { display: block; font-size: var(--fs-sm); color: var(--text); }
+.doc .meta .left b { font: 400 var(--fs-xl)/1 var(--font-display); color: var(--accent-text); margin: 0 2px; font-variant-numeric: tabular-nums; }
+.doc[aria-disabled="true"] { cursor: default; }
+.doc:focus-visible { outline-offset: -3px; border-radius: var(--r-md); }
+.doc[aria-disabled="true"] .meta .left { color: var(--text-subtle); }
+.doc[aria-disabled="true"] .shift { background: var(--border); }
+
+.track { grid-area: bar; position: relative; height: 10px; }
+.track::before { content: ""; position: absolute; inset: 3px 0; border-radius: 999px; background: repeating-linear-gradient(90deg, var(--border) 0 1px, transparent 1px calc(100% / 14)); opacity: .9; }   /* 每小时一格 */
+.shift { position: absolute; top: 1px; bottom: 1px; left: var(--a); width: var(--w); border-radius: var(--r-sm); background: color-mix(in srgb, var(--accent) 32%, var(--surface)); transform-origin: 0 50%; }
+.shift.night { background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 32%, var(--surface)), transparent); }
+.past { position: absolute; inset: -2px auto -2px 0; width: var(--now); background: color-mix(in srgb, var(--surface) 62%, transparent); }
+.nowtick { position: absolute; left: var(--now); top: -4px; bottom: -4px; width: 2px; margin-left: -1px; border-radius: 999px; background: var(--text); }
+.free { position: absolute; top: 50%; left: var(--x); width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--surface); transition: scale 300ms var(--ease-in-quart), opacity 300ms; }
+.free.taken { scale: 0; opacity: 0; }
+.js .duty .shift { scale: 0 1; transition: scale 900ms var(--ease-out-expo); transition-delay: calc(var(--i, 0) * 60ms + 200ms); }
+.js .duty .free { opacity: 0; transition: opacity 300ms var(--ease-out-quart), scale 300ms var(--ease-in-quart); transition-delay: calc(var(--i, 0) * 60ms + 700ms); }
+.js .duty.is-in .shift, .no-motion .duty .shift { scale: 1 1; }
+.js .duty.is-in .free:not(.taken), .no-motion .duty .free:not(.taken) { opacity: 1; }
+.doc.flash { animation: flash 1.8s var(--ease-out-quart); }
+@keyframes flash { 0%, 30% { background: var(--accent-subtle); } 100% { background: transparent; } }
+
+.end { padding: 22px 20px 0; text-align: center; font-size: var(--fs-xs); color: var(--text-faint); }
+
+/* ---------------------------------------------------------------- 标签栏 + 中间的"预约" */
+.tabbar {
+  position: absolute; inset: auto 0 0; z-index: 20; height: 84px; padding-bottom: 30px;
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(16px) saturate(1.6); -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  box-shadow: 0 -1px 0 var(--border);
+}
+.tab { display: grid; justify-items: center; align-content: center; gap: 2px; border: 0; background: none; color: var(--text-subtle); font-size: var(--fs-xs); line-height: 1.2; min-height: 48px; }
+.tab svg { width: 24px; height: 24px; }
+.tab[aria-current="page"] { color: var(--accent-text); font-weight: 600; }
+.tab.book { color: var(--text); font-weight: 600; }
+.fab {
+  display: grid; place-items: center; width: 54px; height: 54px; margin-top: -24px; border-radius: 50%;
+  background: var(--accent); color: var(--accent-fg);
+  box-shadow: 0 0 0 5px var(--bg), inset 0 1px 0 rgb(255 255 255 / .25), 0 12px 20px -6px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.fab svg { width: 26px; height: 26px; }
+.home-ind { position: absolute; left: 50%; bottom: 8px; z-index: 60; width: 134px; height: 5px; border-radius: 999px; background: var(--text); translate: -50% 0; pointer-events: none; }
+
+/* ---------------------------------------------------------------- 底部弹层 */
+.layer { position: absolute; inset: 0; z-index: 40; visibility: hidden; transition: visibility 0s linear 300ms; }
+.layer.open { visibility: visible; transition-delay: 0s; }
+.scrim { position: absolute; inset: 0; background: rgb(18 16 10 / .44); opacity: 0; transition: opacity 240ms var(--ease-out-quart); }
+.layer.open .scrim { opacity: 1; }
+.sheet {
+  position: absolute; inset: auto 0 0; max-height: 90%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none;
+  padding: 8px 16px 40px; border-radius: var(--r-lg) var(--r-lg) 0 0; background: var(--surface);
+  box-shadow: inset 0 1px 0 var(--hi), var(--shadow-5);
+  translate: 0 104%; transition: translate 260ms var(--ease-in-quart);
+}
+.layer.open .sheet { translate: 0 0; transition: translate var(--spring-smooth-dur) var(--spring-smooth); }
+.grab { display: block; width: 36px; height: 5px; margin: 0 auto 10px; border-radius: 999px; background: var(--border-strong); }
+.sheet-h { display: flex; align-items: flex-start; gap: 12px; padding: 4px 4px 4px; }
+.sheet-h h2 { font-size: var(--fs-xl); font-weight: 600; line-height: 1.3; }
+.sheet-h p { font-size: var(--fs-sm); color: var(--text-muted); }
+.x { margin-left: auto; display: grid; place-items: center; width: 44px; height: 44px; margin: -6px -8px 0 auto; border: 0; border-radius: 50%; background: none; color: var(--text-muted); }
+.x svg { width: 20px; height: 20px; }
+fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+legend { padding: 18px 4px 8px; font-size: var(--fs-sm); color: var(--text-subtle); }
+.opts { display: grid; gap: 8px; }
+.opt { position: relative; display: block; }
+.opt input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.opt .card {
+  display: grid; grid-template-columns: 74px minmax(0, 1fr); align-items: center; gap: 2px 12px; padding: 12px 14px; border-radius: var(--r-md);
+  background: var(--surface); box-shadow: inset 0 0 0 1px var(--border-strong);
+  transition: box-shadow 200ms var(--ease-out-quart), background-color 200ms var(--ease-out-quart);
+}
+.opt .t { grid-row: span 2; font: 400 var(--fs-xl)/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.opt .l1 { font-size: var(--fs-md); font-weight: 600; line-height: 1.35; }
+.opt .l2 { font-size: var(--fs-xs); color: var(--text-subtle); }
+.opt input:checked + .card { background: var(--accent-subtle); box-shadow: inset 0 0 0 2px var(--accent); }
+.opt input:checked + .card .t { color: var(--accent-text); }
+.opt input:focus-visible + .card { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { position: relative; }
+.pill input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.pill span {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px;
+  box-shadow: inset 0 0 0 1px var(--border-strong); font-size: var(--fs-md);
+  transition: box-shadow 200ms var(--ease-out-quart), background-color 200ms var(--ease-out-quart);
+}
+.pill .ava { width: 30px; height: 30px; margin-left: -10px; }
+.pill small { font-size: var(--fs-xs); color: var(--text-subtle); }
+.pill input:checked + span { background: var(--accent-subtle); box-shadow: inset 0 0 0 2px var(--accent); font-weight: 600; }
+.pill input:checked + span small { color: var(--accent-text); }
+.pill input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hint { display: flex; gap: 6px; margin: 10px 4px 0; font-size: var(--fs-sm); color: var(--warn); }
+.hint:empty { display: none; }
+.btn-primary {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 52px; margin-top: 22px; border: 0; border-radius: var(--r-md);
+  background: var(--accent); color: var(--accent-fg); font-size: var(--fs-lg); font-weight: 600;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .22), 0 8px 18px -8px color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.btn-primary .num { font-family: var(--font-body); }
+.fine { margin-top: 10px; text-align: center; font-size: var(--fs-xs); color: var(--text-subtle); }
+
+.code-box { display: grid; justify-items: center; gap: 10px; padding: 12px 0 4px; }
+.qr { width: 168px; height: 168px; padding: 10px; border-radius: var(--r-md); background: #fff; box-shadow: 0 0 0 1px var(--border); }
+.qr svg { display: block; width: 100%; height: 100%; }
+.code { font: 400 var(--fs-xl)/1 var(--font-display); letter-spacing: .06em; font-variant-numeric: tabular-nums; }
+.code-box p { font-size: var(--fs-sm); color: var(--text-muted); }
+
+/* ---------------------------------------------------------------- 轻提示 */
+.toast {
+  position: absolute; left: 16px; right: 16px; bottom: 100px; z-index: 50; display: flex; align-items: center; gap: 12px;
+  min-height: 48px; padding: 8px 8px 8px 16px; border-radius: var(--r-md);
+  background: oklch(0.25 0.015 80 / .94); color: oklch(0.96 0.01 80); font-size: var(--fs-sm);
+  box-shadow: var(--shadow-4); opacity: 0; translate: 0 12px; pointer-events: none;
+  transition: opacity 200ms var(--ease-out-quart), translate var(--spring-smooth-dur) var(--spring-smooth);
+}
+.toast.show { opacity: 1; translate: 0 0; pointer-events: auto; }
+.toast button { margin-left: auto; min-height: 36px; padding: 0 12px; border: 0; border-radius: 999px; background: rgb(255 255 255 / .12); color: inherit; font-weight: 600; white-space: nowrap; }
+.toast button[hidden] { display: none; }
+.toast :focus-visible { outline-color: oklch(0.96 0.01 80); }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .duty .shift { transition: none; }
+  .sheet, .layer.open .sheet { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="paw" viewBox="0 0 24 24"><g fill="currentColor"><ellipse cx="12" cy="15.6" rx="5.2" ry="4.4"/><ellipse cx="5.6" cy="10.4" rx="2.1" ry="2.6" transform="rotate(-18 5.6 10.4)"/><ellipse cx="9.4" cy="6.4" rx="2.1" ry="2.7" transform="rotate(-6 9.4 6.4)"/><ellipse cx="14.6" cy="6.4" rx="2.1" ry="2.7" transform="rotate(6 14.6 6.4)"/><ellipse cx="18.4" cy="10.4" rx="2.1" ry="2.6" transform="rotate(18 18.4 10.4)"/></g></symbol>
+    <!-- 医院的章：一圈印泥 + 一只爪印 -->
+    <symbol id="stamp" viewBox="0 0 26 26"><circle cx="13" cy="13" r="11.4" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="13" cy="13" r="9" fill="none" stroke="currentColor" stroke-width=".6" stroke-dasharray="1.2 1.4"/><g transform="translate(7.6 7.4) scale(.45)"><use href="#paw"/></g></symbol>
+    <!-- 年糕：蓝猫，4 个月 -->
+    <symbol id="ava-cat" viewBox="0 0 48 48">
+      <circle cx="24" cy="24" r="24" fill="var(--pet-bg-cat)"/>
+      <path d="M9 22 L11 7 L21 15 Z M39 22 L37 7 L27 15 Z" fill="var(--fur-cat)"/>
+      <path d="M12 17 L13 11 L18 15 Z M36 17 L35 11 L30 15 Z" fill="oklch(0.80 0.05 20)"/>
+      <ellipse cx="24" cy="27" rx="15.5" ry="13.5" fill="var(--fur-cat)"/>
+      <path d="M21 15.5 l.6 4 M24 15 v4.4 M27 15.5 l-.6 4" stroke="var(--fur-cat-2)" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="18.2" cy="26" r="2.6" fill="oklch(0.74 0.13 70)"/><circle cx="29.8" cy="26" r="2.6" fill="oklch(0.74 0.13 70)"/>
+      <circle cx="18.2" cy="26.2" r="1.3" fill="oklch(0.2 0.01 60)"/><circle cx="29.8" cy="26.2" r="1.3" fill="oklch(0.2 0.01 60)"/>
+      <path d="M22.6 30.6 h2.8 l-1.4 1.6 Z" fill="oklch(0.72 0.08 15)"/>
+      <path d="M24 32.2 q-1.2 1.6 -2.6 .6 M24 32.2 q1.2 1.6 2.6 .6" fill="none" stroke="oklch(0.42 0.02 245)" stroke-width=".9" stroke-linecap="round"/>
+    </symbol>
+    <!-- 豆包：黑色拉布拉多，3 岁 -->
+    <symbol id="ava-dog" viewBox="0 0 48 48">
+      <circle cx="24" cy="24" r="24" fill="var(--pet-bg-dog)"/>
+      <ellipse cx="24" cy="25" rx="13.5" ry="14" fill="var(--fur-dog)"/>
+      <path d="M11.5 15 q-5 2 -4.6 11 q.3 4.6 3.6 5.4 q2.6-.6 3-6 Z M36.5 15 q5 2 4.6 11 q-.3 4.6-3.6 5.4 q-2.6-.6-3-6 Z" fill="var(--fur-dog-2)"/>
+      <ellipse cx="24" cy="32" rx="7.4" ry="5.8" fill="oklch(0.40 0.014 60)"/>
+      <ellipse cx="24" cy="29.4" rx="3" ry="2.1" fill="oklch(0.14 0.005 60)"/>
+      <circle cx="18.6" cy="23.4" r="1.8" fill="oklch(0.12 0.005 60)"/><circle cx="29.4" cy="23.4" r="1.8" fill="oklch(0.12 0.005 60)"/>
+      <circle cx="19.1" cy="22.9" r=".6" fill="#fff"/><circle cx="29.9" cy="22.9" r=".6" fill="#fff"/>
+      <path d="M24 31.4 v2 M21.6 34.4 q2.4 1.6 4.8 0" fill="none" stroke="oklch(0.16 0.005 60)" stroke-width=".9" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<main class="desk">
+  <aside class="placard" aria-label="说明">
+    <p class="mark"><svg aria-hidden="true"><use href="#paw"/></svg>爪印</p>
+    <h1>宠物医院预约<br>小程序首页</h1>
+    <p>演示时刻：2026 年 11 月 11 日 周三 10:24，北京望京。</p>
+    <p>家里两只：豆包（黑色拉布拉多，3 岁）、年糕（蓝猫，4 个月，正在打幼猫针）。</p>
+    <p>首页按"该做什么"排：下一次去医院 → 免疫本上到期的针和驱虫 → 今天附近谁出诊、还剩几个号。</p>
+    <div class="theme" role="group" aria-label="外观">
+      <button type="button" data-theme-set="" aria-pressed="true">跟随系统</button>
+      <button type="button" data-theme-set="light" aria-pressed="false">浅色</button>
+      <button type="button" data-theme-set="dark" aria-pressed="false">深色</button>
+    </div>
+  </aside>
+
+  <div class="phone">
+    <div class="screen" id="screen">
+
+      <header class="top" id="top">
+        <div class="status" aria-hidden="true">
+          <span class="num">10:24</span>
+          <span class="icons">
+            <svg viewBox="0 0 18 12"><g fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></g></svg>
+            <svg viewBox="0 0 16 12"><path d="M8 11.5 L5.4 8.6 a3.7 3.7 0 0 1 5.2 0 Z M2.9 6.1 a7.3 7.3 0 0 1 10.2 0 l-1.4 1.5 a5.3 5.3 0 0 0-7.4 0 Z M.4 3.6 a10.9 10.9 0 0 1 15.2 0 L14.2 5 a8.9 8.9 0 0 0-12.4 0 Z" fill="currentColor"/></svg>
+            <svg viewBox="0 0 27 12"><rect x=".5" y=".5" width="23" height="11" rx="3.2" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><path d="M25 4 v4 a2 2 0 0 0 0-4Z" fill="currentColor" opacity=".45"/></svg>
+          </span>
+        </div>
+        <div class="island" aria-hidden="true"></div>
+        <div class="navbar">
+          <span class="brand"><svg aria-hidden="true"><use href="#paw"/></svg>爪印</span>
+          <button class="loc pressable" type="button" aria-label="当前位置：望京，点按切换">望京<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 7.5 9 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <span class="capsule" aria-hidden="true">
+            <span><svg viewBox="0 0 20 20"><g fill="currentColor"><circle cx="4.5" cy="10" r="1.7"/><circle cx="10" cy="10" r="2.2"/><circle cx="15.5" cy="10" r="1.7"/></g></svg></span>
+            <span><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="10" r="2.6" fill="currentColor"/></svg></span>
+          </span>
+        </div>
+      </header>
+
+      <div class="scroll" id="scroll">
+
+        <!-- 首屏：下一次去医院 -->
+        <section class="hero" id="hero" data-pet="nian" data-reveal="scale" style="--delay:40ms" aria-labelledby="hero-label">
+          <div class="hero-in" id="hero-in">
+            <p class="eyebrow" id="hero-label" data-reveal style="--delay:140ms">下一次去医院 <span class="rel">后天</span></p>
+            <p class="big" data-reveal="blur" style="--delay:200ms"><span class="date">11 月 13 日 周五</span>14<span class="colon">:</span>30</p>
+            <h2 class="what" data-reveal style="--delay:300ms">年糕 · 猫三联 第 3 针</h2>
+            <p class="where" data-reveal style="--delay:340ms"><span class="nw">安和动物医院 望京店</span><span class="nw">陈晓 医生</span></p>
+            <p class="tip" data-reveal style="--delay:400ms"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 2.5h9v11h-9z M6 5.5h4 M6 8h4 M6 10.5h2.4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></svg><span>带上免疫证；打针前后 7 天别给它洗澡。</span></p>
+            <div class="acts" data-reveal style="--delay:460ms">
+              <button class="btn-stage pressable" type="button" data-nav><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M15.5 2.5 2.5 8l5.6 1.9L10 15.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>导航 <span class="num">0.8 km</span></button>
+              <button class="btn-ghost pressable" type="button" data-code><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2.5 2.5h5v5h-5z M10.5 2.5h5v5h-5z M2.5 10.5h5v5h-5z M10.5 10.5h2v2h-2z M13.5 13.5h2v2h-2z M13.5 10.5h2 M10.5 15.5h1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>预约码</button>
+            </div>
+          </div>
+
+          <!-- 下一次要去医院的那只，从封皮下面探出头，爪子搭在分隔线上 -->
+          <span class="peek" data-reveal style="--delay:320ms" aria-hidden="true"><svg class="pet-nian" viewBox="0 0 124 112">
+            <path d="M18 54 L23 12 L52 34 Z M106 54 L101 12 L72 34 Z" fill="var(--fur-cat)"/>
+            <path d="M25 44 L27 24 L42 36 Z M99 44 L97 24 L82 36 Z" fill="oklch(0.80 0.05 20)"/>
+            <ellipse cx="62" cy="66" rx="46" ry="40" fill="var(--fur-cat)"/>
+            <ellipse cx="62" cy="54" rx="36" ry="22" fill="oklch(1 0 0 / .06)"/>
+            <path d="M54 30 l1.6 10 M62 28.5 v11 M70 30 l-1.6 10 M20 66 l9 2 M21 76 l8 -1 M104 66 l-9 2 M103 76 l-8 -1" stroke="var(--fur-cat-2)" stroke-width="3.2" stroke-linecap="round"/>
+            <ellipse cx="45" cy="63" rx="8" ry="8.6" fill="oklch(0.76 0.13 70)"/>
+            <ellipse cx="79" cy="63" rx="8" ry="8.6" fill="oklch(0.76 0.13 70)"/>
+            <ellipse cx="43.6" cy="64" rx="4" ry="6.4" fill="oklch(0.18 0.01 60)"/>
+            <ellipse cx="77.6" cy="64" rx="4" ry="6.4" fill="oklch(0.18 0.01 60)"/>
+            <circle cx="42" cy="60.4" r="1.9" fill="#fff"/><circle cx="76" cy="60.4" r="1.9" fill="#fff"/>
+            <path d="M57.6 76 h8.8 l-4.4 4.4 Z" fill="oklch(0.72 0.08 15)" stroke="oklch(0.62 0.08 15)" stroke-width="1" stroke-linejoin="round"/>
+            <path d="M62 80.4 q-3 4.4 -7.4 2 M62 80.4 q3 4.4 7.4 2" fill="none" stroke="oklch(0.40 0.02 245)" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M33 80 l-26 -3 M33 84 l-25 4 M91 80 l26 -3 M91 84 l25 4" stroke="oklch(0.92 0.01 245 / .7)" stroke-width="1" stroke-linecap="round"/>
+            <ellipse cx="40" cy="102" rx="14" ry="9" fill="var(--fur-cat)"/>
+            <ellipse cx="84" cy="102" rx="14" ry="9" fill="var(--fur-cat)"/>
+            <path d="M35 104 v4 M40 105 v4 M45 104 v4 M79 104 v4 M84 105 v4 M89 104 v4" stroke="var(--fur-cat-2)" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <svg class="pet-dou" viewBox="0 0 124 112">
+            <path d="M24 38 q-15 6 -13 34 q2 15 12 15 q9-2 10-19 Z M100 38 q15 6 13 34 q-2 15 -12 15 q-9-2 -10-19 Z" fill="var(--fur-dog-2)"/>
+            <ellipse cx="62" cy="62" rx="40" ry="42" fill="var(--fur-dog)" stroke="oklch(1 0 0 / .14)" stroke-width="1"/>
+            <ellipse cx="62" cy="42" rx="26" ry="13" fill="oklch(1 0 0 / .07)"/>
+            <ellipse cx="62" cy="83" rx="22" ry="16" fill="oklch(0.41 0.014 60)"/>
+            <ellipse cx="62" cy="74" rx="8.5" ry="5.8" fill="oklch(0.14 0.005 60)"/>
+            <ellipse cx="59.6" cy="72.4" rx="2.4" ry="1.3" fill="oklch(1 0 0 / .35)"/>
+            <circle cx="45" cy="59" r="4.8" fill="oklch(0.12 0.005 60)"/><circle cx="79" cy="59" r="4.8" fill="oklch(0.12 0.005 60)"/>
+            <circle cx="46.4" cy="57.4" r="1.6" fill="#fff"/><circle cx="80.4" cy="57.4" r="1.6" fill="#fff"/>
+            <path d="M58.4 89 q3.6 9 7.2 0 Z" fill="oklch(0.70 0.12 15)"/>
+            <path d="M62 79.8 v6 M54 87.6 q8 5 16 0" fill="none" stroke="oklch(0.16 0.005 60)" stroke-width="1.8" stroke-linecap="round"/>
+            <ellipse cx="40" cy="102" rx="15" ry="9" fill="var(--fur-dog)" stroke="oklch(1 0 0 / .14)" stroke-width="1"/>
+            <ellipse cx="84" cy="102" rx="15" ry="9" fill="var(--fur-dog)" stroke="oklch(1 0 0 / .14)" stroke-width="1"/>
+            <path d="M35 104 v4 M40 105 v4 M45 104 v4 M79 104 v4 M84 105 v4 M89 104 v4" stroke="oklch(0.46 0.012 60)" stroke-width="1.6" stroke-linecap="round"/>
+          </svg></span>
+
+          <button class="after" type="button" id="after" data-reveal="fade" style="--delay:560ms">
+            <span>之后</span><b class="t">11.21 周六 10:00</b><span>豆包 洗牙复查</span>
+          </button>
+        </section>
+
+        <!-- 免疫本 -->
+        <section aria-labelledby="book-t">
+          <div class="sec-h" data-reveal style="--delay:520ms">
+            <h2 id="book-t">该打的针，该驱的虫</h2>
+            <p id="book-sum"><b class="warn">1</b> 项逾期 · 30 天内还有 <b>4</b> 项</p>
+          </div>
+          <div class="pet-tabs" data-reveal style="--delay:580ms">
+            <button class="pet-tab pressable" type="button" data-go="page-dou" aria-current="true"><svg class="ava" aria-hidden="true"><use href="#ava-dog"/></svg>豆包<i class="dot" data-dot="dou" role="img" aria-label="有逾期"></i></button>
+            <button class="pet-tab pressable" type="button" data-go="page-nian" aria-current="false"><svg class="ava" aria-hidden="true"><use href="#ava-cat"/></svg>年糕<i class="dot" data-dot="nian" role="img" hidden></i></button>
+          </div>
+
+          <div class="pages" id="pages" data-reveal="right" style="--delay:620ms">
+            <article class="page" id="page-dou" data-pet="dou" aria-labelledby="pn-dou">
+              <header class="page-h">
+                <svg class="ava" aria-hidden="true"><use href="#ava-dog"/></svg>
+                <div><h3 id="pn-dou">豆包</h3><p>拉布拉多 · 3 岁 · <span class="num">31.4</span> kg</p></div>
+                <span class="no">No. 0213</span>
+              </header>
+
+              <div class="rec" data-key="dou-ext" data-pet="dou" data-due="2026-11-09" data-state="overdue">
+                <p class="name">体外驱虫<small>每月 · 在家滴</small></p>
+                <p class="due">逾期 2 天</p>
+                <div class="strip">
+                  <span class="sticker worm" style="--r:-3deg">09.09<svg class="stamp" style="--sr:-14deg" aria-hidden="true"><use href="#stamp"/></svg></span>
+                  <span class="sticker worm" style="--r:2deg">10.09<svg class="stamp" style="--sr:8deg" aria-hidden="true"><use href="#stamp"/></svg></span>
+                  <span class="slot overdue">11.09</span>
+                </div>
+                <div class="act"><button class="chip-btn solid pressable" type="button" data-dosed>已在家用药</button></div>
+              </div>
+
+              <div class="rec" data-key="dou-dhpp" data-pet="dou" data-due="2026-12-02" data-state="soon">
+                <p class="name">犬八联<small>每年 · 到院</small></p>
+                <p class="due">21 天后</p>
+                <div class="strip">
+                  <span class="sticker" style="--r:-2deg">25.12<svg class="stamp" style="--sr:-6deg" aria-hidden="true"><use href="#stamp"/></svg></span>
+                  <span class="slot">12.02</span>
+                </div>
+                <div class="act"><button class="chip-btn pressable" type="button" data-book-item="dou-dhpp">预约</button></div>
+              </div>
+
+              <div class="rec" data-key="dou-int" data-pet="dou" data-due="2026-12-20" data-state="ok">
+                <p class="name">体内驱虫<small>每 3 个月 · 在家喂</small></p>
+                <p class="due">39 天后</p>
+                <div class="strip">
+                  <span class="sticker worm" style="--r:3deg">06.20<svg class="stamp" style="--sr:-18deg" aria-hidden="true"><use href="#stamp"/></svg></span>
+                  <span class="sticker worm" style="--r:-1.5deg">09.20<svg class="stamp" style="--sr:4deg" aria-hidden="true"><use href="#stamp"/></svg></span>
+                  <span class="slot">12.20</span>
+                </div>
+              </div>
+
+              <div class="rec" data-key="dou-rab" data-pet="dou" data-due="2027-05-19" data-state="ok">
+                <p class="name">狂犬疫苗<small>每年 · 到院</small></p>
+                <p class="due">有效期内</p>
+                <div class="strip">
+                  <span class="sticker" style="--r:1.5deg">26.05<svg class="stamp" style="--sr:-10deg" aria-hidden="true"><use href="#stamp"/></svg></span>
+                  <span class="slot">27.05</span>
+                </div>
+              </div>
+            </article>
+
+            <article class="page" id="page-nian" data-pet="nian" aria-labelledby="pn-nian">
+              <header class="page-h">
+                <svg class="ava" aria-hidden="true"><use href="#ava-cat"/></svg>
+                <div><h3 id="pn-nian">年糕</h3><p>蓝猫 · 4 个月 · <span class="num">1.9</span> kg</p></div>
+                <span class="no">No. 0587</span>
+              </header>
+
+              <div class="rec" data-key="nian-fvrcp" data-pet="nian" data-due="2026-11-13" data-state="booked">
+                <p class="name">猫三联<small>幼猫 3 针</small></p>
+                <p class="due">已约 后天</p>
+                <div class="strip">
+                  <span class="sticker" style="--r:-3deg">09.16<svg class="stamp" style="--sr:10deg" aria-hidden="true"><use href="#stamp"/></svg></span>
+                  <span class="sticker" style="--r:2.5deg">10.14<svg class="stamp" style="--sr:-12deg" aria-hidden="true"><use href="#stamp"/></svg></span>
+                  <span class="slot booked">11.13</span>
+                </div>
+              </div>
+
+              <div class="rec" data-key="nian-rab" data-pet="nian" data-due="2026-11-27" data-state="soon">
+                <p class="name">狂犬疫苗<small>首针</small></p>
+                <p class="due">第 3 针后 1–2 周</p>
+                <div class="strip">
+                  <span class="slot">11.27</span>
+                </div>
+                <div class="act"><button class="chip-btn quiet pressable" type="button" data-remind aria-pressed="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.2a3.8 3.8 0 0 0-3.8 3.8v2.6L3 10.8h10l-1.2-2.2V6A3.8 3.8 0 0 0 8 2.2zM6.5 12.6a1.6 1.6 0 0 0 3 0" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>提醒已开</button></div>
+              </div>
+
+              <div class="rec" data-key="nian-worm" data-pet="nian" data-due="2026-11-28" data-state="soon">
+                <p class="name">内外驱虫<small>每月 · 在家滴</small></p>
+                <p class="due">17 天后</p>
+                <div class="strip">
+                  <span class="sticker worm" style="--r:-2deg">09.28<svg class="stamp" style="--sr:14deg" aria-hidden="true"><use href="#stamp"/></svg></span>
+                  <span class="sticker worm" style="--r:3deg">10.28<svg class="stamp" style="--sr:-8deg" aria-hidden="true"><use href="#stamp"/></svg></span>
+                  <span class="slot">11.28</span>
+                </div>
+                <div class="act"><button class="chip-btn quiet pressable" type="button" data-remind aria-pressed="true"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2.2a3.8 3.8 0 0 0-3.8 3.8v2.6L3 10.8h10l-1.2-2.2V6A3.8 3.8 0 0 0 8 2.2zM6.5 12.6a1.6 1.6 0 0 0 3 0" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>提醒已开</button></div>
+              </div>
+            </article>
+          </div>
+          <p class="book-foot">贴纸来自疫苗瓶上的标签，红章是接种医院盖的。到院项目可直接预约，在家用药的点"已在家用药"记一笔。</p>
+        </section>
+
+        <!-- 今天谁出诊 -->
+        <section aria-labelledby="duty-t">
+          <div class="sec-h" data-reveal>
+            <h2 id="duty-t">今天谁出诊</h2>
+            <p>望京 3 km 内 3 家 · 还能约 <b id="left-total">10</b> 个号</p>
+          </div>
+          <div class="duty-tools" data-reveal>
+            <button class="toggle" type="button" id="only-open" aria-pressed="false"><span class="sw" aria-hidden="true"></span>只看还有号的</button>
+            <span class="legend" aria-hidden="true"><span><i class="sh"></i>在班</span><span><i></i>空号</span></span>
+          </div>
+
+          <div class="duty" id="duty" data-reveal style="--now:17.14%">
+            <div class="axis" aria-hidden="true">
+              <span style="--x:0%">8 点</span><span style="--x:28.57%">12</span><span style="--x:57.14%">16</span><span style="--x:85.71%">20</span>
+              <span class="now" style="--x:17.14%">10:24</span>
+            </div>
+            <div id="duty-list"></div>
+          </div>
+          <p class="end">号源每 5 分钟同步一次 · 上次 10:21</p>
+        </section>
+      </div>
+
+      <nav class="tabbar" aria-label="主导航">
+        <button class="tab" type="button" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z" fill="currentColor" opacity=".16"/><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>首页</button>
+        <button class="tab" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V8.5L12 5l8 3.5V20M2.5 20h19M12 9.5v5M9.5 12h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>医院</button>
+        <button class="tab book pressable" type="button" id="fab"><span class="fab"><svg viewBox="0 0 26 26" aria-hidden="true"><rect x="4" y="5.5" width="18" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 10.5h18M9 3.5v4M17 3.5v4M13 13.5v5M10.5 16h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>预约</button>
+        <button class="tab" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h11a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6z M6 3.5v17 M9.5 8h5 M9.5 11h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><path d="M4 3.5h2v17H4z" fill="currentColor" opacity=".25"/></svg>免疫本</button>
+        <button class="tab" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>我的</button>
+      </nav>
+      <span class="home-ind" aria-hidden="true"></span>
+
+      <!-- 快速预约弹层 -->
+      <div class="layer" id="book-layer" inert>
+        <div class="scrim" data-close></div>
+        <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-t">
+          <span class="grab" aria-hidden="true"></span>
+          <div class="sheet-h">
+            <div><h2 id="sheet-t">快速预约</h2><p id="sheet-sub">今天 11 月 11 日 周三</p></div>
+            <button class="x" type="button" data-close aria-label="关闭"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          </div>
+          <fieldset><legend id="slot-legend">选一个号</legend><div class="opts" id="slot-opts"></div></fieldset>
+          <fieldset><legend>带谁去</legend><div class="row-opts" id="pet-opts">
+            <label class="pill"><input type="radio" name="pet" value="dou"><span><svg class="ava" aria-hidden="true"><use href="#ava-dog"/></svg>豆包</span></label>
+            <label class="pill"><input type="radio" name="pet" value="nian"><span><svg class="ava" aria-hidden="true"><use href="#ava-cat"/></svg>年糕</span></label>
+          </div></fieldset>
+          <fieldset><legend>看什么</legend><div class="row-opts" id="item-opts"></div><p class="hint" id="hint" role="status"></p></fieldset>
+          <button class="btn-primary pressable" type="button" id="confirm">确认预约</button>
+          <p class="fine">就诊前 2 小时可以免费取消</p>
+        </div>
+      </div>
+
+      <!-- 预约码弹层 -->
+      <div class="layer" id="code-layer" inert>
+        <div class="scrim" data-close></div>
+        <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="code-t">
+          <span class="grab" aria-hidden="true"></span>
+          <div class="sheet-h">
+            <div><h2 id="code-t">到前台出示</h2><p id="code-sub"></p></div>
+            <button class="x" type="button" data-close aria-label="关闭"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5 5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          </div>
+          <div class="code-box">
+            <div class="qr"><svg id="qr" viewBox="0 0 25 25" shape-rendering="crispEdges" aria-hidden="true"></svg></div>
+            <p class="code" id="code"></p>
+            <p>扫码或报这串号，前台会把它挂到医生的队列里。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast" id="toast" role="status" aria-live="polite"><span id="toast-msg"></span><button type="button" id="toast-act" hidden>撤销</button></div>
+    </div>
+  </div>
+</main>
+
+<script>
+/* ==========================================================================
+   motion.js · 无依赖的小型动效运行库（约 4KB 压缩前）
+   --------------------------------------------------------------------------
+   配合 assets/motion.css。用法：
+
+   <head> 里尽早放这一行（避免内容先闪一下再被藏起来；1.5 秒内本库没跑起来就全部直接显示）：
+     document.documentElement.classList.add('js');
+     setTimeout(function(){ if(!window.Motion) document.documentElement.classList.add('no-motion') }, 1500);
+   <body> 末尾内联本文件。注意：本文件和它的注释里都不能出现字面的 script 结束标签。默认在 DOMContentLoaded 时自动执行 Motion.auto()；
+          若要手动控制，在本文件之前设 window.MOTION_MANUAL = true。
+
+   Motion.auto()                 一次装好下面所有能力
+   Motion.reveal(root?)          [data-reveal] [data-split] .draw 进入视口时加 .is-in；
+                                 同一个 [data-stagger] 容器里的子项自动编号 --i
+   Motion.split(el)              把标题按 <br> 拆成行（data-split），或 data-split="words" 按词
+   Motion.count(el, opts?)       数字滚动到目标值：<span data-count="4113.6" data-decimals="2">
+   Motion.spring(el, kf, name?)  用弹簧缓动跑 WAAPI 动画，name = snappy|smooth|bouncy|gentle
+   Motion.flip(els, mutate, name?) 布局变化动画（FLIP）：先记位置→改 DOM→从旧位置弹到新位置
+   Motion.swap(fn)               用 View Transition 包住一次 DOM 更新，不支持时直接执行
+   Motion.spotlight(sel?)        .spotlight 元素跟随指针写入 --mx / --my
+   Motion.reduced                是否开启了"减弱动态效果"
+
+   所有函数在减弱动效时退化为直接到终态（或只做透明度）。
+   ========================================================================== */
+(function () {
+  'use strict';
+  var root = document.documentElement;
+  root.classList.add('js');
+  var mq = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+
+  function css(name, fallback) {
+    var v = getComputedStyle(root).getPropertyValue(name).trim();
+    return v || fallback;
+  }
+  function springOf(name) {
+    name = name || 'smooth';
+    return {
+      easing: css('--spring-' + name, 'cubic-bezier(0.2, 0.8, 0.2, 1)'),
+      duration: parseFloat(css('--spring-' + name + '-dur', '600')) || 600
+    };
+  }
+
+  /* ---------------------------------------------------------------- 拆行 */
+  function split(el) {
+    if (!el || el.dataset.splitDone) return;
+    el.dataset.splitDone = '1';
+    var mode = el.getAttribute('data-split');
+    var label = el.textContent.replace(/\s+/g, ' ').trim();
+    if (!el.getAttribute('aria-label')) el.setAttribute('aria-label', label);
+    var parts;
+    if (mode === 'words') {
+      // 中文按字、西文按词（有 Intl.Segmenter 时用它）
+      var text = el.textContent;
+      if (window.Intl && Intl.Segmenter) {
+        parts = Array.from(new Intl.Segmenter(undefined, { granularity: 'word' }).segment(text), function (s) { return s.segment; });
+      } else {
+        parts = text.split(/(\s+)/);
+      }
+      el.innerHTML = '';
+      var n = 0;
+      parts.forEach(function (p) {
+        if (/^\s+$/.test(p)) { el.appendChild(document.createTextNode(p)); return; }
+        var line = document.createElement('span'); line.className = 'line'; line.style.display = 'inline-block';
+        var inner = document.createElement('span'); inner.textContent = p; inner.style.setProperty('--i', n++);
+        line.appendChild(inner); el.appendChild(line);
+      });
+    } else {
+      var html = el.innerHTML.split(/<br\s*\/?>/i);
+      el.innerHTML = html.map(function (h, i) {
+        return '<span class="line" aria-hidden="true"><span style="--i:' + i + '">' + h.trim() + '</span></span>';
+      }).join('');
+    }
+  }
+
+  /* ---------------------------------------------------------------- 进入视口 */
+  var io = null;
+  function onEnter(entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var t = e.target;
+      t.classList.add('is-in');
+      if (t.hasAttribute('data-count')) count(t);
+      t.querySelectorAll && t.querySelectorAll('[data-count]').forEach(function (c) { count(c); });
+      io.unobserve(t);
+    });
+  }
+  function reveal(scope) {
+    scope = scope || document;
+    scope.querySelectorAll('[data-split]').forEach(split);
+    scope.querySelectorAll('[data-stagger]').forEach(function (box) {
+      var kids = box.querySelectorAll(':scope > [data-reveal], :scope > * > [data-reveal]');
+      kids.forEach(function (k, i) { if (!k.style.getPropertyValue('--i')) k.style.setProperty('--i', i); });
+    });
+    scope.querySelectorAll('.draw').forEach(function (p) {
+      if (p.getTotalLength) { try { p.style.setProperty('--len', Math.ceil(p.getTotalLength()) + 1); } catch (e) {} }
+    });
+    var targets = scope.querySelectorAll('[data-reveal], [data-split], [data-count], .draw, [data-observe]');
+    if (!('IntersectionObserver' in window)) { targets.forEach(function (t) { t.classList.add('is-in'); }); return; }
+    // 阈值用 0 + 底部收进 6%：元素上沿一进入可视区下方 94% 就开始入场。
+    // 不用比例阈值——高的卡片要露出 12% 才触发，会在首屏留下一块空白。
+    io = io || new IntersectionObserver(onEnter, { rootMargin: '0px 0px -6% 0px', threshold: 0 });
+    targets.forEach(function (t) { io.observe(t); });
+  }
+
+  /* ---------------------------------------------------------------- 数字滚动 */
+  function count(el, opts) {
+    if (el.dataset.counted) return;
+    el.dataset.counted = '1';
+    opts = opts || {};
+    var to = parseFloat(opts.to != null ? opts.to : el.dataset.count);
+    var from = parseFloat(opts.from != null ? opts.from : (el.dataset.from || 0));
+    var dec = opts.decimals != null ? opts.decimals : parseInt(el.dataset.decimals || '0', 10);
+    var dur = opts.duration || parseInt(el.dataset.duration || '1100', 10);
+    var fmt = new Intl.NumberFormat(opts.locale || undefined, { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    if (isNaN(to)) return;
+    el.style.fontVariantNumeric = 'tabular-nums';
+    if (mq.matches) { el.textContent = fmt.format(to); return; }
+    var t0 = performance.now();
+    (function frame(now) {
+      var p = Math.min(1, (now - t0) / dur);
+      var k = 1 - Math.pow(1 - p, 4);            // ease-out-quart：前快后慢，最后几位数字慢慢停稳
+      el.textContent = fmt.format(from + (to - from) * k);
+      if (p < 1) requestAnimationFrame(frame);
+    })(t0);
+  }
+
+  /* ---------------------------------------------------------------- 弹簧动画 */
+  function spring(el, keyframes, name, extra) {
+    if (!el || !el.animate) return null;
+    var s = springOf(name);
+    if (mq.matches) {
+      var last = Array.isArray(keyframes) ? keyframes[keyframes.length - 1] : keyframes;
+      return el.animate([last, last], { duration: 1, fill: 'forwards' });
+    }
+    var o = { duration: s.duration, easing: s.easing, fill: 'both' };
+    for (var k in extra || {}) o[k] = extra[k];
+    return el.animate(keyframes, o);
+  }
+
+  /* ---------------------------------------------------------------- FLIP 布局动画 */
+  function flip(els, mutate, name) {
+    els = Array.prototype.slice.call(els);
+    var first = els.map(function (e) { return e.getBoundingClientRect(); });
+    mutate();
+    if (mq.matches) return;
+    els.forEach(function (e, i) {
+      var last = e.getBoundingClientRect(), f = first[i];
+      var dx = f.left - last.left, dy = f.top - last.top;
+      var sx = last.width ? f.width / last.width : 1, sy = last.height ? f.height / last.height : 1;
+      if (!dx && !dy && sx === 1 && sy === 1) return;
+      spring(e, [
+        { transformOrigin: '0 0', transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')' },
+        { transformOrigin: '0 0', transform: 'none' }
+      ], name || 'smooth', { fill: 'none' });
+    });
+  }
+
+  /* ---------------------------------------------------------------- View Transition */
+  function swap(fn) {
+    if (document.startViewTransition && !mq.matches) return document.startViewTransition(fn);
+    fn(); return null;
+  }
+
+  /* ---------------------------------------------------------------- 指针光斑 */
+  function spotlight(sel) {
+    if (!matchMedia('(hover: hover)').matches) return;
+    document.querySelectorAll(sel || '.spotlight').forEach(function (el) {
+      el.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect();
+        el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
+  }
+
+  function auto() { reveal(); spotlight(); }
+
+  window.Motion = { auto: auto, reveal: reveal, split: split, count: count, spring: spring, flip: flip,
+                    swap: swap, spotlight: spotlight, get reduced() { return mq.matches; } };
+
+  if (!window.MOTION_MANUAL) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auto);
+    else auto();
+  }
+})();
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  /* ---------------------------------------------------------------- 数据：2026-11-11 周三 10:24，望京 */
+  var TODAY = '2026-11-11';
+  var NOW = '10:24';
+  var WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  var PETS = {
+    dou:  { name: '豆包', species: 'dog' },
+    nian: { name: '年糕', species: 'cat' }
+  };
+  var HOSP = {
+    ah: { name: '安和动物医院', branch: '望京店', dist: '0.8 km', hours: '09:00–21:00' },
+    xl: { name: '小鹿宠物医院', branch: '酒仙桥店', dist: '1.6 km', hours: '09:30–18:30' },
+    by: { name: '北苑动物医疗中心', branch: '', dist: '2.9 km', hours: '24 小时' }
+  };
+  // shifts：[开始, 结束]（小时，可跨午夜）；slots：今天还空着的号
+  var DOCS = [
+    { id: 'chen', name: '陈晓', spec: '猫科', years: 11, hosp: 'ah', species: 'cat', shifts: [[9, 17]], slots: ['14:00', '15:30'] },
+    { id: 'wang', name: '王一舟', spec: '犬内科', years: 7, hosp: 'ah', species: 'dog', shifts: [[13, 21]], slots: ['13:30', '16:00', '18:30', '19:00'] },
+    { id: 'zhou', name: '周南', spec: '皮肤科', years: 9, hosp: 'xl', shifts: [[9.5, 12], [14, 18]], slots: [], full: '明早 09:30 放号' },
+    { id: 'li',   name: '李沐', spec: '牙科', years: 6, hosp: 'xl', shifts: [[10, 18]], slots: ['16:30'] },
+    { id: 'zhao', name: '赵启明', spec: '急诊', years: 14, hosp: 'by', shifts: [[8, 20]], slots: ['11:00', '11:40', '17:20'] },
+    { id: 'sun',  name: '孙蔓', spec: '急诊夜班', years: 8, hosp: 'by', shifts: [[20, 32]], slots: [], walkin: true }
+  ];
+  var APPTS = [
+    { d: '2026-11-13', t: '14:30', pet: 'nian', item: '猫三联 第 3 针', doc: 'chen', key: 'nian-fvrcp', tip: 'vax', code: 'AH 1113 0427' },
+    { d: '2026-11-21', t: '10:00', pet: 'dou', item: '洗牙复查', doc: 'li', tip: 'recheck', code: 'XL 1121 0118' }
+  ];
+  var TIPS = {
+    vax: '带上免疫证；打针前后 7 天别给它洗澡。',
+    recheck: '带上上次的洗牙记录，复查不用禁食。',
+    exam: '体检前 8 小时禁食，可以带一份新鲜便便样本。',
+    sick: '带上免疫证，记下症状是从什么时候开始的。',
+    skin: '来之前 3 天别洗澡，医生要看皮屑原样。',
+    neuter: '咨询不用禁食；术前检查会另约一次。'
+  };
+  var ITEMS = {
+    dou:  [{ label: '犬八联 年度加强', note: '12.02 到期', key: 'dou-dhpp', tip: 'vax' }, { label: '看病', tip: 'sick' }, { label: '体检', tip: 'exam' }, { label: '皮肤问题', tip: 'skin' }],
+    nian: [{ label: '看病', tip: 'sick' }, { label: '体检', tip: 'exam' }, { label: '绝育咨询', note: '5–6 月龄', tip: 'neuter' }]
+  };
+
+  function docById(id) { for (var i = 0; i < DOCS.length; i++) if (DOCS[i].id === id) return DOCS[i]; }
+  function toMin(t) { var p = t.split(':'); return +p[0] * 60 + +p[1]; }
+  function pct(h) { return Math.max(0, Math.min(100, (h - 8) / 14 * 100)).toFixed(2) + '%'; }
+  function dayDiff(d) { return Math.round((new Date(d + 'T00:00') - new Date(TODAY + 'T00:00')) / 864e5); }
+  function rel(d) { var n = dayDiff(d); return n === 0 ? '今天' : n === 1 ? '明天' : n === 2 ? '后天' : n + ' 天后'; }
+  function md(d) { var x = new Date(d + 'T00:00'); return (x.getMonth() + 1) + ' 月 ' + x.getDate() + ' 日 ' + WEEK[x.getDay()]; }
+  function short(d) { var x = new Date(d + 'T00:00'); return (x.getMonth() + 1) + '.' + String(x.getDate()).padStart(2, '0') + ' ' + WEEK[x.getDay()]; }
+  function hospName(h) { return HOSP[h].name + (HOSP[h].branch ? ' ' + HOSP[h].branch : ''); }
+  function sortAppts() { APPTS.sort(function (a, b) { return (a.d + a.t) < (b.d + b.t) ? -1 : 1; }); }
+
+  /* ---------------------------------------------------------------- 排班表 */
+  function renderDuty() {
+    var html = '', last = null, i = 0;
+    DOCS.forEach(function (doc) {
+      if (doc.hosp !== last) {
+        var H = HOSP[doc.hosp];
+        html += '<p class="hosp-h"><b>' + H.name + '</b>' + (H.branch ? '<span>' + H.branch + '</span>' : '') +
+                '<span class="d">' + H.dist + ' · ' + H.hours + '</span></p>';
+        last = doc.hosp;
+      }
+      var open = doc.slots.length > 0;
+      var meta = open
+        ? '<span class="left">余<b>' + doc.slots.length + '</b>号</span>最早 ' + doc.slots[0]
+        : doc.walkin ? '<span class="left">到院即诊</span>20:00 接班' : '<span class="left">今天约满</span>' + doc.full;
+      var bars = doc.shifts.map(function (s) {
+        var a = (s[0] - 8) / 14 * 100, w = (Math.min(s[1], 22) - s[0]) / 14 * 100;
+        return '<span class="shift' + (s[1] > 22 ? ' night' : '') + '" style="--a:' + a.toFixed(2) + '%;--w:' + w.toFixed(2) + '%"></span>';
+      }).join('');
+      var dots = doc.slots.map(function (t) { return '<i class="free" data-t="' + t + '" style="--x:' + pct(toMin(t) / 60) + '"></i>'; }).join('');
+      var label = doc.name + '，' + doc.spec + '，' + hospName(doc.hosp) + '，' +
+        (open ? '今天还剩 ' + doc.slots.length + ' 个号，最早 ' + doc.slots[0] : (doc.walkin ? '夜班急诊，到院即诊，不需预约' : '今天约满'));
+      html += '<div class="doc-wrap" data-open="' + (open ? 1 : 0) + '"><div>' +
+        '<button class="doc" type="button" data-doc="' + doc.id + '" style="--i:' + (i++) + '"' + (open ? '' : ' aria-disabled="true"') + ' aria-label="' + label + '">' +
+          '<span class="ini" aria-hidden="true">' + doc.name.charAt(0) + '</span>' +
+          '<span class="who" aria-hidden="true"><b>' + doc.name + '</b><span><span>' + doc.spec + '</span><span>从业 ' + doc.years + ' 年</span></span></span>' +
+          '<span class="meta" aria-hidden="true">' + meta + '</span>' +
+          '<span class="track" aria-hidden="true">' + bars + '<span class="past"></span>' + dots + '<span class="nowtick"></span></span>' +
+        '</button></div></div>';
+    });
+    $('#duty-list').innerHTML = html;
+  }
+  function totalLeft() { return DOCS.reduce(function (s, d) { return s + d.slots.length; }, 0); }
+
+  /* ---------------------------------------------------------------- 首屏 */
+  var CAL = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 2.5h9v11h-9z M6 5.5h4 M6 8h4 M6 10.5h2.4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+  function renderHero() {
+    sortAppts();
+    var a = APPTS[0], doc = docById(a.doc), p = a.t.split(':'), hero = $('#hero');
+    if (hero.dataset.pet !== a.pet) {
+      hero.dataset.pet = a.pet;
+      Motion.spring($('.pet-' + a.pet), [{ transform: 'translateY(60px)' }, { transform: 'none' }], 'bouncy', { delay: 120 });
+    }
+    $('#hero-in').innerHTML =
+      '<p class="eyebrow" id="hero-label">下一次去医院 <span class="rel">' + rel(a.d) + '</span></p>' +
+      '<p class="big"><span class="date">' + md(a.d) + '</span>' + p[0] + '<span class="colon">:</span>' + p[1] + '</p>' +
+      '<h2 class="what">' + PETS[a.pet].name + ' · ' + a.item + '</h2>' +
+      '<p class="where"><span class="nw">' + hospName(doc.hosp) + '</span><span class="nw">' + doc.name + ' 医生</span></p>' +
+      '<p class="tip">' + CAL + '<span>' + TIPS[a.tip] + '</span></p>' +
+      '<div class="acts">' + $('.acts').innerHTML.replace(/[\d.]+ km/, HOSP[doc.hosp].dist) + '</div>';
+    var b = APPTS[1];
+    $('#after').innerHTML = b
+      ? '<span>之后</span><b class="t">' + short(b.d) + ' ' + b.t + '</b><span>' + PETS[b.pet].name + ' ' + b.item + '</span>' 
+      : '<span>之后没有别的预约</span>';
+  }
+
+  /* ---------------------------------------------------------------- 免疫本汇总 */
+  function updateSummary() {
+    var over = 0, soon = 0, perPet = { dou: 0, nian: 0 };
+    $$('.rec').forEach(function (r) {
+      var n = dayDiff(r.dataset.due);
+      if (r.dataset.state === 'overdue') { over++; perPet[r.dataset.pet]++; }
+      else if (n >= 0 && n <= 30) soon++;
+    });
+    $('#book-sum').innerHTML = (over ? '<b class="warn">' + over + '</b> 项逾期 · ' : '没有逾期 · ') + '30 天内还有 <b>' + soon + '</b> 项';
+    Object.keys(perPet).forEach(function (k) {
+      var dot = $('[data-dot="' + k + '"]');
+      dot.hidden = !perPet[k];
+      if (perPet[k]) dot.setAttribute('aria-label', '有逾期'); else dot.removeAttribute('aria-label');
+    });
+  }
+
+  /* ---------------------------------------------------------------- 轻提示 */
+  var toastTimer, toastUndo;
+  function toast(msg, undo) {
+    var el = $('#toast'), btn = $('#toast-act');
+    $('#toast-msg').textContent = msg;
+    toastUndo = undo || null; btn.hidden = !undo;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('show'); toastUndo = null; }, undo ? 5000 : 2600);
+  }
+  $('#toast-act').addEventListener('click', function () {
+    if (toastUndo) toastUndo();
+    toastUndo = null; $('#toast').classList.remove('show');
+  });
+
+  /* ---------------------------------------------------------------- 弹层 */
+  var opener = null, openLayer = null;
+  var bg = function () { return [$('#scroll'), $('.tabbar'), $('#top')]; };
+  function open(layer) {
+    opener = document.activeElement; openLayer = layer;
+    layer.inert = false; layer.classList.add('open');
+    bg().forEach(function (el) { el.inert = true; });
+    setTimeout(function () { var f = layer.querySelector('input:checked') || layer.querySelector('.x'); f && f.focus({ preventScroll: true }); }, 60);
+  }
+  function close() {
+    if (!openLayer) return;
+    var layer = openLayer; openLayer = null;
+    layer.classList.remove('open'); layer.inert = true;
+    bg().forEach(function (el) { el.inert = false; });
+    if (opener && opener.isConnected) opener.focus({ preventScroll: true });
+  }
+  $$('[data-close]').forEach(function (b) { b.addEventListener('click', close); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+
+  /* ---------------------------------------------------------------- 快速预约 */
+  var ctx = {};
+  function earliestPerDoc(species) {
+    var nowM = toMin(NOW);
+    return DOCS.filter(function (d) { return d.slots.length && (!species || !d.species || d.species === species); })
+      .map(function (d) { var t = d.slots.filter(function (s) { return toMin(s) > nowM; })[0]; return t && { doc: d, t: t }; })
+      .filter(Boolean).sort(function (a, b) { return (a.doc.spec === '急诊') - (b.doc.spec === '急诊') || toMin(a.t) - toMin(b.t); }).slice(0, 3);
+  }
+  function openBook(o) {
+    ctx = o;
+    var list;
+    if (o.doc) {
+      var d = docById(o.doc);
+      list = d.slots.map(function (t) { return { doc: d, t: t }; });
+      $('#slot-legend').textContent = d.name + ' 医生今天还空着的号';
+    } else {
+      list = earliestPerDoc(o.pet ? PETS[o.pet].species : null);
+      $('#slot-legend').textContent = '最早能约的 ' + list.length + ' 个号';
+    }
+    $('#confirm').disabled = !list.length;
+    if (!list.length) $('#confirm').textContent = '今天没有号了';
+    $('#slot-opts').innerHTML = list.map(function (s, i) {
+      var H = HOSP[s.doc.hosp];
+      return '<label class="opt"><input type="radio" name="slot" value="' + s.doc.id + '|' + s.t + '"' + (i ? '' : ' checked') + '>' +
+        '<span class="card"><span class="t">' + s.t + '</span><span class="l1">' + s.doc.name + ' · ' + s.doc.spec + '</span>' +
+        '<span class="l2">' + hospName(s.doc.hosp) + ' · ' + H.dist + '</span></span></label>';
+    }).join('') || '<p class="fine">今天的号都约满了，明早 9:00 放号。</p>';
+    var pet = o.pet || (o.doc && docById(o.doc).species === 'cat' ? 'nian' : 'dou');
+    $$('#pet-opts input').forEach(function (r) { r.checked = r.value === pet; });
+    renderItems(o.itemKey);
+    sync();
+    open($('#book-layer'));
+  }
+  function renderItems(prefKey) {
+    var pet = $('#pet-opts input:checked').value;
+    var items = ITEMS[pet], pick = 0;
+    items.forEach(function (it, i) { if (prefKey && it.key === prefKey) pick = i; });
+    $('#item-opts').innerHTML = items.map(function (it, i) {
+      return '<label class="pill"><input type="radio" name="item" value="' + i + '"' + (i === pick ? ' checked' : '') + '><span>' + it.label +
+        (it.note ? '<small>' + it.note + '</small>' : '') + '</span></label>';
+    }).join('');
+  }
+  function sel() {
+    var s = $('#slot-opts input:checked'); if (!s) return null;
+    var v = s.value.split('|'), pet = $('#pet-opts input:checked').value;
+    return { doc: docById(v[0]), t: v[1], pet: pet, item: ITEMS[pet][+$('#item-opts input:checked').value] };
+  }
+  function sync() {
+    var s = sel(); if (!s) return;
+    $('#confirm').innerHTML = '确认预约 · 今天 <span class="num">' + s.t + '</span> ' + s.doc.name;
+    var hint = '';
+    if (s.doc.species && s.doc.species !== PETS[s.pet].species)
+      hint = s.doc.name + '医生主看' + (s.doc.species === 'cat' ? '猫' : '狗') + '，' + PETS[s.pet].name + '换一位会更合适。';
+    else if (s.doc.spec === '急诊' && s.item.tip !== 'sick')
+      hint = '急诊号优先留给急症；不急的话可以选别的医生。';
+    $('#hint').textContent = hint;
+  }
+  $('#book-layer').addEventListener('change', function (e) {
+    if (e.target.name === 'pet') renderItems(ctx.itemKey);
+    sync();
+  });
+
+  $('#confirm').addEventListener('click', function () {
+    var s = sel(); if (!s) return;
+    var appt = { d: TODAY, t: s.t, pet: s.pet, item: s.item.label, doc: s.doc.id, key: s.item.key, tip: s.item.tip,
+                 code: s.doc.hosp.toUpperCase() + ' 1111 0' + (500 + Math.floor(Math.random() * 400)) };
+    close();
+    // 1. 号源：这个号从排班尺上消失，余号滚动
+    s.doc.slots = s.doc.slots.filter(function (t) { return t !== s.t; });
+    var btn = $('[data-doc="' + s.doc.id + '"]'), dot = btn.querySelector('.free[data-t="' + s.t + '"]');
+    if (dot) dot.classList.add('taken');
+    setTimeout(function () {
+      renderDuty(); $('#duty').classList.add('is-in'); applyFilter(false);
+      var nb = $('[data-doc="' + s.doc.id + '"]'); nb.classList.add('flash');
+      if (document.activeElement === document.body) nb.focus({ preventScroll: true });
+      var tl = $('#left-total'); tl.dataset.counted = ''; Motion.count(tl, { from: totalLeft() + 1, to: totalLeft(), duration: 600 });
+    }, 320);
+    // 2. 首屏：新预约成了"下一次"
+    APPTS.push(appt);
+    var heroIn = $('#hero-in');
+    var out = Motion.spring(heroIn, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-10px)' }], 'snappy', { duration: 180, easing: 'ease-in' });
+    var swapIn = function () {
+      renderHero();
+      Motion.spring(heroIn, [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], 'smooth');
+      Motion.spring($('.big', heroIn), [{ transform: 'scale(.92)', transformOrigin: '0 100%' }, { transform: 'none', transformOrigin: '0 100%' }], 'bouncy');
+    };
+    if (out) out.onfinish = swapIn; else swapIn();
+    $('#scroll').scrollTo({ top: 0, behavior: Motion.reduced ? 'auto' : 'smooth' });
+    // 3. 免疫本：如果约的是本子上的项目，那一格变成"已约"
+    if (appt.key) {
+      var rec = $('.rec[data-key="' + appt.key + '"]');
+      if (rec) {
+        rec.dataset.state = 'booked';
+        $('.due', rec).textContent = '已约 今天';
+        $('.slot', rec).classList.add('booked');
+        var act = $('.act', rec); if (act) act.remove();
+        updateSummary();
+      }
+    }
+    toast('约好了：今天 ' + s.t + ' ' + s.doc.name + ' 医生 · ' + PETS[s.pet].name);
+  });
+
+  /* ---------------------------------------------------------------- 免疫本：在家用药 → 贴一张、盖个章 */
+  var STAMP = '<svg class="stamp" style="--sr:-4deg" aria-hidden="true"><use href="#stamp"/></svg>';
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-dosed]');
+    if (!b) return;
+    var rec = b.closest('.rec'), strip = $('.strip', rec), before = rec.innerHTML, beforeDue = rec.dataset.due;
+    var slot = $('.slot', strip);
+    var st = document.createElement('span');
+    st.className = 'sticker worm'; st.style.setProperty('--r', '-1deg'); st.innerHTML = '11.11' + STAMP;
+    strip.replaceChild(st, slot);
+    var stickers = $$('.sticker', strip); if (stickers.length > 2) stickers[0].remove();
+    var next = document.createElement('span'); next.className = 'slot'; next.textContent = '12.11'; strip.appendChild(next);
+    rec.dataset.state = 'soon'; rec.dataset.due = '2026-12-11';
+    $('.due', rec).textContent = '30 天后';
+    $('.act', rec).innerHTML = '';
+    Motion.spring(st, [{ opacity: 0, transform: 'translateY(-16px) scale(1.14) rotate(-8deg)' }, { opacity: 1, transform: 'none' }], 'bouncy');
+    var stamp = $('.stamp', st);
+    Motion.spring(stamp, [{ opacity: 0, transform: 'scale(1.9)' }, { opacity: 1, transform: 'none' }], 'snappy', { delay: 280 });
+    Motion.spring(next, [{ opacity: 0, transform: 'translateX(-8px)' }, { opacity: 1, transform: 'none' }], 'smooth', { delay: 200 });
+    updateSummary();
+    toast('记下了：豆包 体外驱虫 11.11，下次 12.11', function () {
+      rec.innerHTML = before; rec.dataset.state = 'overdue'; rec.dataset.due = beforeDue; updateSummary();
+      $('[data-dosed]', rec).focus();
+    });
+  });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-remind]');
+    if (!b) return;
+    var on = b.getAttribute('aria-pressed') !== 'true';
+    b.setAttribute('aria-pressed', on);
+    b.lastChild.textContent = on ? '提醒已开' : '提醒我';
+    toast(on ? '到期前一天早上 9 点提醒你' : '已关闭这一项的提醒');
+  });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-book-item]');
+    if (b) openBook({ pet: 'dou', itemKey: b.dataset.bookItem });
+  });
+
+  /* ---------------------------------------------------------------- 免疫本：两本之间切换 */
+  var pages = $('#pages');
+  $$('.pet-tab').forEach(function (t) {
+    t.addEventListener('click', function () {
+      var pg = document.getElementById(t.dataset.go);
+      pages.scrollTo({ left: pg.offsetLeft - 20, behavior: Motion.reduced ? 'auto' : 'smooth' });
+    });
+  });
+  pages.addEventListener('scroll', function () {
+    var idx = Math.round(pages.scrollLeft / (pages.scrollWidth - pages.clientWidth || 1));
+    $$('.pet-tab').forEach(function (t, i) { t.setAttribute('aria-current', i === idx); });
+  }, { passive: true });
+
+  /* ---------------------------------------------------------------- 排班：点医生 → 预约；只看有号 */
+  $('#duty-list').addEventListener('click', function (e) {
+    var b = e.target.closest('.doc');
+    if (!b) return;
+    if (b.getAttribute('aria-disabled') === 'true') {
+      var d = docById(b.dataset.doc);
+      toast(d.walkin ? '夜班急诊不用预约，直接去北苑就行' : d.name + ' 医生今天约满了，' + d.full);
+      return;
+    }
+    openBook({ doc: b.dataset.doc });
+  });
+  function applyFilter(animate) {
+    var on = $('#only-open').getAttribute('aria-pressed') === 'true';
+    $$('.doc-wrap').forEach(function (w) {
+      var hide = on && w.dataset.open === '0';
+      if (!animate) w.style.transition = 'none';
+      w.classList.toggle('gone', hide);
+      w.querySelector('.doc').tabIndex = hide ? -1 : 0;
+      if (!animate) { void w.offsetHeight; w.style.transition = ''; }
+    });
+  }
+  $('#only-open').addEventListener('click', function () {
+    var b = this; b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') !== 'true');
+    applyFilter(true);
+  });
+
+  /* ---------------------------------------------------------------- 其他入口 */
+  $('#fab').addEventListener('click', function () { openBook({}); });
+  $('#after').addEventListener('click', function () { toast('全部预约在"我的 → 预约记录"里'); });
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-nav]')) { sortAppts(); var d = docById(APPTS[0].doc); toast('已在地图里打开：' + hospName(d.hosp)); }
+    if (e.target.closest('[data-code]')) {
+      sortAppts(); var a = APPTS[0], d2 = docById(a.doc);
+      $('#code').textContent = a.code;
+      $('#code-sub').textContent = short(a.d) + ' ' + a.t + ' · ' + PETS[a.pet].name + ' · ' + d2.name + ' 医生';
+      drawQR(a.code);
+      open($('#code-layer'));
+    }
+  });
+  function drawQR(seed) {   // 示意二维码：由预约码决定的固定图案 + 三个定位角
+    var h = 0, s = '', n = 25;
+    for (var i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+    function rnd() { h ^= h << 13; h >>>= 0; h ^= h >> 17; h ^= h << 5; h >>>= 0; return h / 4294967296; }
+    function finder(x, y) { s += '<path d="M' + x + ' ' + y + 'h7v7h-7z M' + (x + 1) + ' ' + (y + 1) + 'v5h5v-5z M' + (x + 2) + ' ' + (y + 2) + 'h3v3h-3z" fill-rule="evenodd"/>'; }
+    for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) {
+      var inF = (x < 8 && y < 8) || (x > n - 9 && y < 8) || (x < 8 && y > n - 9);
+      if (!inF && rnd() > .52) s += '<rect x="' + x + '" y="' + y + '" width="1" height="1"/>';
+    }
+    finder(0, 0); finder(n - 7, 0); finder(0, n - 7);
+    $('#qr').innerHTML = '<g fill="#1d1b17">' + s + '</g>';
+  }
+
+  /* ---------------------------------------------------------------- 顶栏随滚动出现底线 */
+  var top = $('#top');
+  $('#scroll').addEventListener('scroll', function () { top.classList.toggle('scrolled', this.scrollTop > 8); }, { passive: true });
+
+  /* ---------------------------------------------------------------- 外观切换（画框外） */
+  $$('[data-theme-set]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var v = b.dataset.themeSet;
+      if (v) document.documentElement.dataset.theme = v; else delete document.documentElement.dataset.theme;
+      $$('[data-theme-set]').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+    });
+  });
+
+  renderDuty();
+  $('#left-total').textContent = totalLeft();
+  updateSummary();
+})();
+</script>
+</body>
+</html>

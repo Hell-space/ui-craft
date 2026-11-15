@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>借力 · 植物展签</title>
+<style>
+  * { box-sizing: border-box }
+  body { margin: 0; background: #e1daca; color: #352b38; }
+  main { min-height: 100vh; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: center; gap: clamp(8px, 1.6vw, 26px); max-width: 1510px; padding: clamp(12px, 3vw, 55px); margin: auto }
+  .plate { position: relative; aspect-ratio: 1; container-type: inline-size; overflow: hidden; background: #f5edda; }
+  canvas { display: block; width: 100%; height: 100% }
+  .caption { position: absolute; inset: auto 6.8% 4.8%; display:flex; justify-content:space-between; align-items: baseline; border-top: max(1px, .39cqw) solid; padding-top: 2.3cqw; line-height:1 }
+  h2 { margin: 0; font: 700 13.1cqw/1.08 "STZhongsong", "Songti SC", SimSun, serif; letter-spacing: .045em }
+  .series { font: 600 5.6cqw/1 "Microsoft YaHei", "PingFang SC", sans-serif; letter-spacing: .16em; margin-right: -.16em }
+  @container (max-width: 110px) {
+    h2 { font: 700 15.8cqw/1.04 "Microsoft YaHei", "PingFang SC", sans-serif; letter-spacing: 0; }
+    .series { font-size: 9cqw; letter-spacing: .02em; margin-right: 0 }
+  }
+  @media (max-width: 620px) {
+    main { grid-template-columns: minmax(0, 420px); justify-content: center; align-content: start; }
+  }
+  @media print {
+    body, main { background: white; }
+    main { min-height: 0; padding: 0; display: grid; grid-template-columns: repeat(3,1fr); gap: 3mm; }
+    .plate { break-inside: avoid; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<main aria-label="植物展 借力">
+  <article class="plate"><canvas width="900" height="900" role="img" aria-label="一枚槭树翅果斜向回旋，种仁在扇开膜翅的根部"></canvas><div class="caption"><h2>乘风</h2><span class="series">借力</span></div></article>
+  <article class="plate"><canvas width="900" height="900" role="img" aria-label="牛蒡果序的弯钩勾住一根从织物伸出的纤维"></canvas><div class="caption"><h2>借衣</h2><span class="series">借力</span></div></article>
+  <article class="plate"><canvas width="900" height="900" role="img" aria-label="凤仙花果荚的瓣片裂开卷起，圆籽沿弧线向外散开"></canvas><div class="caption"><h2>裂荚</h2><span class="series">借力</span></div></article>
+</main>
+<script>
+  const colors = { paper: '#f5edda', ink: '#352b38', ochre: '#d7954c', red: '#aa482d', blue: '#566389', bluePale: '#aab1ba' };
+  const drawings = [...document.querySelectorAll('canvas')].map(canvas => {
+    const context = canvas.getContext('2d');
+    context.scale(canvas.width / 360, canvas.height / 360);
+    context.lineCap = 'round';
+    context.lineJoin = 'round';
+    return context;
+  });
+  function path(context, data, fill, stroke, width = 1) {
+    const shape = new Path2D(data);
+    if (fill) { context.fillStyle = fill; context.fill(shape); }
+    if (stroke) { context.strokeStyle = stroke; context.lineWidth = width; context.stroke(shape); }
+  }
+  function ellipse(context, x, y, rx, ry, angle, color) {
+    context.beginPath();
+    context.ellipse(x, y, rx, ry, angle, 0, Math.PI * 2);
+    context.fillStyle = color;
+    context.fill();
+  }
+  function maple(context) {
+    const { paper, ink, ochre, red, blue } = colors;
+    // One descending turn passes behind the seed. Its open end gives the wing air.
+    path(context, 'M20 96 C55 42 154 24 233 38 C265 44 282 57 278 72 C273 90 242 99 204 108', null, blue, 5.1);
+    path(context, 'M105 167 C63 181 41 202 44 219 C48 244 126 254 202 231 C230 222 250 211 264 198', null, blue, 6);
+    path(context, 'M52 236 C82 257 150 257 208 237', null, blue, 1.25);
+    // A single wing widens towards its distal margin. The close-set veins meet the nutlet.
+    path(context, 'M95 195 C112 172 151 137 182 102 C222 57 273 36 320 49 Q331 53 326 67 C316 99 288 123 251 138 C216 155 181 164 150 180 C134 189 121 199 119 210 Z', ochre, ink, 3.2);
+    path(context, 'M107 191 Q153 151 189 114 Q249 53 318 50', null, red, 5.4);
+    const veins = [
+      'M113 191 Q199 99 322 57', 'M113 193 Q207 109 322 66',
+      'M115 194 Q201 125 316 77', 'M116 196 Q208 130 307 91',
+      'M116 198 Q220 136 292 106', 'M115 201 Q207 149 274 122'
+    ];
+    for (const vein of veins) path(context, vein, null, red, 1.75);
+    path(context, 'M75 181 Q81 162 96 167 Q111 166 119 177 L128 186 Q135 200 122 216 Q112 232 98 235 Q83 238 72 228 Q65 220 66 206 Z', ink);
+    path(context, 'M77 212 Q72 185 92 177 Q102 174 110 178 M75 222 Q87 227 98 219', null, ochre, 2.3);
+    path(context, 'M69 226 Q60 229 59 223 Q60 215 67 211 L77 216 Z', red, ink, 2);
+    path(context, 'M91 179 Q87 184 85 188', null, paper, 1.4);
+  }
+  function burdock(context) {
+    const { paper, ink, ochre, red, blue, bluePale } = colors;
+    // The cut edge is the sleeve. Its loose warp continues into one oversized bract.
+    const cuff = 'M280 -12 L375 -12 L375 146 C330 138 292 124 255 103 L251 97 L246 97 L244 90 L238 91 L237 86 L231 84 L235 79 L232 75 C244 54 259 21 269 2 Z';
+    path(context, cuff, bluePale);
+    context.save();
+    context.clip(new Path2D(cuff));
+    for (let i = 0; i < 16; i++) {
+      const y = i * 10;
+      path(context, 'M219 '+y+' Q270 '+(y-4)+' 312 '+(y+9)+' T373 '+(y+24), null, blue, 2.1);
+    }
+    for (let i = 0; i < 13; i++) {
+      const x = 229 + i * 13;
+      path(context, 'M'+x+' -7 Q'+(x+11)+' 46 '+(x-11)+' 121', null, paper, 2.5);
+    }
+    path(context, 'M241 78 Q301 116 369 126', null, blue, 5);
+    context.setLineDash([5,4]);
+    path(context, 'M242 84 Q301 122 367 131', null, paper, 2.2);
+    context.restore();
+    path(context, 'M177 69 C191 65 204 60 216 64 C231 68 237 76 253 80', null, blue, 7.2);
+    path(context, 'M178 68 C193 62 206 60 217 64 C231 68 239 76 253 79', null, bluePale, 1.6);
+    path(context, 'M225 90 Q235 85 244 89 M226 104 Q235 95 248 99', null, blue, 2.8);
+    context.save();
+    context.translate(124, 172);
+    context.rotate(-.38);
+    ellipse(context, 0, 0, 45, 58, 0, ink);
+    for (let i = 0; i < 13; i++) {
+      const angle = (i + .2) * 2 * Math.PI / 13;
+      const reach = 12 + ((i*13) % 16);
+      const x = 40*Math.cos(angle), y = 52*Math.sin(angle);
+      context.save();
+      context.translate(x, y);
+      context.rotate(Math.atan2(y,x));
+      const tip = reach+11;
+      path(context, 'M-9 -5 Q11 -4 '+reach+' -8 Q'+tip+' -12 '+(tip+2)+' -3 Q'+(tip+3)+' 3 '+(tip-1)+' 5', null, ink, 4.8);
+      path(context, 'M-5 -5 Q10 -3 '+reach+' -8', null, ochre, 1.6);
+      context.restore();
+    }
+    const bracts = [[-13,-35,-.9],[10,-37,-.15],[-25,-10,-1.1],[0,-14,-.55],[18,-11,.05],[-20,13,-1],[3,12,-.4],[15,26,-.2],[-14,32,-.7]];
+    for (const [x,y,t] of bracts) {
+      context.save(); context.translate(x,y); context.rotate(t);
+      path(context, 'M-4 9 Q5 3 7 -12 Q2 -9 -4 2 Z', ochre);
+      context.restore();
+    }
+    context.restore();
+    // The tip turns back across the blue strand, leaving a light pocket beneath.
+    path(context, 'M149 144 C177 124 202 100 217 77 C231 54 227 42 216 42 C204 42 195 56 198 75', null, ink, 8.7);
+    path(context, 'M151 141 C177 123 203 99 218 76 C230 56 227 44 217 43', null, red, 4.2);
+    path(context, 'M150 140 C177 120 197 101 211 83', null, ochre, 1.8);
+  }
+  function balsam(context) {
+    const { ink, ochre, red, paper } = colors;
+    // The three rolled valves remain attached at the stalk, with clear space at the open mouth.
+    path(context, 'M77 269 Q93 244 121 223 Q130 215 136 202', null, ink, 8);
+    path(context, 'M79 267 Q98 241 120 225', null, ochre, 2.2);
+    path(context, 'M122 224 Q93 201 75 184 C42 151 47 118 70 112 C91 106 106 118 103 134 C101 146 86 151 80 143 Q76 137 81 132 Q85 130 89 134 C90 126 85 120 76 122 C62 126 65 144 75 157 Q99 181 138 196 Z', ochre, ink, 3.5);
+    path(context, 'M125 217 C98 193 58 165 57 141 C55 123 66 114 79 116', null, red, 4.8);
+    path(context, 'M126 219 C137 190 133 166 123 145 C109 118 110 91 125 75 C144 55 170 61 174 78 C179 94 164 107 152 103 C146 100 144 93 148 89 Q153 84 158 91 Q167 83 158 77 C142 69 133 88 134 104 C137 125 153 147 155 169 Q158 197 143 218 Z', red, ink, 3.4);
+    path(context, 'M139 208 Q151 177 136 137 C123 109 122 84 141 73', null, ochre, 5.3);
+    path(context, 'M126 213 C151 197 167 184 179 161 C194 134 213 124 230 128 C247 132 253 147 246 158 C238 170 219 173 214 162 Q211 154 217 151 Q220 150 224 154 C235 154 236 146 230 142 C218 134 204 148 198 160 C186 189 170 213 140 227 Z', ochre, ink, 3.6);
+    path(context, 'M132 220 Q166 203 185 168 C198 143 211 132 226 133', null, red, 5);
+    path(context, 'M118 219 Q125 221 138 215 L150 213 L140 229 L128 232 Z', ink);
+    // The opened chamber and larger successive gaps lead out along the same arc.
+    path(context, 'M144 201 Q148 185 153 179 Q155 194 152 202 Z', paper);
+    const seeds = [[161,164,8.4,10,-.65],[192,129,10.2,9.3,-.53],[239,92,11,9.4,-.44],[303,49,10,8.5,-.38]];
+    for (const [x,y,rx,ry,rot] of seeds) {
+      ellipse(context, x,y,rx,ry,rot,ink);
+      path(context, 'M'+(x-rx*.55)+' '+y+' q1 -3 4 -4', null, paper, 1.7);
+    }
+  }
+  [maple,burdock,balsam].forEach((draw,index) => draw(drawings[index]));
+</script>
+</body>
+</html>

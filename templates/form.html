@@ -1,0 +1,109 @@
+<!--@title 登录 · 青梧图书馆-->
+<!--@use 登录、注册、单步表单、申请与预约。立场：夹在书里的那张还书期限卡。左边是一句话和一张跟产品有关的实物（这里是盖了日期戳的期限卡），右边是表单：标签在上，帮助文字在下，一个主按钮。不要在左边放渐变色块和泛泛的插画-->
+<!--@sample 青梧图书馆|长安的荔枝|读者证号-->
+<style>
+/* 本页的版式与细节。颜色和字体都来自预设变量，换 --style / --accent 会跟着变。 */
+.auth { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); --mono: var(--font-mono, ui-monospace, monospace); }
+.auth > * { min-width: 0; }
+.tell { background: var(--surface-sunken); padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1.5rem, 5vw, 5rem); display: grid; grid-template-rows: auto auto 1fr; gap: clamp(1.5rem, 3vw, 2.5rem); }
+.tell .brand { color: var(--text); }
+.tell h1 { font-family: var(--font-display); font-size: clamp(2.25rem, 1.3rem + 3vw, 3.75rem); line-height: 1.25; letter-spacing: .02em; }
+.tell .lede { margin-top: 1rem; font-size: 1.0625rem; line-height: 1.8; color: var(--text-muted); max-width: 24em; }
+
+/* 期限卡：米色卡纸、横线、日期戳 */
+.slip { align-self: end; justify-self: start; width: min(100%, 30rem); position: relative; background: light-dark(#FBF7EC, #26241E); border-radius: 3px;
+        padding: 1.25rem 1.5rem 1.5rem; box-shadow: 0 1px 0 rgb(255 255 255 / .5) inset, 0 0 0 1px light-dark(#E6DDC6, #3A362C), 0 18px 40px -22px rgb(var(--shade, 0 0 0) / .45);
+        rotate: -1.2deg; }
+.slip::before { content: ""; position: absolute; top: .9rem; right: 1.25rem; width: .75rem; height: .75rem; border-radius: 50%; background: var(--surface-sunken); box-shadow: inset 0 1px 2px rgb(0 0 0 / .2); }
+.slip-head { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: .6rem; border-bottom: 2px solid light-dark(#7C8C6A, #8FA07A); margin-right: 1.75rem; }
+.slip-head b { font-family: var(--font-display); font-size: 1.0625rem; }
+.slip-head span { font: 500 .6875rem/1 var(--mono); letter-spacing: .14em; color: var(--text-subtle); }
+.slip table { width: 100%; border-collapse: collapse; margin-top: .25rem; font-size: .875rem; }
+.slip th { text-align: left; font: 500 .6875rem/1 var(--mono); letter-spacing: .08em; color: var(--text-subtle); padding: .7rem 0 .4rem; font-weight: 500; }
+.slip td { padding: .55rem 0; border-bottom: 1px solid light-dark(#D9E1EA, #3A4350); }
+.slip td:not(:first-child), .slip th:not(:first-child) { width: 4.5rem; font: .8125rem var(--mono); }
+.slip td small { display: block; color: var(--text-subtle); font-size: .75rem; }
+.slip tr.soon td { color: var(--text); }
+.stamp { position: absolute; right: -2.4rem; top: 3.1rem; width: 6.25rem; height: 6.25rem;   /* 盖在最先到期那一行旁边，压出卡边一点 */
+         border-radius: 50%; display: grid; place-content: center; text-align: center;
+         color: var(--danger); border: 2px solid currentColor; box-shadow: inset 0 0 0 3px light-dark(#FBF7EC, #26241E), inset 0 0 0 4.5px currentColor;
+         rotate: -14deg; opacity: .88; mix-blend-mode: multiply; animation: f-stamp 520ms cubic-bezier(.2, 1.4, .4, 1) .6s both; }
+.stamp b { font-family: var(--font-display); font-size: 1.375rem; line-height: 1.1; }
+.stamp span { font: 500 .625rem/1.3 var(--mono); letter-spacing: .12em; }
+@keyframes f-stamp { from { scale: 1.6; opacity: 0; } 60% { opacity: .95; } to { scale: 1; opacity: .88; } }
+@media (prefers-color-scheme: dark) { .stamp { mix-blend-mode: normal; } }
+
+/* 表单：标签在上，帮助文字在下，一个主按钮 */
+.form-side { display: grid; justify-items: center; align-content: start; padding: clamp(2rem, 5vw, 4rem) var(--gutter); }
+.form { width: 100%; max-width: 23rem; display: grid; gap: 1.4rem; }
+.form h2 { font-family: var(--font-display); font-size: 2rem; letter-spacing: .02em; }
+.form .input { height: 3rem; font-size: 1rem; }
+.form .btn.lg { height: 3.25rem; font-size: 1rem; }
+.divider { display: flex; align-items: center; gap: .75rem; font-size: var(--fs-xs); color: var(--text-subtle); }
+.divider::before, .divider::after { content: ""; flex: 1; border-top: 1px solid var(--border); }
+.hours { display: grid; grid-template-columns: auto 1fr; gap: .25rem 1rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: var(--fs-sm); color: var(--text-muted); }
+.hours dt { font: 500 .75rem/1.7 var(--mono); color: var(--text-subtle); }
+@media (max-width: 900px) { .auth { grid-template-columns: minmax(0, 1fr); } .slip { display: none; } .tell { grid-template-rows: auto auto; } }
+</style>
+
+<div class="auth" id="library">
+  <section class="tell">
+    <a class="brand" href="#library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 19.5V5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>青梧图书馆</a>
+    <div>
+      <h1 data-reveal>你借的书，<br>什么时候该还。</h1>
+      <p class="lede" data-reveal style="--delay:120ms">登录后能看到在借的每一本、还能续几次，以及预约的书到没到。</p>
+    </div>
+    <!-- 与产品有关的实物：夹在书里的期限卡，最先到期的那本盖了日期戳 -->
+    <figure class="slip" data-reveal style="--delay:200ms" aria-label="在借的三本书和应还日期">
+      <div class="slip-head"><b>还书期限卡</b><span>DATE DUE</span></div>
+      <table>
+        <thead><tr><th>书名</th><th>借出</th><th>应还</th></tr></thead>
+        <tbody>
+          <tr class="soon"><td>长安的荔枝<small>马伯庸</small></td><td>10.17</td><td>11.14</td></tr>
+          <tr><td>置身事内<small>兰小欢 · 已续借 1 次</small></td><td>10.30</td><td>11.27</td></tr>
+          <tr><td>一个人的朝圣<small>预约中 · 排第 2 位</small></td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div class="stamp" aria-hidden="true"><span>还有</span><b>3 天</b><span>11·14</span></div>
+    </figure>
+  </section>
+
+  <main class="form-side">
+    <form class="form" id="form" novalidate>
+      <div><h2>登录</h2><p class="muted" style="margin-top: .5rem">用读者证号，或者办证时留的手机号。</p></div>
+      <div class="field">
+        <label for="id">读者证号或手机号</label>
+        <input class="input" id="id" name="id" inputmode="numeric" autocomplete="username" placeholder="0027 4416" required aria-describedby="id-hint">
+        <span class="hint" id="id-hint">证号在读者证背面，8 位数字。</span>
+      </div>
+      <div class="field">
+        <div class="row between"><label for="pw">密码</label><button class="btn sm ghost" id="pw-help-toggle" type="button" aria-expanded="false" aria-controls="pw-help">忘了密码</button></div>
+        <input class="input" id="pw" name="pw" type="password" autocomplete="current-password" required aria-describedby="pw-err">
+        <span class="hint" id="pw-help" hidden>初始密码是生日的 8 位数字。如果已经改过密码，可拨打下方的图书馆咨询电话。</span>
+        <span class="error" id="pw-err" hidden>请输入密码。初始密码是生日的 8 位数字，例如 19960412。</span>
+      </div>
+      <label class="check"><input type="checkbox" checked><span>这台设备上保持登录 30 天</span></label>
+      <button class="btn ink lg block" id="submit" type="submit">登录</button>
+      <div class="divider">还没有读者证</div>
+      <a class="btn block" role="link" aria-disabled="true">在线办证，3 分钟</a>
+      <dl class="hours"><dt>到馆办证</dt><dd>带身份证，工作日 9:00–20:00</dd><dt>咨询</dt><dd>0571-8702 4416</dd></dl>
+    </form>
+  </main>
+</div>
+
+<script>
+var passwordHelp = document.getElementById('pw-help');
+document.getElementById('pw-help-toggle').addEventListener('click', function () {
+  passwordHelp.hidden = !passwordHelp.hidden;
+  this.setAttribute('aria-expanded', String(!passwordHelp.hidden));
+});
+// 演示逻辑：失焦不打扰，提交时才校验；错误说清怎么改；提交中按钮保持宽度。换成你的真实提交。
+document.getElementById('form').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var pw = document.getElementById('pw'), err = document.getElementById('pw-err'), btn = document.getElementById('submit');
+  var bad = !pw.value; pw.setAttribute('aria-invalid', bad); err.hidden = !bad;
+  if (bad) { pw.focus(); return; }
+  btn.classList.add('loading'); btn.textContent = '登录中…';
+  setTimeout(function () { btn.classList.remove('loading'); btn.textContent = '登录'; }, 1200);
+});
+</script>

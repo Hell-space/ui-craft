@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>丹崖茶号 · 武夷岩茶</title>
+<meta name="description" content="丹崖茶号，武夷山正岩产区的小茶号。十七亩自管茶园，每年只做一季春茶，炭火慢焙，秋后开汤。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* 纸与墨 */
+  --paper:#F2ECE1;
+  --paper-2:#E9E1D2;
+  --ink:#211D18;
+  --ink-2:#574F45;
+  --ink-3:#8A8072;
+  --rule:#D5CABA;
+  --rule-strong:#B9AC98;
+  /* 丹岩：武夷丹霞岩壁的锈红，不是印章的朱红 */
+  --rock:#9E4A2F;
+  --rock-deep:#7A3622;
+  --rock-tint:#D9A68C;
+  --rock-wash:#EAD3C3;
+  /* 涧水 */
+  --stream:#6E8088;
+  /* 焙间 */
+  --kiln:#221D18;
+  --kiln-2:#2E2720;
+  --kiln-rule:#463C31;
+  --kiln-ink:#ECE3D3;
+  --kiln-ink-2:#A89C8A;
+  --ember:#D07A3E;
+
+  --serif:"Noto Serif SC","Source Han Serif SC","Source Han Serif CN","Songti SC","STSong","SimSun",serif;
+  --sans:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei UI","Microsoft YaHei","Noto Sans SC",sans-serif;
+  --num:"Iowan Old Style","Palatino Linotype","Palatino","Georgia",serif;
+
+  --wrap:1200px;
+  --gutter:clamp(16px,5vw,64px);
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:72px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--serif);
+  font-size:17px;
+  line-height:1.85;
+  font-kerning:normal;
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+}
+/* 纸纹：极轻的噪点，只在浅色区 */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.35;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .3 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+main,header,footer{position:relative;z-index:1}
+img,svg{display:block;max-width:100%}
+a{color:inherit}
+p{margin:0}
+h1,h2,h3,h4{margin:0;font-weight:600}
+::selection{background:var(--rock);color:var(--paper)}
+
+.nw{display:inline-block}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--gutter)}
+.label{
+  font-family:var(--sans);font-size:12px;letter-spacing:.16em;line-height:1.4;
+  color:var(--ink-3);
+}
+.num{font-family:var(--num);font-variant-numeric:lining-nums tabular-nums;letter-spacing:0}
+.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:var(--paper);padding:8px 14px;z-index:100;font-family:var(--sans);font-size:14px}
+.skip:focus{left:8px}
+:focus-visible{outline:2px solid var(--rock);outline-offset:3px;border-radius:2px}
+
+/* ---------- 顶栏 ---------- */
+.top{
+  position:sticky;top:0;z-index:50;
+  background:color-mix(in srgb,var(--paper) 88%,transparent);
+  -webkit-backdrop-filter:saturate(1.2) blur(10px);backdrop-filter:saturate(1.2) blur(10px);
+  border-bottom:1px solid transparent;
+  transition:border-color .3s var(--ease);
+}
+.top.is-scrolled{border-bottom-color:var(--rule)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:64px;gap:24px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.seal{
+  width:34px;height:34px;flex:none;background:var(--rock);color:var(--paper);
+  display:grid;grid-template-columns:1fr 1fr;place-items:center;
+  font-family:var(--serif);font-weight:900;font-size:13px;line-height:1;padding:3px;
+  border-radius:3px;
+}
+.seal span{display:block;writing-mode:vertical-rl;letter-spacing:.02em}
+.brand-name{font-size:19px;font-weight:600;letter-spacing:.24em;line-height:1}
+.brand-sub{display:block;font-family:var(--sans);font-size:10.5px;letter-spacing:.2em;color:var(--ink-3);margin-top:5px;line-height:1}
+.nav{display:flex;gap:32px;align-items:center;font-family:var(--sans);font-size:14px;letter-spacing:.08em}
+.nav a{text-decoration:none;color:var(--ink-2);padding:6px 0;position:relative;transition:color .2s}
+.nav a::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--rock);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.nav a:hover{color:var(--ink)}
+.nav a:hover::after{transform:scaleX(1)}
+.nav .btn{margin-left:8px}
+.top .menu-btn{display:none}
+
+/* ---------- 按钮 ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--sans);font-size:14px;letter-spacing:.1em;line-height:1;
+  padding:13px 20px;border-radius:2px;text-decoration:none;cursor:pointer;
+  border:1px solid var(--ink);background:var(--ink);color:var(--paper);
+  transition:background .2s,border-color .2s,color .2s,transform .1s;
+}
+.btn:hover{background:var(--rock-deep);border-color:var(--rock-deep)}
+.btn:active{transform:translateY(1px)}
+.btn--ghost{background:transparent;color:var(--ink)}
+.btn--ghost:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn--sm{padding:10px 14px;font-size:13px}
+.btn .arr{transition:transform .25s var(--ease)}
+.btn:hover .arr{transform:translateX(3px)}
+.nav a.btn{color:var(--paper);padding:10px 16px}
+.nav a.btn::after{display:none}
+
+/* ---------- 首屏 ---------- */
+.hero{padding:56px 0 0}
+.hero-grid{
+  display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:start;
+}
+.hero-title{
+  grid-column:1 / span 2;grid-row:1 / span 2;
+  writing-mode:vertical-rl;
+  font-size:clamp(64px,8.4vw,112px);font-weight:900;line-height:1.08;letter-spacing:.06em;
+  margin:0;justify-self:start;
+}
+.hero-title .sm{display:block;font-size:.36em;font-weight:400;letter-spacing:.34em;color:var(--ink-2);margin-top:.6em;margin-right:.4em}
+.hero-art{grid-column:3 / span 6;grid-row:1 / span 2;margin-top:8px}
+.hero-art svg{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 6%,#000 94%,transparent 100%)}
+.hero-copy{grid-column:9 / span 4;padding-top:24px}
+.hero-copy .label{margin-bottom:28px;display:flex;gap:10px;align-items:center}
+.hero-copy .label::before{content:"";width:24px;height:1px;background:var(--rock)}
+.lede{font-size:21px;line-height:1.75;font-weight:600;letter-spacing:.02em;margin-bottom:20px}
+.hero-copy p.body{color:var(--ink-2);font-size:16px;line-height:1.95}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.facts{
+  grid-column:1 / -1;margin-top:56px;
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  border-top:1px solid var(--ink);
+}
+.fact{padding:20px 24px 24px 0;border-right:1px solid var(--rule)}
+.fact + .fact{padding-left:24px}
+.fact:last-child{border-right:0}
+.fact b{display:block;font-family:var(--num);font-weight:400;font-size:44px;line-height:1;letter-spacing:-.01em;font-variant-numeric:lining-nums}
+.fact b small{font-family:var(--serif);font-size:16px;margin-left:4px;letter-spacing:.06em;color:var(--ink-2)}
+.fact span{display:block;margin-top:10px;font-family:var(--sans);font-size:13px;color:var(--ink-2);letter-spacing:.06em;line-height:1.6}
+
+/* ---------- 通用栏目 ---------- */
+section{padding:120px 0}
+.sec-head{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;margin-bottom:56px;align-items:end}
+.sec-head .idx{grid-column:1 / span 2;font-family:var(--num);font-size:15px;color:var(--rock);letter-spacing:.04em}
+.sec-head h2{grid-column:3 / span 6;font-size:40px;line-height:1.3;letter-spacing:.06em}
+.sec-head .note{grid-column:9 / span 4;color:var(--ink-2);font-size:15px;line-height:1.9}
+
+/* ---------- 半在山 半在火 ---------- */
+.thesis{padding-top:136px}
+.thesis-quote{
+  font-size:clamp(30px,4vw,52px);font-weight:600;line-height:1.5;letter-spacing:.08em;
+  max-width:16em;margin:0 0 72px;text-wrap:balance;
+}
+.thesis-quote em{font-style:normal;color:var(--rock)}
+.halves{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px}
+.half{grid-column:span 5;border-top:1px solid var(--rule-strong);padding-top:24px}
+.half:first-child{grid-column:3 / span 5}
+.half h3{font-size:21px;letter-spacing:.14em;margin-bottom:14px;display:flex;align-items:baseline;gap:14px}
+.half h3 .label{color:var(--rock)}
+.half p{color:var(--ink-2);font-size:16px;line-height:1.95}
+.half p + p{margin-top:12px}
+
+/* ---------- 茶单 ---------- */
+.menu{background:var(--paper-2);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.tea-list{list-style:none;margin:0;padding:0;border-top:1px solid var(--ink)}
+.tea{
+  display:grid;
+  grid-template-columns:48px minmax(0,2.3fr) minmax(0,1.6fr) 132px minmax(0,2.4fr) 120px 104px;
+  column-gap:24px;align-items:baseline;
+  padding:28px 0;border-bottom:1px solid var(--rule-strong);
+  position:relative;transition:background .25s var(--ease);
+}
+.tea::before{content:"";position:absolute;left:-16px;top:0;bottom:0;width:2px;background:var(--rock);transform:scaleY(0);transition:transform .3s var(--ease)}
+.tea:hover::before{transform:scaleY(1)}
+.tea-head{padding:12px 0;border-bottom:1px solid var(--rule-strong)}
+.tea-head > span{font-family:var(--sans);font-size:12px;letter-spacing:.14em;color:var(--ink-3)}
+.tea-head::before{display:none}
+.t-no{font-family:var(--num);font-size:15px;color:var(--ink-3)}
+.t-name{font-size:22px;font-weight:600;letter-spacing:.08em;line-height:1.35}
+.t-name small{display:block;font-size:13px;font-weight:400;font-family:var(--sans);color:var(--ink-3);letter-spacing:.1em;margin-top:6px}
+.t-origin{font-size:15px;line-height:1.7}
+.t-origin .tag{display:inline-block;font-family:var(--sans);font-size:11px;letter-spacing:.12em;padding:2px 6px;border:1px solid var(--rock);color:var(--rock);border-radius:2px;margin-left:6px;vertical-align:2px;line-height:1.4}
+.t-origin .tag--muted{border-color:var(--rule-strong);color:var(--ink-3)}
+.t-origin small{display:block;color:var(--ink-3);font-family:var(--sans);font-size:12.5px;letter-spacing:.04em}
+.t-notes{font-size:15px;color:var(--ink-2);line-height:1.8}
+.t-spec{font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:1.7}
+.t-price{text-align:right}
+.t-price b{font-family:var(--num);font-weight:400;font-size:24px;font-variant-numeric:lining-nums tabular-nums;letter-spacing:0}
+.t-price b i{font-style:normal;font-size:15px;margin-right:2px;color:var(--ink-2)}
+.t-price small{display:block;font-family:var(--sans);font-size:12px;color:var(--ink-3);margin-top:4px;letter-spacing:.04em}
+.t-price small.low{color:var(--rock)}
+
+.roast{display:flex;flex-direction:column;gap:8px}
+.roast-bar{display:flex;gap:3px}
+.roast-bar i{width:20px;height:6px;background:var(--rule);border-radius:1px}
+.roast-bar i.on{background:var(--rock)}
+.roast-bar i.on.hot{background:var(--rock-deep)}
+.roast span{font-family:var(--sans);font-size:12.5px;color:var(--ink-2);letter-spacing:.08em;line-height:1}
+.menu-foot{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-top:32px;align-items:center}
+.menu-foot p{font-family:var(--sans);font-size:13px;color:var(--ink-3);letter-spacing:.04em;line-height:1.8;max-width:42em}
+
+/* ---------- 山场 ---------- */
+.terrain-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:start}
+.map{grid-column:1 / span 7;border:1px solid var(--rule-strong);background:var(--paper);position:sticky;top:96px}
+.map figcaption{display:flex;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--rule);font-family:var(--sans);font-size:12px;color:var(--ink-3);letter-spacing:.08em}
+.map .pin{cursor:pointer}
+.map .pin circle.ring{transition:r .25s var(--ease),opacity .25s;opacity:0}
+.map .pin:hover circle.ring,.map .pin.is-active circle.ring{opacity:1}
+.map .pin text{transition:fill .2s}
+.map .pin:hover text,.map .pin.is-active text{fill:var(--rock-deep)}
+.sites{grid-column:9 / span 4;list-style:none;margin:0;padding:0}
+.site{border-top:1px solid var(--rule-strong);padding:18px 0 20px;cursor:default;transition:opacity .25s}
+.site:last-child{border-bottom:1px solid var(--rule-strong)}
+.site h4{font-size:19px;letter-spacing:.12em;display:flex;justify-content:space-between;align-items:baseline}
+.site h4 .num{font-size:13px;color:var(--ink-3);font-family:var(--sans);letter-spacing:.06em;font-weight:400}
+.site p{font-size:14.5px;color:var(--ink-2);line-height:1.85;margin-top:6px}
+.sites.has-focus .site{opacity:.42}
+.sites.has-focus .site.is-active{opacity:1}
+
+/* ---------- 焙火（深色） ---------- */
+.kiln{background:var(--kiln);color:var(--kiln-ink);position:relative;overflow:hidden}
+.kiln::after{
+  content:"";position:absolute;left:50%;bottom:-40%;width:120%;height:80%;transform:translateX(-50%);
+  background:radial-gradient(closest-side,rgba(208,122,62,.16),rgba(208,122,62,0));pointer-events:none;
+}
+.kiln .wrap{position:relative;z-index:1}
+.kiln .sec-head .idx{color:var(--ember)}
+.kiln .sec-head .note{color:var(--kiln-ink-2)}
+.timeline{position:relative}
+.tl-chart{border-top:1px solid var(--kiln-rule);border-bottom:1px solid var(--kiln-rule);padding:24px 0 8px}
+.tl-chart svg text{font-family:var(--sans)}
+.steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));column-gap:24px;margin-top:40px}
+.step{border-left:1px solid var(--kiln-rule);padding-left:16px}
+.step .when{font-family:var(--sans);font-size:12px;letter-spacing:.14em;color:var(--ember)}
+.step h4{font-size:19px;letter-spacing:.14em;margin:10px 0 8px;font-weight:600}
+.step p{font-size:14px;line-height:1.85;color:var(--kiln-ink-2)}
+
+/* ---------- 冲泡 ---------- */
+.brew-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:start}
+.params{grid-column:1 / span 5;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--ink)}
+.param{padding:22px 0 24px;border-bottom:1px solid var(--rule)}
+.param:nth-child(odd){padding-right:24px;border-right:1px solid var(--rule)}
+.param:nth-child(even){padding-left:24px}
+.param b{display:block;font-family:var(--num);font-weight:400;font-size:40px;line-height:1;font-variant-numeric:lining-nums}
+.param b small{font-family:var(--serif);font-size:15px;color:var(--ink-2);margin-left:4px}
+.param span{display:block;font-family:var(--sans);font-size:13px;letter-spacing:.08em;color:var(--ink-2);margin-top:10px}
+.brew-tip{grid-column:1 / -1;margin-top:24px;font-size:14.5px;line-height:1.9;color:var(--ink-2)}
+.steeps{grid-column:7 / span 6}
+.steeps h3{font-size:19px;letter-spacing:.14em;margin-bottom:6px}
+.steeps > p{font-size:14.5px;color:var(--ink-2);margin-bottom:28px;line-height:1.85}
+.steep-row{display:grid;grid-template-columns:64px 1fr 56px;gap:16px;align-items:center;padding:7px 0}
+.steep-row .k{font-family:var(--sans);font-size:13px;color:var(--ink-2);letter-spacing:.06em}
+.steep-row .v{font-family:var(--num);font-size:15px;text-align:right;font-variant-numeric:tabular-nums lining-nums}
+.steep-row .track{height:10px;background:var(--rule);position:relative;border-radius:1px;overflow:hidden}
+.steep-row .track i{position:absolute;left:0;right:0;top:0;bottom:0;background:var(--rock);transform-origin:left;transform:scaleX(var(--w));transition:transform .9s var(--ease)}
+.js .steeps:not(.in) .track i{transform:scaleX(0)}
+.steep-row:nth-child(4) .track i{transition-delay:.15s}.steep-row:nth-child(5) .track i{transition-delay:.22s}.steep-row:nth-child(6) .track i{transition-delay:.29s}.steep-row:nth-child(7) .track i{transition-delay:.36s}.steep-row:nth-child(8) .track i{transition-delay:.43s}.steep-row:nth-child(9) .track i{transition-delay:.5s}.steep-row:nth-child(10) .track i{transition-delay:.57s}.steep-row:nth-child(11) .track i{transition-delay:.64s}
+.steep-row:nth-of-type(-n+2) .track i{background:var(--rock-tint)}
+.steep-hint{margin-top:20px;font-family:var(--sans);font-size:12.5px;color:var(--ink-3);letter-spacing:.04em;line-height:1.8}
+
+/* ---------- 到访 ---------- */
+.visit{border-top:1px solid var(--rule)}
+.visit-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:start}
+.visit-main{grid-column:1 / span 6}
+.visit-main h2{font-size:40px;line-height:1.3;letter-spacing:.06em;margin:14px 0 24px}
+.visit-main > p{color:var(--ink-2);font-size:16px;line-height:1.95;max-width:30em}
+.visit-dl{margin:36px 0 0;display:grid;grid-template-columns:88px 1fr;row-gap:14px;column-gap:16px;font-size:15px;line-height:1.7}
+.visit-dl dt{font-family:var(--sans);font-size:12.5px;letter-spacing:.14em;color:var(--ink-3);padding-top:2px}
+.visit-dl dd{margin:0}
+.notify{grid-column:8 / span 5;background:var(--paper-2);border:1px solid var(--rule-strong);padding:32px;margin-top:40px}
+.notify h3{font-size:21px;letter-spacing:.1em;margin-bottom:8px}
+.notify p{font-size:14.5px;color:var(--ink-2);line-height:1.85}
+.field{display:flex;margin-top:22px;border:1px solid var(--ink);background:var(--paper);border-radius:2px}
+.field:focus-within{outline:2px solid var(--rock);outline-offset:2px}
+.field input{
+  flex:1;min-width:0;border:0;background:transparent;padding:13px 14px;
+  font-family:var(--sans);font-size:15px;color:var(--ink);outline:none;
+}
+.field input::placeholder{color:var(--ink-3)}
+.field .btn{border-radius:0;border:0;border-left:1px solid var(--ink)}
+.form-msg{font-family:var(--sans);font-size:12.5px;margin-top:10px;min-height:1.6em;color:var(--ink-3);letter-spacing:.04em}
+.form-msg.ok{color:var(--rock-deep)}
+.form-msg.err{color:#A3321F}
+.notify ul{margin:20px 0 0;padding:0;list-style:none;font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:2}
+.notify ul li::before{content:"—";color:var(--rock);margin-right:8px}
+
+/* ---------- 页脚 ---------- */
+footer{border-top:1px solid var(--ink);padding:40px 0 48px}
+.foot{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;row-gap:24px;font-family:var(--sans);font-size:13px;color:var(--ink-2);line-height:1.9;letter-spacing:.03em}
+.foot .brand{grid-column:1 / span 4;align-items:flex-start}
+.foot-col{grid-column:span 2}
+.foot-col h5{margin:0 0 6px;font-size:12px;font-weight:400;color:var(--ink-3);letter-spacing:.16em}
+.foot-col a{text-decoration:none}
+.foot-col a:hover{color:var(--rock-deep);text-decoration:underline;text-underline-offset:3px}
+.foot-legal{grid-column:1 / -1;border-top:1px solid var(--rule);padding-top:20px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--ink-3);font-size:12px}
+
+/* ---------- 入场 ---------- */
+.js .rise{opacity:0;transform:translateY(14px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.js .rise.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .js .rise{opacity:1;transform:none;transition:none}
+  .steep-row .track i{transition:none}
+  *{transition-duration:0s!important}
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:1080px){
+  .tea{grid-template-columns:40px minmax(0,2fr) minmax(0,1.6fr) 120px 110px;row-gap:12px}
+  .t-notes{grid-column:2 / span 3;grid-row:2}
+  .t-spec{grid-column:5;grid-row:2;text-align:right}
+  .tea-head .h-notes,.tea-head .h-spec{display:none}
+  .steps{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:32px}
+}
+@media (max-width:900px){
+  section{padding:88px 0}
+  .nav{display:none}
+  .top .menu-btn{display:inline-flex}
+  .nav.open{
+    display:flex;position:absolute;top:64px;left:0;right:0;flex-direction:column;align-items:stretch;gap:0;
+    background:var(--paper);border-bottom:1px solid var(--rule);padding:8px var(--gutter) 20px;
+  }
+  .nav.open a{padding:14px 0;border-bottom:1px solid var(--rule);font-size:15px}
+  .nav.open a::after{display:none}
+  .nav.open .btn{margin:16px 0 0;justify-content:center;border-bottom:1px solid var(--ink)}
+
+  .hero{padding-top:32px}
+  .hero-title{grid-column:1 / span 4;grid-row:1}
+  .hero-art{grid-column:5 / -1;grid-row:1;margin-top:0}
+  .hero-copy{grid-column:1 / -1;grid-row:2;padding-top:32px}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fact{padding:18px 16px 20px 0!important;border-right:0;border-bottom:1px solid var(--rule)}
+  .fact:nth-child(odd){border-right:1px solid var(--rule)}
+  .fact:nth-child(even){padding-left:16px!important}
+
+  .sec-head .idx{grid-column:1 / -1;margin-bottom:10px}
+  .sec-head h2{grid-column:1 / -1;font-size:32px}
+  .sec-head .note{grid-column:1 / -1;margin-top:14px}
+  .sec-head{margin-bottom:40px}
+
+  .thesis{padding-top:96px}
+  .half,.half:first-child{grid-column:1 / -1}
+  .half + .half{margin-top:36px}
+
+  .map{grid-column:1 / -1;position:relative;top:auto}
+  .sites{grid-column:1 / -1;margin-top:32px}
+
+  .params{grid-column:1 / -1}
+  .steeps{grid-column:1 / -1;margin-top:48px}
+
+  .visit-main,.notify{grid-column:1 / -1}
+  .visit-main h2{font-size:32px}
+
+  .tl-chart{display:none}
+  .steps{margin-top:0}
+  .foot .brand{grid-column:1 / -1}
+  .foot-col{grid-column:span 6}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  .hero-grid{column-gap:12px}
+  .hero-title{font-size:58px;grid-column:1 / span 5}
+  .hero-art{grid-column:6 / -1}
+  .lede{font-size:19px}
+  .fact b{font-size:34px}
+
+  .tea-head{display:none}
+  .tea-list{border-top:1px solid var(--ink)}
+  .tea{grid-template-columns:28px 1fr auto;row-gap:10px;column-gap:12px;padding:22px 0}
+  .tea::before{display:none}
+  .t-no{grid-column:1;grid-row:1}
+  .t-name{grid-column:2;grid-row:1;font-size:20px}
+  .t-price{grid-column:3;grid-row:1}
+  .t-origin{grid-column:2 / -1;grid-row:2}
+  .roast{grid-column:2 / -1;grid-row:3;flex-direction:row;align-items:center;gap:12px}
+  .t-notes{grid-column:2 / -1;grid-row:4}
+  .t-spec{grid-column:2 / -1;grid-row:5;text-align:left}
+  .t-price b{font-size:21px}
+
+  .steps{grid-template-columns:1fr;row-gap:0}
+  .step{border-left:0;border-top:1px solid var(--kiln-rule);padding:18px 0 20px;display:grid;grid-template-columns:72px 1fr;column-gap:12px}
+  .step .when{grid-row:1 / span 2;padding-top:6px}
+  .step h4{margin:0 0 4px}
+
+  .param b{font-size:32px}
+  .param:nth-child(odd){padding-right:16px}
+  .param:nth-child(even){padding-left:16px}
+  .steep-row{grid-template-columns:56px 1fr 48px;gap:12px}
+
+  .notify{padding:24px 20px}
+  .map .pins text{font-size:22px}
+  .map .pins text.sub{display:none}
+  .map .aux{font-size:17px}
+  .visit-dl{grid-template-columns:72px 1fr}
+  .thesis-quote{margin-bottom:48px}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+
+<header class="top" id="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="丹崖茶号 首页">
+      <span class="seal" aria-hidden="true"><span>茶号</span><span>丹崖</span></span>
+      <span><span class="brand-name">丹崖茶号</span><span class="brand-sub">武夷 · 正岩 · 炭焙</span></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="主导航">
+      <a href="#menu">本季茶单</a>
+      <a href="#terrain">山场</a>
+      <a href="#kiln">焙火</a>
+      <a href="#brew">冲泡</a>
+      <a class="btn btn--sm" href="#visit">预约品饮</a>
+    </nav>
+    <button class="btn btn--ghost btn--sm menu-btn" id="menuBtn" aria-expanded="false" aria-controls="nav">目录</button>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- 首屏 -->
+<section class="hero" aria-labelledby="h-hero" style="padding-bottom:0">
+  <div class="wrap hero-grid">
+    <h1 class="hero-title" id="h-hero">岩骨花香<span class="sm">武夷正岩</span></h1>
+
+    <div class="hero-art" aria-hidden="true">
+      <svg viewBox="0 0 560 600" role="img">
+        <defs>
+          <clipPath id="cliffA"><path d="M188 520 L206 236 Q210 168 262 160 L436 150 Q492 150 498 214 L522 520 Z"/></clipPath>
+          <clipPath id="cliffB"><path d="M20 520 L46 300 Q54 250 98 246 L196 242 Q234 244 238 290 L254 520 Z"/></clipPath>
+          <linearGradient id="mist" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#F2ECE1" stop-opacity="0"/>
+            <stop offset=".45" stop-color="#F2ECE1" stop-opacity=".9"/>
+            <stop offset=".72" stop-color="#F2ECE1" stop-opacity="1"/>
+            <stop offset="1" stop-color="#F2ECE1" stop-opacity="1"/>
+          </linearGradient>
+        </defs>
+
+        <!-- 远峰 -->
+        <path d="M0 400 Q60 330 120 352 Q170 300 230 330 Q300 270 360 300 Q420 250 480 290 Q530 270 560 300 L560 520 L0 520 Z" fill="#E4D6C6"/>
+
+        <!-- 左侧矮崖 -->
+        <path d="M20 520 L46 300 Q54 250 98 246 L196 242 Q234 244 238 290 L254 520 Z" fill="#D9A68C"/>
+        <g clip-path="url(#cliffB)" stroke="#F2ECE1" stroke-opacity=".45" stroke-width="1.2" fill="none">
+          <path d="M0 270 H260"/><path d="M0 284 H260"/><path d="M0 312 H260"/><path d="M0 330 H260"/>
+          <path d="M0 362 H260"/><path d="M0 390 H260"/><path d="M0 402 H260"/><path d="M0 438 H260"/><path d="M0 470 H260"/>
+          <path d="M92 246 V520" stroke-opacity=".25"/><path d="M168 244 V520" stroke-opacity=".25"/>
+        </g>
+
+        <!-- 主崖：平顶、陡壁、横向岩层，是丹霞地貌的典型轮廓 -->
+        <path d="M188 520 L206 236 Q210 168 262 160 L436 150 Q492 150 498 214 L522 520 Z" fill="#9E4A2F"/>
+        <g clip-path="url(#cliffA)" fill="none" stroke="#F2ECE1" stroke-width="1.1">
+          <g stroke-opacity=".32">
+            <path d="M180 188 H530"/><path d="M180 198 H530"/><path d="M180 222 H530"/>
+            <path d="M180 250 H530"/><path d="M180 258 H530"/><path d="M180 290 H530"/>
+            <path d="M180 318 H530"/><path d="M180 344 H530"/><path d="M180 352 H530"/>
+            <path d="M180 384 H530"/><path d="M180 420 H530"/><path d="M180 432 H530"/><path d="M180 470 H530"/>
+          </g>
+          <!-- 雨水冲刷出的竖向沟痕 -->
+          <g stroke="#7A3622" stroke-opacity=".55" stroke-width="1.4">
+            <path d="M262 168 C258 240 266 300 260 520"/>
+            <path d="M318 160 C322 230 312 330 318 520"/>
+            <path d="M356 156 C352 210 360 260 354 360"/>
+            <path d="M404 152 C410 250 400 340 408 520"/>
+            <path d="M456 156 C452 220 462 300 458 420"/>
+          </g>
+        </g>
+        <!-- 崖顶茶丛 -->
+        <g fill="#5E6650">
+          <ellipse cx="270" cy="160" rx="10" ry="5"/><ellipse cx="292" cy="157" rx="12" ry="5.5"/>
+          <ellipse cx="318" cy="155" rx="9" ry="4.5"/><ellipse cx="380" cy="152" rx="11" ry="5"/>
+          <ellipse cx="420" cy="151" rx="8" ry="4"/><ellipse cx="452" cy="151" rx="10" ry="4.5"/>
+          <ellipse cx="108" cy="245" rx="9" ry="4"/><ellipse cx="150" cy="243" rx="11" ry="4.5"/>
+        </g>
+
+        <!-- 雾 -->
+        <rect x="0" y="420" width="560" height="140" fill="url(#mist)"/>
+
+        <!-- 岩脚茶园：一级级石砌梯田 -->
+        <g stroke="#5E6650" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 7" fill="none" opacity=".9">
+          <path d="M150 516 Q260 504 370 514"/>
+          <path d="M126 530 Q262 518 410 528"/>
+          <path d="M104 544 Q270 532 456 542"/>
+        </g>
+        <!-- 九曲溪 -->
+        <path d="M0 560 C80 540 140 572 230 560 S380 532 450 552 S530 570 560 560" fill="none" stroke="#6E8088" stroke-width="1.4"/>
+        <path d="M30 578 C110 566 170 590 250 580 S400 560 470 574" fill="none" stroke="#6E8088" stroke-width="1" stroke-opacity=".55"/>
+
+        <!-- 标注 -->
+        <g font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#574F45" letter-spacing="1.5">
+          <path d="M498 214 H540" stroke="#574F45" stroke-width=".8"/>
+          <text x="512" y="206">崖顶</text>
+          <path d="M522 470 H546" stroke="#574F45" stroke-width=".8"/>
+          <text x="518" y="462" text-anchor="start">岩壁</text>
+          <text x="150" y="504">岩脚茶园 · 海拔 380 米</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="hero-copy">
+      <p class="label">武夷山 · 正岩产区 · 自 2011 年</p>
+      <p class="lede">茶长在岩缝里，香气焙在炭火上。</p>
+      <p class="body">丹崖是一间只做武夷岩茶的小茶号。我们在慧苑坑一带打理十七亩老茶园，每年只采一季春茶，用龙眼木炭慢焙，等它在秋天退了火气，再交到你手上。</p>
+      <div class="hero-cta">
+        <a class="btn" href="#menu">看本季茶单 <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn--ghost" href="#visit">来茶室坐坐</a>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><b>17<small>亩</small></b><span>自管茶园，分布于慧苑坑、流香涧两侧</span></div>
+      <div class="fact"><b>1<small>季</small></b><span>每年只采春茶，不做夏暑、秋茶</span></div>
+      <div class="fact"><b>3–4<small>道</small></b><span>龙眼木炭复焙，每道间隔二十天</span></div>
+      <div class="fact"><b>860<small>斤</small></b><span>2026 年全年成品茶，售完即止</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 立场 -->
+<section class="thesis" aria-labelledby="h-thesis">
+  <div class="wrap">
+    <h2 class="thesis-quote rise" id="h-thesis"><span class="nw">一泡岩茶，</span><span class="nw"><em>半在山</em>，</span><span class="nw"><em>半在火</em>。</span></h2>
+    <div class="halves">
+      <div class="half rise">
+        <h3>半在山 <span class="label">山场</span></h3>
+        <p>武夷岩茶讲“山场”。同一个品种，长在峡谷深处的坑涧里，和长在平地上的，喝起来是两种茶。岩壁挡住了一半日照，岩石风化成的砾土让根扎得深，涧水带来常年的雾。</p>
+        <p>岩韵——那种喝完舌面发沉、喉底回甘的“骨感”——大半是山给的，人能做的只是不去破坏它。</p>
+      </div>
+      <div class="half rise">
+        <h3>半在火 <span class="label">焙火</span></h3>
+        <p>另一半在焙间。刚做好的毛茶香气浮、水气重，要用炭火一道一道焙进去，香才会从“表面”沉到“汤里”。火太轻，茶不耐泡；火太足，山场的个性就被烤没了。</p>
+        <p>我们的原则是：好山场用轻一点的火，把山的味道留给你。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 茶单 -->
+<section class="menu" id="menu" aria-labelledby="h-menu">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="idx">01 / 本季茶单</span>
+      <h2 id="h-menu">二〇二六 · 秋</h2>
+      <p class="note">以下均为 2026 年春茶，四月下旬采制，十月完成退火。每款数量有限，余量每日更新。</p>
+    </div>
+
+    <ul class="tea-list" role="list">
+      <li class="tea tea-head" aria-hidden="true">
+        <span>#</span><span>茶名</span><span>山场</span><span>焙火</span><span class="h-notes">风味</span><span class="h-spec">规格</span><span style="text-align:right">价格</span>
+      </li>
+
+      <li class="tea">
+        <span class="t-no">01</span>
+        <h3 class="t-name">牛栏坑 · 肉桂<small>品种：肉桂</small></h3>
+        <div class="t-origin">牛栏坑<span class="tag">正岩</span><small>三坑之一，谷窄日照短</small></div>
+        <div class="roast" aria-label="焙火程度：中足火，五级中的第四级">
+          <div class="roast-bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on hot"></i><i></i></div>
+          <span>中足火</span>
+        </div>
+        <p class="t-notes">桂皮与奶油般的辛香，汤感厚滑，第七泡后仍有岩韵。</p>
+        <p class="t-spec">8 克 × 6 泡<br>铁盒</p>
+        <div class="t-price"><b class="num"><i>¥</i>1,280</b><small class="low">余 38 盒</small></div>
+      </li>
+
+      <li class="tea">
+        <span class="t-no">02</span>
+        <h3 class="t-name">慧苑 · 老枞水仙<small>品种：水仙，树龄约 70 年</small></h3>
+        <div class="t-origin">慧苑坑<span class="tag">正岩</span><small>自管茶园，坑底向阳坡</small></div>
+        <div class="roast" aria-label="焙火程度：足火，五级中的第四级">
+          <div class="roast-bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on hot"></i><i></i></div>
+          <span>足火</span>
+        </div>
+        <p class="t-notes">枞味明显，粽叶与旧木头的气息，汤水醇厚，回甘慢而长。</p>
+        <p class="t-spec">8 克 × 8 泡<br>纸盒</p>
+        <div class="t-price"><b class="num"><i>¥</i>760</b><small>余 64 盒</small></div>
+      </li>
+
+      <li class="tea">
+        <span class="t-no">03</span>
+        <h3 class="t-name">流香涧 · 水金龟<small>品种：水金龟</small></h3>
+        <div class="t-origin">流香涧<span class="tag">正岩</span><small>两涧之一，终年有雾</small></div>
+        <div class="roast" aria-label="焙火程度：中火，五级中的第三级">
+          <div class="roast-bar"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+          <span>中火</span>
+        </div>
+        <p class="t-notes">腊梅般的清幽花香，入口甜润，适合刚开始喝岩茶的人。</p>
+        <p class="t-spec">8 克 × 8 泡<br>纸盒</p>
+        <div class="t-price"><b class="num"><i>¥</i>520</b><small>余 90 盒</small></div>
+      </li>
+
+      <li class="tea">
+        <span class="t-no">04</span>
+        <h3 class="t-name">马头岩 · 肉桂<small>品种：肉桂</small></h3>
+        <div class="t-origin">马头岩<span class="tag">正岩</span><small>山势开阔，日照较足</small></div>
+        <div class="roast" aria-label="焙火程度：中火，五级中的第三级">
+          <div class="roast-bar"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+          <span>中火</span>
+        </div>
+        <p class="t-notes">花果香外放，辛锐感比牛栏坑更直接，汤水略薄而清亮。</p>
+        <p class="t-spec">8 克 × 8 泡<br>纸盒</p>
+        <div class="t-price"><b class="num"><i>¥</i>580</b><small>余 72 盒</small></div>
+      </li>
+
+      <li class="tea">
+        <span class="t-no">05</span>
+        <h3 class="t-name">丹崖 · 日常大红袍<small>拼配：肉桂、水仙、黄观音</small></h3>
+        <div class="t-origin">天心村周边<span class="tag tag--muted">半岩</span><small>如实标注，非正岩</small></div>
+        <div class="roast" aria-label="焙火程度：足火，五级中的第四级">
+          <div class="roast-bar"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on hot"></i><i></i></div>
+          <span>足火</span>
+        </div>
+        <p class="t-notes">焦糖与烘烤坚果香，耐泡不挑水，办公室里一壶喝一下午。</p>
+        <p class="t-spec">250 克<br>锡罐</p>
+        <div class="t-price"><b class="num"><i>¥</i>320</b><small>常备</small></div>
+      </li>
+    </ul>
+
+    <div class="menu-foot">
+      <p>价格含顺丰包邮（港澳台及海外除外）。拆封前七日内可退。每单附当季山场笔记一张。</p>
+      <a class="btn btn--ghost" href="#visit">先到茶室试喝 <span class="arr" aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- 山场 -->
+<section class="terrain" id="terrain" aria-labelledby="h-terrain">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="idx">02 / 山场</span>
+      <h2 id="h-terrain">三坑两涧</h2>
+      <p class="note">武夷山风景区内最受推崇的五处产区。我们的茶园和合作茶农，都在这几道峡谷里。</p>
+    </div>
+
+    <div class="terrain-grid">
+      <figure class="map rise" style="margin:0">
+        <svg viewBox="0 0 640 460" aria-label="三坑两涧位置示意图">
+          <!-- 等高线 -->
+          <g fill="none" stroke="#C9BBA6" stroke-width="1">
+            <path d="M60 120 C140 60 280 50 360 90 S560 110 600 190 S560 360 470 400 S240 430 140 380 S20 220 60 120Z"/>
+            <path d="M100 140 C170 92 280 86 350 116 S530 140 560 200 S520 340 450 370 S260 396 170 356 S70 220 100 140Z"/>
+            <path d="M150 165 C210 128 290 124 345 146 S490 170 510 214 S480 318 425 338 S280 360 210 330 S120 230 150 165Z"/>
+            <path d="M205 190 C250 165 300 162 340 178 S445 200 458 230 S430 296 395 306 S300 322 255 300 S180 240 205 190Z" stroke="#B9AC98"/>
+          </g>
+          <!-- 峡谷与涧 -->
+          <g fill="none" stroke="#6E8088" stroke-linecap="round">
+            <path d="M120 300 C170 270 210 268 250 250" stroke-width="1.6"/>
+            <path d="M300 110 C310 160 300 200 318 236" stroke-width="1.6"/>
+            <path d="M440 150 C420 190 400 214 392 250" stroke-width="1.6"/>
+            <path d="M210 380 C250 350 290 340 320 300" stroke-width="2.2"/>
+            <path d="M520 300 C480 300 450 296 420 280" stroke-width="2.2"/>
+          </g>
+          <!-- 九曲溪 -->
+          <path d="M20 440 C90 420 120 448 190 432 S300 404 360 430 S470 452 520 426 S600 410 630 420" fill="none" stroke="#6E8088" stroke-width="2.4" stroke-opacity=".7"/>
+          <text class="aux" x="548" y="452" font-size="11" fill="#6E8088" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif" letter-spacing="2">九曲溪</text>
+          <!-- 天心岩 -->
+          <g font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif" font-size="11" fill="#8A8072" letter-spacing="2">
+            <path d="M330 220 l8 -14 l8 14 z" fill="none" stroke="#8A8072"/>
+            <text class="aux" x="352" y="220">天心岩</text>
+          </g>
+
+          <g class="pins" font-family="'Noto Serif SC','Songti SC','STSong','SimSun',serif" font-size="15" letter-spacing="2">
+            <g class="pin" data-site="nlk" tabindex="0" role="button" aria-label="牛栏坑">
+              <circle class="ring" cx="250" cy="250" r="14" fill="none" stroke="#9E4A2F"/>
+              <circle cx="250" cy="250" r="5" fill="#9E4A2F"/>
+              <text x="234" y="236" text-anchor="end" fill="#211D18">牛栏坑</text>
+            </g>
+            <g class="pin" data-site="hyk" tabindex="0" role="button" aria-label="慧苑坑">
+              <circle class="ring" cx="318" cy="236" r="14" fill="none" stroke="#9E4A2F"/>
+              <circle cx="318" cy="236" r="6.5" fill="#9E4A2F"/>
+              <circle cx="318" cy="236" r="2.2" fill="#F2ECE1"/>
+              <text x="300" y="276" fill="#211D18">慧苑坑</text>
+              <text class="sub" x="300" y="294" font-size="11" fill="#9E4A2F" font-family="-apple-system,'PingFang SC','Microsoft YaHei',sans-serif" letter-spacing="1">自管茶园</text>
+            </g>
+            <g class="pin" data-site="dsk" tabindex="0" role="button" aria-label="倒水坑">
+              <circle class="ring" cx="392" cy="250" r="14" fill="none" stroke="#9E4A2F"/>
+              <circle cx="392" cy="250" r="5" fill="#9E4A2F"/>
+              <text x="410" y="246" fill="#211D18">倒水坑</text>
+            </g>
+            <g class="pin" data-site="lxj" tabindex="0" role="button" aria-label="流香涧">
+              <circle class="ring" cx="320" cy="300" r="14" fill="none" stroke="#9E4A2F"/>
+              <circle cx="320" cy="300" r="5" fill="#9E4A2F"/>
+              <text x="306" y="320" text-anchor="end" fill="#211D18">流香涧</text>
+            </g>
+            <g class="pin" data-site="wyj" tabindex="0" role="button" aria-label="悟源涧">
+              <circle class="ring" cx="420" cy="280" r="14" fill="none" stroke="#9E4A2F"/>
+              <circle cx="420" cy="280" r="5" fill="#9E4A2F"/>
+              <text x="440" y="316" fill="#211D18">悟源涧</text>
+            </g>
+          </g>
+          <!-- 指北 -->
+          <g transform="translate(596 52)" font-family="Georgia,serif" font-size="11" fill="#574F45">
+            <path d="M0 -18 L5 0 L0 -4 L-5 0 Z" fill="#574F45"/>
+            <text x="0" y="16" text-anchor="middle">N</text>
+          </g>
+        </svg>
+        <figcaption><span>位置示意，非实际比例</span><span>武夷山风景区 · 正岩核心区</span></figcaption>
+      </figure>
+
+      <ul class="sites" id="sites" role="list">
+        <li class="site" data-site="hyk">
+          <h4>慧苑坑 <span class="num">海拔 约 400 米</span></h4>
+          <p>三坑中最开阔的一处，品种最杂。我们的十二亩老枞水仙在坑底向阳坡，石砌梯田是上世纪五十年代留下的。</p>
+        </li>
+        <li class="site" data-site="nlk">
+          <h4>牛栏坑 <span class="num">海拔 约 350 米</span></h4>
+          <p>峡谷窄而深，一天只有几个小时直射光。“牛肉”（牛栏坑肉桂）的名声由此而来，产量极少。</p>
+        </li>
+        <li class="site" data-site="dsk">
+          <h4>倒水坑 <span class="num">海拔 约 380 米</span></h4>
+          <p>因坑内溪水倒流而得名。土层偏薄、砾石多，出产的茶香气清扬。</p>
+        </li>
+        <li class="site" data-site="lxj">
+          <h4>流香涧 <span class="num">海拔 约 330 米</span></h4>
+          <p>涧长约一公里，两侧岩壁高耸，雾气终年不散。我们另外五亩茶园在涧口北侧。</p>
+        </li>
+        <li class="site" data-site="wyj">
+          <h4>悟源涧 <span class="num">海拔 约 360 米</span></h4>
+          <p>林木最密的一条涧，湿度高，茶汤偏柔，多与当地老茶农合作收购。</p>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 焙火 -->
+<section class="kiln" id="kiln" aria-labelledby="h-kiln">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="idx">03 / 焙火</span>
+      <h2 id="h-kiln">从四月到十一月</h2>
+      <p class="note">一泡岩茶从采下到能喝，要走大半年。中间大部分时间，它只是在焙笼里、在缸里，安静地等。</p>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-chart rise">
+        <svg viewBox="0 0 1100 170" aria-label="2026 年制茶时间线：四月采制，五月初焙，六至九月炭焙三道，十月退火，十一月开汤">
+          <g font-size="12" fill="#A89C8A" letter-spacing="1">
+            <!-- 月份刻度：4月到11月，每月 137.5 -->
+            <g stroke="#463C31">
+              <path d="M0 140 H1100"/>
+              <path d="M0 132 V148"/><path d="M137.5 136 V144"/><path d="M275 136 V144"/><path d="M412.5 136 V144"/>
+              <path d="M550 136 V144"/><path d="M687.5 136 V144"/><path d="M825 136 V144"/><path d="M962.5 136 V144"/><path d="M1100 132 V148"/>
+            </g>
+            <text x="4" y="166">四月</text><text x="141" y="166">五月</text><text x="279" y="166">六月</text><text x="416" y="166">七月</text>
+            <text x="554" y="166">八月</text><text x="691" y="166">九月</text><text x="829" y="166">十月</text><text x="966" y="166">十一月</text>
+          </g>
+          <!-- 采制 -->
+          <rect x="96" y="96" width="34" height="36" fill="#7A6A58"/>
+          <text x="96" y="86" font-size="12" fill="#ECE3D3" letter-spacing="1">采制</text>
+          <!-- 初焙 -->
+          <rect x="150" y="70" width="26" height="62" fill="#B0643A"/>
+          <text x="150" y="60" font-size="12" fill="#ECE3D3" letter-spacing="1">初焙</text>
+          <!-- 三道炭焙：高度表示焙温 -->
+          <rect x="300" y="44" width="22" height="88" fill="#D07A3E"/>
+          <rect x="470" y="52" width="22" height="80" fill="#D07A3E"/>
+          <rect x="640" y="60" width="22" height="72" fill="#D07A3E"/>
+          <text x="300" y="34" font-size="12" fill="#ECE3D3" letter-spacing="1">一道</text>
+          <text x="470" y="42" font-size="12" fill="#ECE3D3" letter-spacing="1">二道</text>
+          <text x="640" y="50" font-size="12" fill="#ECE3D3" letter-spacing="1">三道</text>
+          <!-- 退火 -->
+          <rect x="700" y="118" width="300" height="14" fill="none" stroke="#A89C8A" stroke-dasharray="3 4"/>
+          <text x="760" y="110" font-size="12" fill="#ECE3D3" letter-spacing="1">退火 · 静置</text>
+          <!-- 开汤 -->
+          <circle cx="1010" cy="125" r="7" fill="#ECE3D3"/>
+          <text x="1022" y="110" font-size="12" fill="#ECE3D3" letter-spacing="1">开汤</text>
+          <!-- 图例 -->
+          <text x="1100" y="20" font-size="11" fill="#A89C8A" text-anchor="end" letter-spacing="1">柱高示意焙温</text>
+        </svg>
+      </div>
+
+      <div class="steps">
+        <div class="step rise"><span class="when">四月下旬</span><h4>采青</h4><p>“中开面”采三到四叶。只在晴天午后采，雨天的青叶不收。</p></div>
+        <div class="step rise"><span class="when">采摘当晚</span><h4>做青</h4><p>摇青六至八次，通宵约十小时。叶缘泛红、青气转为花香才停。</p></div>
+        <div class="step rise"><span class="when">五月</span><h4>初焙</h4><p>俗称“走水焙”，约 120℃ 快速去掉水分，定住香型。</p></div>
+        <div class="step rise"><span class="when">六至九月</span><h4>炭焙</h4><p>龙眼木炭，焙笼埋灰控温 90–110℃，每道八到十二小时，共三至四道。</p></div>
+        <div class="step rise"><span class="when">十月</span><h4>退火</h4><p>入缸静置，让火气慢慢退去。这一步急不得，也省不得。</p></div>
+        <div class="step rise"><span class="when">十一月</span><h4>开汤</h4><p>逐批审评，定下每款茶的名字、价格和这张茶单。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 冲泡 -->
+<section class="brew" id="brew" aria-labelledby="h-brew">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="idx">04 / 冲泡</span>
+      <h2 id="h-brew">一盏的分寸</h2>
+      <p class="note">岩茶不难泡，难的是“快”。记住四个数，再按下面的出汤节奏走一遍。</p>
+    </div>
+    <div class="brew-grid">
+      <div class="params rise">
+        <div class="param"><b class="num">110<small>毫升</small></b><span>白瓷盖碗</span></div>
+        <div class="param"><b class="num">8<small>克</small></b><span>投茶量，一小包</span></div>
+        <div class="param"><b class="num">100<small>℃</small></b><span>沸水，高冲</span></div>
+        <div class="param"><b class="num">8–10<small>泡</small></b><span>足火茶可到十二泡</span></div>
+        <p class="brew-tip">水比器重要。家里没有山泉，用低矿化度的瓶装水即可，避免反复烧开的水。一包茶尽量一次喝完，不要隔夜续泡。</p>
+      </div>
+
+      <div class="steeps rise" id="steeps">
+        <h3>出汤时间</h3>
+        <p>前几泡快进快出，越往后越慢。闷太久，岩茶的苦涩会盖过香气。</p>
+        <div class="steep-row"><span class="k">第 1 泡</span><span class="track"><i style="--w:0.06"></i></span><span class="v">即出</span></div>
+        <div class="steep-row"><span class="k">第 2 泡</span><span class="track"><i style="--w:0.1"></i></span><span class="v">5 秒</span></div>
+        <div class="steep-row"><span class="k">第 3 泡</span><span class="track"><i style="--w:0.14"></i></span><span class="v">7 秒</span></div>
+        <div class="steep-row"><span class="k">第 4 泡</span><span class="track"><i style="--w:0.2"></i></span><span class="v">10 秒</span></div>
+        <div class="steep-row"><span class="k">第 5 泡</span><span class="track"><i style="--w:0.3"></i></span><span class="v">15 秒</span></div>
+        <div class="steep-row"><span class="k">第 6 泡</span><span class="track"><i style="--w:0.4"></i></span><span class="v">20 秒</span></div>
+        <div class="steep-row"><span class="k">第 7 泡</span><span class="track"><i style="--w:0.6"></i></span><span class="v">30 秒</span></div>
+        <div class="steep-row"><span class="k">第 8 泡</span><span class="track"><i style="--w:0.9"></i></span><span class="v">45 秒</span></div>
+        <p class="steep-hint">浅色两格：第一泡用于醒茶，可以喝；第二泡起香气最高，建议先闻盖。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 到访 -->
+<section class="visit" id="visit" aria-labelledby="h-visit">
+  <div class="wrap visit-grid">
+    <div class="visit-main rise">
+      <span class="label" style="color:var(--rock)">05 / 茶室</span>
+      <h2 id="h-visit"><span class="nw">来天心村，</span><span class="nw">喝一泡再说</span></h2>
+      <p>茶室就在焙间隔壁。秋冬焙茶的日子，进门能闻到炭火味。每场只接待四位客人，由做茶的人亲自泡，喝五款，约九十分钟，不推销。</p>
+      <dl class="visit-dl">
+        <dt>地址</dt><dd>福建省武夷山市 武夷街道 天心村 岩茶街 27 号</dd>
+        <dt>开放</dt><dd>周三至周日 10:00–18:00<br><span style="color:var(--ink-3);font-size:14px">春茶季（4 月 15 日 – 5 月 15 日）闭门做茶</span></dd>
+        <dt>品饮</dt><dd><span class="num">¥120</span> / 位，购茶可抵扣，需提前一天预约</dd>
+        <dt>电话</dt><dd><a class="num" href="tel:+8605995231176" style="text-decoration:none">0599 – 523 1176</a></dd>
+      </dl>
+    </div>
+
+    <aside class="notify rise" aria-labelledby="h-notify">
+      <h3 id="h-notify">开汤通知</h3>
+      <p>每年只发两封邮件：十一月新茶开汤，以及三月春茶预订。不发促销。</p>
+      <form id="notifyForm" novalidate>
+        <label for="email" class="label" style="display:block;margin-top:22px;margin-bottom:-12px">电子邮箱</label>
+        <div class="field">
+          <input id="email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" required>
+          <button class="btn" type="submit">订阅</button>
+        </div>
+        <p class="form-msg" id="formMsg" role="status" aria-live="polite"></p>
+      </form>
+      <ul>
+        <li>上一封：2025 年 11 月 18 日</li>
+        <li>订阅人数：<span class="num">2,317</span></li>
+      </ul>
+    </aside>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <a class="brand" href="#top" aria-label="回到顶部">
+      <span class="seal" aria-hidden="true"><span>茶号</span><span>丹崖</span></span>
+      <span><span class="brand-name">丹崖茶号</span><span class="brand-sub">武夷 · 正岩 · 炭焙</span></span>
+    </a>
+    <div class="foot-col">
+      <h5>茶</h5>
+      <a href="#menu">本季茶单</a><br>
+      <a href="#terrain">山场</a><br>
+      <a href="#kiln">焙火</a>
+    </div>
+    <div class="foot-col">
+      <h5>喝</h5>
+      <a href="#brew">冲泡</a><br>
+      <a href="#visit">茶室预约</a><br>
+      <a href="#visit">开汤通知</a>
+    </div>
+    <div class="foot-col">
+      <h5>联系</h5>
+      <a href="tel:+8605995231176">0599 – 523 1176</a><br>
+      微信公众号：丹崖茶号
+    </div>
+    <div class="foot-col">
+      <h5>售后</h5>
+      拆封前七日可退<br>
+      顺丰包邮
+    </div>
+    <div class="foot-legal">
+      <span>© 2011–2026 武夷山市丹崖茶业有限公司</span>
+      <span>食品经营许可与 SC 编号见产品包装</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var doc=document.documentElement;
+  doc.classList.add('js');
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // 顶栏描边
+  var top=document.getElementById('top');
+  function onScroll(){top.classList.toggle('is-scrolled',window.scrollY>8)}
+  onScroll();window.addEventListener('scroll',onScroll,{passive:true});
+
+  // 移动端目录
+  var btn=document.getElementById('menuBtn'),nav=document.getElementById('nav');
+  btn.addEventListener('click',function(){
+    var open=nav.classList.toggle('open');
+    btn.setAttribute('aria-expanded',open);
+    btn.textContent=open?'收起':'目录';
+  });
+  nav.addEventListener('click',function(e){
+    if(e.target.tagName==='A'&&nav.classList.contains('open')){nav.classList.remove('open');btn.setAttribute('aria-expanded','false');btn.textContent='目录';}
+  });
+
+  // 入场
+  var rises=[].slice.call(document.querySelectorAll('.rise'));
+  if(reduce||!('IntersectionObserver' in window)){
+    rises.forEach(function(el){el.classList.add('in')});
+  }else{
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(!en.isIntersecting)return;
+        en.target.classList.add('in');
+        io.unobserve(en.target);
+      });
+    },{rootMargin:'0px 0px -10% 0px',threshold:.12});
+    rises.forEach(function(el){io.observe(el)});
+  }
+
+  // 山场：地图与列表互相指认
+  var sites=document.getElementById('sites');
+  var pins=[].slice.call(document.querySelectorAll('.pin'));
+  var items=[].slice.call(sites.querySelectorAll('.site'));
+  function focus(key){
+    sites.classList.toggle('has-focus',!!key);
+    pins.forEach(function(p){p.classList.toggle('is-active',p.dataset.site===key)});
+    items.forEach(function(it){it.classList.toggle('is-active',it.dataset.site===key)});
+  }
+  pins.forEach(function(p){
+    p.addEventListener('mouseenter',function(){focus(p.dataset.site)});
+    p.addEventListener('mouseleave',function(){focus(null)});
+    p.addEventListener('focus',function(){focus(p.dataset.site)});
+    p.addEventListener('blur',function(){focus(null)});
+    p.addEventListener('click',function(){focus(p.dataset.site)});
+  });
+  items.forEach(function(it){
+    it.addEventListener('mouseenter',function(){focus(it.dataset.site)});
+    it.addEventListener('mouseleave',function(){focus(null)});
+  });
+
+  // 订阅表单（演示：不发送任何数据）
+  var form=document.getElementById('notifyForm'),msg=document.getElementById('formMsg'),email=document.getElementById('email');
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var v=email.value.trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){
+      msg.className='form-msg err';msg.textContent='这个邮箱地址好像不完整，再看一眼？';email.focus();return;
+    }
+    msg.className='form-msg ok';msg.textContent='已记下。十一月开汤那天见。';
+    form.querySelector('button').disabled=true;email.disabled=true;
+  });
+})();
+</script>
+</body>
+</html>

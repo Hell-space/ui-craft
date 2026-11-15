@@ -1,0 +1,33 @@
+{
+  "desk": "对花台",
+  "footer": "采用本次结果",
+  "items": [
+    "W–27",
+    "S–03"
+  ],
+  "workOrder": {
+    "sampleId": "W–27",
+    "signedMasterId": "S–03",
+    "matchAt": "同一条拼缝",
+    "units": "mm"
+  },
+  "measurements": {
+    "W–27": {
+      "repeatLengthMm": 41,
+      "joinMarkMm": 12
+    },
+    "S–03": {
+      "repeatLengthMm": 40,
+      "joinMarkMm": 9
+    }
+  },
+  "store": [
+    "workOrder",
+    "camera",
+    "acceptedSampleId"
+  ],
+  "drawing": {
+    "weftGuide": null,
+    "transform": "pan / rotate + zoom"
+  }
+}

@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>周六前还 1 本 · 青梧路社区图书馆</title>
+<script>document.documentElement.classList.add('js');setTimeout(function(){if(!window.Motion)document.documentElement.classList.add('no-motion')},1500)</script>
+<!--
+  档位：3 叙事（个人中心的"今日"页）
+  这一屏回答：接下来我要去图书馆做什么，最晚哪天。
+  立场：一张夹在书后的期限表，而不是一个账户后台。
+  否掉：封面墙阅读 App / 电商订单列表加彩色胶囊 / 图书馆系统原样表格 / 阅读打卡徽章
+  贯穿装置：书架 + 日期章。四本在借的书画成书脊立在架上，快到期的那本被抽出一截、夹着红书签；
+            下面每本书一条期限线，书脊色就是那本书封面的主色。日期盖成章，续借时"啪"地盖一枚新的。
+  五个来源：尺度（136px 日期）· 色面（印油蓝的深色舞台）· 光（舞台光、书脊高光与投影）
+            · 物件（书脊、书签、到馆小票）· 运动（首屏编排、书脊依次立起、盖章、FLIP 移动期限端点、数字滚动）
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,400..600&family=Noto+Serif+SC:wght@600&display=swap" rel="stylesheet">
+<style>
+/*MOTION_CSS*/
+
+:root {
+  color-scheme: light dark;
+  --bg:            light-dark(#F3EEE2, #171512);
+  --surface:       light-dark(#FBF8F0, #1F1C18);
+  --sunken:        light-dark(#EAE4D6, #12100D);
+  --border:        light-dark(#DED6C5, #312C25);
+  --border-strong: light-dark(#C9BFAB, #463F35);
+  --text:          light-dark(#1E1B17, #ECE5D8);
+  --muted:         light-dark(#524C44, #B8AE9C);
+  --subtle:        light-dark(#6A6357, #988F7F);
+  --faint:         light-dark(#8E8575, #6C6457);
+  /* 两种印油 */
+  --stamp:         light-dark(#3F4C8C, #AEB8EA);
+  --stamp-tint:    light-dark(#E6E7F1, #23263A);
+  --due:           light-dark(#B0362C, #E8857A);
+  /* 舞台：印油蓝铺成的深色面 */
+  --stage:         #1D2347;
+  --stage-ink:     #F4EFE4;
+  --stage-muted:   #B9BCD6;
+  --stage-due:     #FF9A85;
+  --shade: 40 28 12;
+  --shadow-1: 0 1px 1px rgb(var(--shade) / .05), 0 1px 3px rgb(var(--shade) / .06);
+  --shadow-2: 0 1px 2px rgb(var(--shade) / .06), 0 4px 10px -2px rgb(var(--shade) / .08);
+  --shadow-3: 0 2px 4px rgb(var(--shade) / .06), 0 12px 24px -6px rgb(var(--shade) / .12);
+  --shadow-lift: 0 2px 4px rgb(var(--shade) / .06), 0 16px 32px -10px rgb(var(--shade) / .2);
+
+  --font-sans: -apple-system, "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "HarmonyOS Sans SC",
+               "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --font-serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --font-num: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  --hi: light-dark(rgb(255 255 255 / .65), rgb(255 255 255 / .05));   /* 表面顶边高光，暗色里要很弱 */
+  --gutter: clamp(1.25rem, 5vw, 3.5rem);
+  --today: 48.05;   /* 11.11 在 10.05–12.21 这 77 天里的位置（%） */
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"]  { color-scheme: dark; --shade: 0 0 0; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 0.9375rem/1.75 var(--font-sans);
+       -webkit-font-smoothing: antialiased; text-autospace: normal; line-break: strict; }
+h1, h2, p, ol, ul, dl, dd { margin: 0; padding: 0; }
+ol, ul { list-style: none; }
+button { font: inherit; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--stamp); outline-offset: 2px; border-radius: 3px; }
+::selection { background: color-mix(in srgb, var(--stamp) 22%, transparent); }
+.wrap { max-width: 76rem; margin-inline: auto; padding-inline: var(--gutter); }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* 日期章：盖上去的，所以略歪 */
+.stamp { display: inline-block; padding: 3px 7px 2px; font: 500 0.8125rem/1 var(--font-mono); letter-spacing: .04em;
+         font-variant-numeric: tabular-nums; color: var(--stamp); border: 1.5px solid currentColor; border-radius: 3px;
+         transform: rotate(var(--tilt, -1.5deg)); }
+.stamp.due { color: var(--due); }
+
+/* ================================================================ 顶栏 */
+.top { position: sticky; top: 0; z-index: 20; transition: background-color 240ms var(--ease-out-quart), box-shadow 240ms; }
+.top.scrolled { background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(14px) saturate(1.5);
+                box-shadow: 0 1px 0 var(--border); }
+.top .wrap { display: flex; align-items: center; gap: 1.5rem; height: 3.5rem; }
+.brand { display: flex; align-items: center; gap: .625rem; margin-right: auto; text-decoration: none;
+         font: 600 1.0625rem/1 var(--font-serif); letter-spacing: .1em; }
+.brand svg { width: 22px; height: 22px; color: var(--stamp); }
+.nav { display: flex; gap: .25rem; }
+.nav a { padding: 0 .75rem; line-height: 2rem; border-radius: 6px; font-size: .8125rem; color: var(--muted); text-decoration: none;
+         transition: background-color 160ms var(--ease-out-quart), color 160ms; }
+.nav a:hover { background: color-mix(in srgb, var(--text) 6%, transparent); color: var(--text); }
+.nav a[aria-current] { color: var(--text); font-weight: 600; }
+.card-no { font-size: .75rem; color: var(--subtle); white-space: nowrap; }
+
+/* ================================================================ 舞台 */
+.stage {
+  position: relative; isolation: isolate; overflow: hidden; color: var(--stage-ink);
+  margin: .5rem clamp(.5rem, 1.5vw, 1.25rem) 0; border-radius: 20px;
+  background:
+    radial-gradient(70% 90% at 82% 18%, #3A4690 0%, transparent 62%),
+    radial-gradient(55% 70% at 8% 100%, #4A2A3A 0%, transparent 70%),
+    linear-gradient(180deg, #222A55, var(--stage));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .08), var(--shadow-3);
+}
+.stage::after {   /* 颗粒：让深色面像一块印了油墨的卡纸 */
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .32; mix-blend-mode: overlay;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.stage-grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 2rem clamp(2rem, 5vw, 5rem);
+              align-items: end; padding: clamp(2.5rem, 2rem + 4vw, 4.5rem) clamp(1.5rem, 4vw, 4rem) 0; }
+.eyebrow { font: 500 .8125rem/1.4 var(--font-sans); letter-spacing: .06em; font-variant-numeric: tabular-nums; color: var(--stage-muted); }
+h1 { margin-top: 1rem; font: 600 clamp(1.75rem, 1.2rem + 2.2vw, 2.625rem)/1.3 var(--font-serif); letter-spacing: .04em; }
+.when { display: flex; align-items: flex-end; gap: 1.125rem; margin-top: 1.5rem; }
+.date { font: 500 clamp(5rem, 2.4rem + 10vw, 9.5rem)/.8 var(--font-num); letter-spacing: -.04em; margin-left: -.05em;
+        font-variant-numeric: lining-nums tabular-nums; color: #FFFDF7; text-shadow: 0 2px 30px rgb(150 160 255 / .25); }
+.when .side { display: grid; gap: .375rem; padding-bottom: .5rem; }
+.when .dow { font: 600 1.25rem/1.2 var(--font-serif); letter-spacing: .08em; }
+.left { display: inline-flex; align-items: center; gap: .375rem; padding: .25rem .625rem; border-radius: 999px; width: max-content;
+        font-size: .8125rem; font-weight: 600; line-height: 1.2; color: var(--stage-due); background: rgb(255 154 133 / .12);
+        box-shadow: inset 0 0 0 1px rgb(255 154 133 / .3); }
+.left::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px rgb(255 154 133 / .2); }
+.say { max-width: 32em; margin-top: 1.75rem; color: var(--stage-muted); }
+.say b { color: var(--stage-ink); font-weight: 600; white-space: nowrap; }   /* 书名不拆行 */
+.acts { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.25rem; margin-top: 1.75rem; padding-bottom: clamp(2.5rem, 4vw, 4rem); }
+.btn { display: inline-flex; align-items: center; gap: .5rem; height: 2.75rem; padding: 0 1.25rem; border: 0; border-radius: 10px;
+       font-size: .9375rem; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.btn-paper { background: linear-gradient(#FFFDF7, #EFE9DC); color: #1D2347;
+             box-shadow: inset 0 1px 0 #fff, 0 1px 1px rgb(0 0 0 / .2), 0 8px 20px -8px rgb(0 0 0 / .5); }
+.btn-paper:hover { background: linear-gradient(#FFFFFF, #F6F1E6); }
+.btn-paper svg { width: 16px; height: 16px; }
+.btn-paper .n { display: inline-block; min-width: .6em; text-align: center; }
+.acts .hint { font-size: .8125rem; color: var(--stage-muted); }
+
+.stage :focus-visible { outline-color: #FFFDF7; }
+
+/* ---------------- 书架 */
+.shelf-wrap { position: relative; align-self: end; }
+.shelf-wrap::before {   /* 舞台光：书架后面的一团光 */
+  content: ""; position: absolute; inset: -30% -15% -5%; z-index: -1;
+  background: radial-gradient(50% 50% at 50% 60%, rgb(140 155 255 / .32), transparent 70%); filter: blur(10px);
+}
+.shelf { display: flex; align-items: flex-end; justify-content: center; gap: 6px; height: 21rem; padding: 0 1rem; }
+.spine {
+  --c: #555; --ink: #F6EFE2;
+  position: relative; width: var(--w); height: var(--h); flex: none; border-radius: 4px 4px 2px 2px; cursor: pointer;
+  color: var(--ink); text-decoration: none;
+  background:
+    linear-gradient(90deg, rgb(0 0 0 / .28) 0, rgb(0 0 0 / 0) 10%, rgb(255 255 255 / .14) 28%, rgb(255 255 255 / 0) 50%, rgb(0 0 0 / .18) 100%),
+    linear-gradient(transparent 1.6rem, rgb(255 255 255 / .18) 1.6rem, rgb(255 255 255 / .18) calc(1.6rem + 1px), transparent calc(1.6rem + 1px),
+                    transparent calc(100% - 1.7rem), rgb(0 0 0 / .2) calc(100% - 1.7rem), rgb(0 0 0 / .2) calc(100% - 1.7rem + 1px), transparent calc(100% - 1.7rem + 1px)),
+    var(--c);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .25), 0 1px 0 rgb(0 0 0 / .3), 6px 10px 22px -8px rgb(0 0 0 / .55);
+}
+/* 书脊既要参与入场编排（transform），又要被抽出、被 hover 抬起（translate，独立属性，不会互相覆盖） */
+.js .shelf .spine, .shelf .spine {
+  transition: opacity 500ms var(--ease-out-quart), transform var(--spring-gentle-dur) var(--spring-gentle),
+              translate var(--spring-smooth-dur) var(--spring-smooth), box-shadow 300ms var(--ease-out-quart);
+  transition-delay: calc(var(--i, 0) * 90ms + var(--delay, 0ms)), calc(var(--i, 0) * 90ms + var(--delay, 0ms)), 0ms, 0ms;
+}
+.spine .t { position: absolute; top: 2.4rem; left: 50%; translate: -50% 0; writing-mode: vertical-rl; white-space: nowrap;
+            font: 600 1.0625rem/1 var(--font-serif); letter-spacing: .14em; text-shadow: 0 1px 0 rgb(0 0 0 / .25); }
+.spine .a { position: absolute; bottom: .6rem; left: 50%; translate: -50% 0; writing-mode: vertical-rl; white-space: nowrap;
+            font-size: .6875rem; line-height: 1; letter-spacing: .12em; opacity: .72; }
+.spine .no { position: absolute; top: .45rem; left: 0; right: 0; text-align: center; font: 500 .625rem/1 var(--font-mono); opacity: .6; }
+@media (hover: hover) { .spine:hover { translate: 0 -10px; } }
+.spine.out { translate: 0 -34px; }
+@media (hover: hover) { .spine.out:hover { translate: 0 -42px; } }
+.spine.lean { rotate: 4deg; transform-origin: 100% 100%; margin-right: 2px; }
+.ribbon { position: absolute; top: -1.6rem; right: 22%; width: 14px; height: 3.2rem; z-index: -1;
+          background: linear-gradient(90deg, #C23A2E, #E0533F 60%, #B5332A); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+          box-shadow: 0 2px 6px rgb(0 0 0 / .3); }
+.bookend { width: 18px; height: 7rem; align-self: flex-end; border-radius: 3px 10px 2px 2px;
+           background: linear-gradient(90deg, #8E929F, #C9CCD6 40%, #7C808C); box-shadow: inset 0 1px 0 rgb(255 255 255 / .5), 4px 8px 16px -6px rgb(0 0 0 / .5); }
+.board { height: 14px; margin: 0 -.5rem; border-radius: 3px 3px 0 0;
+         background: linear-gradient(#7A5C3E, #5B4029); box-shadow: inset 0 1px 0 rgb(255 255 255 / .25), 0 -1px 0 rgb(0 0 0 / .2), 0 18px 30px -12px rgb(0 0 0 / .6); }
+.shelf-cap { display: flex; justify-content: space-between; margin-top: .75rem; padding-bottom: 1.25rem; font-size: .75rem; color: var(--stage-muted); }
+.shelf-cap .mono { color: var(--stage-ink); }
+
+/* ================================================================ 版心 */
+.page { display: grid; grid-template-columns: minmax(0, 1fr) 17rem; gap: 3rem clamp(2rem, 4vw, 4rem); align-items: start;
+        padding-block: clamp(3rem, 6vw, 4.5rem) 5rem; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding-bottom: .875rem; }
+h2 { font: 600 1.375rem/1.3 var(--font-serif); letter-spacing: .06em; }
+.sec-head span { font-size: .8125rem; color: var(--subtle); }
+
+/* ---------------- 期限表：一张卡片 */
+.ledger { background: var(--surface); border-radius: 16px; padding: .5rem 1.5rem 1.25rem;
+          box-shadow: inset 0 1px 0 var(--hi), 0 0 0 1px var(--border), var(--shadow-2); }
+.loans { --cols: 1.25rem minmax(0, 12rem) minmax(0, 1fr) 6rem 8.5rem; }
+.axis, .loan { display: grid; grid-template-columns: var(--cols); column-gap: 1rem; align-items: center; }
+.axis { border-bottom: 1px solid var(--border); height: 2.75rem; }
+.axis .lab { grid-column: 2; font-size: .75rem; letter-spacing: .14em; color: var(--subtle); }
+.scale { grid-column: 3; position: relative; height: 100%; }
+.scale span { position: absolute; top: 50%; translate: 0 -50%; left: calc(var(--at) * 1%); font-size: .75rem; color: var(--faint); white-space: nowrap; }
+.scale .now { left: calc(var(--today) * 1%); translate: -50% -50%; padding: .125rem .5rem; border-radius: 999px;
+              font: 500 .6875rem/1.4 var(--font-mono); color: var(--bg); background: var(--text); }
+.axis .lab2 { grid-column: 4; font-size: .75rem; letter-spacing: .14em; color: var(--subtle); }
+.loan { min-height: 5.5rem; padding-block: 1rem; border-bottom: 1px solid var(--border); border-radius: 10px;
+        transition: background-color 200ms var(--ease-out-quart); }
+.loan:last-child { border-bottom: 0; }
+.loan { scroll-margin-top: 6rem; }
+.loan:target { animation: found 1.8s var(--ease-out-quart); }
+@keyframes found { 0%, 25% { background: color-mix(in srgb, var(--c) 16%, transparent); } }
+@media (hover: hover) { .loan:hover { background: color-mix(in srgb, var(--text) 3%, transparent); } }
+.chip { width: 10px; height: 2.75rem; border-radius: 2px; background: var(--c);
+        box-shadow: inset 0 1px 0 rgb(255 255 255 / .25), inset 2px 0 0 rgb(0 0 0 / .15); justify-self: center; }
+.book .t { font-weight: 600; line-height: 1.45; text-wrap: pretty; }
+.book .a { font-size: .8125rem; color: var(--muted); line-height: 1.5; }
+.book .c { font-size: .75rem; color: var(--subtle); line-height: 1.5; margin-top: .125rem; }
+.book .c { display: flex; flex-wrap: wrap; column-gap: .75em; }
+.book .c span { white-space: nowrap; }
+
+.line { position: relative; height: 100%; min-height: 2.5rem; }
+.line::before { content: ""; position: absolute; top: -1rem; bottom: -1rem; left: calc(var(--today) * 1%); width: 1px; background: var(--text); opacity: .7; }
+.line i { position: absolute; top: 50%; height: 8px; margin-top: -4px; border-radius: 4px; }
+.line .track { left: calc(var(--s) * 1%); width: calc((var(--o, var(--d)) - var(--s)) * 1%); background: var(--sunken);
+               box-shadow: inset 0 0 0 1px var(--border); }
+.line .gone { left: calc(var(--s) * 1%); width: calc((min(var(--today), var(--d)) - var(--s)) * 1%);
+              background: linear-gradient(90deg, color-mix(in srgb, var(--c) 55%, var(--bg)), var(--c)); }
+.line .ext { left: calc(var(--o, var(--d)) * 1%); width: calc((var(--d) - var(--o, var(--d))) * 1%); transform-origin: 0 50%;
+             background: repeating-linear-gradient(135deg, var(--stamp) 0 2px, color-mix(in srgb, var(--stamp) 20%, transparent) 2px 5px); }
+.line .end { left: calc(var(--d) * 1%); width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%;
+             background: var(--surface); box-shadow: inset 0 0 0 2.5px var(--stamp), 0 1px 3px rgb(var(--shade) / .2); }
+.loan.soon .line .end { box-shadow: inset 0 0 0 2.5px var(--due), 0 0 0 5px color-mix(in srgb, var(--due) 18%, transparent); }
+.duecol { display: grid; justify-items: start; gap: .375rem; }
+.duecol .rest { font-size: .75rem; color: var(--muted); line-height: 1.4; white-space: nowrap; }
+.loan.soon .duecol .rest { color: var(--due); font-weight: 600; }
+.act { display: flex; justify-content: flex-end; }
+.act .why { font-size: .75rem; line-height: 1.5; color: var(--subtle); text-align: right; text-wrap: balance; }
+.btn-line { height: 2.125rem; padding: 0 .875rem; border-radius: 8px; font-size: .8125rem; color: var(--text);
+            background: linear-gradient(var(--surface), color-mix(in srgb, var(--surface) 92%, var(--text)));
+            box-shadow: inset 0 1px 0 var(--hi), 0 0 0 1px var(--border-strong), var(--shadow-1); }
+.btn-line:hover { box-shadow: inset 0 1px 0 var(--hi), 0 0 0 1px var(--subtle), var(--shadow-2); }
+.foot-note { margin-top: 1rem; font-size: .75rem; color: var(--subtle); }
+.legend { display: inline-flex; gap: 1.25rem; flex-wrap: wrap; }
+.legend i { display: inline-block; width: 18px; height: 6px; margin-right: .375rem; border-radius: 3px; vertical-align: .1em; }
+.legend .l1 { background: var(--text); opacity: .55; } .legend .l2 { background: var(--sunken); box-shadow: inset 0 0 0 1px var(--border); }
+.legend .l3 { background: repeating-linear-gradient(135deg, var(--stamp) 0 2px, transparent 2px 5px); }
+
+/* ---------------- 侧栏 */
+aside { display: grid; gap: 2rem; }
+.ticket { position: relative; padding: 1.125rem 1.25rem 1rem; border-radius: 14px; background: var(--stamp-tint);
+          box-shadow: inset 0 1px 0 var(--hi), 0 0 0 1px color-mix(in srgb, var(--stamp) 18%, transparent), var(--shadow-2);
+          --cut: 6.5rem;
+          --mask: radial-gradient(circle 7px at 0 var(--cut), #0000 98%, #000) left / 51% 100% no-repeat,
+                  radial-gradient(circle 7px at 100% var(--cut), #0000 98%, #000) right / 51% 100% no-repeat;
+          -webkit-mask: var(--mask); mask: var(--mask); }
+.ticket .k { font: 600 .75rem/1.4 var(--font-sans); letter-spacing: .08em; color: var(--stamp); }
+.ticket .t { margin-top: .375rem; font: 600 1.125rem/1.35 var(--font-serif); letter-spacing: .04em; }
+.ticket .a { font-size: .8125rem; color: var(--muted); }
+.ticket::after { content: ""; position: absolute; left: 12px; right: 12px; top: var(--cut); border-top: 1.5px dashed color-mix(in srgb, var(--stamp) 32%, transparent); }
+.ticket .head { min-height: calc(var(--cut) - 1.125rem); }
+.ticket .head + .row { margin-top: .875rem; }
+.ticket .row { display: flex; justify-content: space-between; align-items: center; font-size: .8125rem; color: var(--muted); }
+.ticket .row b { font-weight: 600; color: var(--text); }
+.hold2 { padding: 1rem 0; border-top: 1px solid var(--border); }
+.hold2 .t { font-weight: 600; line-height: 1.45; }
+.hold2 .a { font-size: .8125rem; color: var(--muted); }
+.queue { display: flex; gap: 4px; margin-top: .625rem; }
+.queue i { width: 22px; height: 6px; border-radius: 3px; background: var(--border-strong); }
+.queue i.me { background: var(--stamp); }
+.queue + p { margin-top: .375rem; font-size: .75rem; color: var(--subtle); }
+.hours { width: 100%; border-collapse: collapse; font-size: .8125rem; font-variant-numeric: tabular-nums; }
+.hours th, .hours td { padding: .5rem 0; border-bottom: 1px solid var(--border); text-align: left; font-weight: 400; line-height: 1.5; }
+.hours td { text-align: right; font: .75rem var(--font-mono); color: var(--muted); }
+.hours .go th { font-weight: 600; }
+.hours .go th::after { content: "去还书"; margin-left: .5rem; padding: .0625rem .375rem; border-radius: 4px; font-size: .6875rem; font-weight: 500;
+                       color: var(--stamp); background: var(--stamp-tint); }
+.hours .go td { color: var(--text); font-weight: 500; }
+.hours .off td { font-family: var(--font-sans); color: var(--subtle); }
+.addr { margin-top: .75rem; font-size: .75rem; color: var(--subtle); line-height: 1.6; }
+
+footer { border-top: 1px solid var(--border); padding-block: 1.5rem 3rem; }
+footer p { font-size: .75rem; color: var(--subtle); }
+
+/* ================================================================ 响应 */
+@media (max-width: 1080px) {
+  .page { grid-template-columns: minmax(0, 1fr); }
+  aside { grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr)); gap: 2rem 2.5rem; }
+}
+@media (max-width: 860px) {
+  .stage-grid { grid-template-columns: minmax(0, 1fr); }
+  .shelf { height: 17rem; }
+  .spine { width: calc(var(--w) * .82); height: calc(var(--h) * .8); }
+  .nav { display: none; }
+  .ledger { padding: .25rem 1rem 1rem; }
+  .axis { display: none; }
+  .loan { grid-template-columns: .75rem minmax(0, 1fr) auto; grid-template-rows: auto auto auto; row-gap: .625rem; padding-block: 1.125rem; }
+  .chip { grid-row: 1; height: 2.5rem; width: 6px; }
+  .book { grid-column: 2; grid-row: 1; }
+  .act { grid-column: 3; grid-row: 1; align-self: start; }
+  .line { grid-column: 1 / -1; grid-row: 2; min-height: 1.5rem; }
+  .line::before { top: -.25rem; bottom: -.25rem; }
+  .duecol { grid-column: 1 / -1; grid-row: 3; display: flex; align-items: center; gap: .75rem; }
+  .act .why { max-width: 8em; }
+  .btn-line { height: 2.75rem; }
+}
+@media (prefers-reduced-motion: reduce) { .spine, .loan { transition: none; } }
+</style>
+</head>
+<body>
+
+<header class="top" id="top">
+  <div class="wrap">
+    <a class="brand" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5.5A1.5 1.5 0 0 1 5.5 4H9v15.5H5.5A1.5 1.5 0 0 1 4 19.5Z"/><path d="M9 4h3.5v15.5H9"/><path d="m14.2 5.3 3.4-.9 3.4 13.6-3.4.9z"/></svg>青梧路社区图书馆</a>
+    <nav class="nav" aria-label="主导航"><a href="#" aria-current="page">我的借阅</a><a href="#">找书</a><a href="#">活动</a></nav>
+    <span class="card-no mono" title="读者证号">证 0027 4416</span>
+  </div>
+</header>
+
+<section class="stage" aria-labelledby="h">
+  <div class="stage-grid">
+    <div>
+      <p class="eyebrow" data-reveal style="--delay:60ms">11 月 11 日 周三 · 在借 4 本，可借 8 本</p>
+      <h1 id="h" data-split style="--delay:120ms">周六前，去一趟图书馆</h1>
+      <div class="when">
+        <span class="date" data-reveal="blur" style="--delay:260ms" aria-label="11 月 14 日">11.14</span>
+        <span class="side" data-reveal="left" style="--delay:420ms"><span class="dow">周六</span><span class="left">还有 3 天</span></span>
+      </div>
+      <p class="say" id="say" data-reveal style="--delay:480ms">还<b>《长安的荔枝》</b>——有 2 位读者在等它，不能续借。顺便取走已经到馆的<b>《克拉拉与太阳》</b>，它只留到周日。另外 <b class="mono" id="cnt">2</b> 本还能续借 14 天。</p>
+      <div class="acts" id="acts" data-reveal style="--delay:540ms">
+        <button class="btn btn-paper pressable" id="renewAll" type="button">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9"/><path d="M13.5 2.5v3h-3"/></svg>
+          续借这 <span class="n" id="n">2</span> 本</button>
+        <span class="hint">每本书可以续借一次，延 14 天</span>
+      </div>
+    </div>
+
+    <div class="shelf-wrap" data-reveal="fade" style="--delay:200ms">
+      <div class="shelf" data-stagger>
+        <a class="spine out" href="#b-a" data-reveal="up" style="--w:3.4rem;--h:17rem;--c:#B4432F;--delay:300ms" aria-label="长安的荔枝，周六到期">
+          <span class="ribbon" aria-hidden="true"></span><span class="no">M118</span><span class="t">长安的荔枝</span><span class="a">马伯庸</span></a>
+        <a class="spine" href="#b-b" data-reveal="up" style="--w:4.2rem;--h:19rem;--c:#2E4566;--delay:300ms" aria-label="置身事内">
+          <span class="no">L215</span><span class="t">置身事内</span><span class="a">兰小欢</span></a>
+        <a class="spine" href="#b-c" data-reveal="up" style="--w:3.7rem;--h:18rem;--c:#2F4B3B;--delay:300ms" aria-label="额尔古纳河右岸">
+          <span class="no">C552</span><span class="t">额尔古纳河右岸</span><span class="a">迟子建</span></a>
+        <a class="spine lean" href="#b-d" data-reveal="up" style="--w:3.1rem;--h:15.5rem;--c:#C9A33E;--ink:#2A2210;--delay:300ms" aria-label="杂草的故事">
+          <span class="no">M451</span><span class="t">杂草的故事</span><span class="a">梅比</span></a>
+        <span class="bookend" data-reveal="up" style="--delay:300ms" aria-hidden="true"></span>
+      </div>
+      <div class="board" aria-hidden="true"></div>
+      <p class="shelf-cap"><span>你书架上的 4 本</span><span>最早到期 <span class="mono">11.14</span></span></p>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+  <div class="page">
+    <section aria-labelledby="h-loans">
+      <div class="sec-head" data-reveal><h2 id="h-loans">期限表</h2><span>按到期先后</span></div>
+      <div class="ledger loans" data-reveal style="--delay:60ms">
+        <div class="axis" aria-hidden="true">
+          <span class="lab">书</span>
+          <div class="scale"><span style="--at:0">10 月</span><span style="--at:74.03">12 月</span><span class="now">今天</span></div>
+          <span class="lab2">应还</span>
+        </div>
+        <ol data-stagger>
+          <li class="loan soon" id="b-a" data-reveal style="--s:15.58;--d:51.95;--c:#B4432F">
+            <span class="chip" aria-hidden="true"></span>
+            <div class="book"><p class="t">长安的荔枝</p><p class="a">马伯庸</p><p class="c mono"><span>10.17 借出</span><span>I247.53/M118</span></p></div>
+            <div class="line" aria-hidden="true"><i class="track"></i><i class="gone"></i><i class="ext"></i><i class="end"></i></div>
+            <div class="duecol"><span class="stamp due" style="--tilt:-2.5deg">11.14</span><span class="rest">周六 · 还有 3 天</span></div>
+            <div class="act"><p class="why">有 2 人在等，不能续借</p></div>
+          </li>
+          <li class="loan" id="b-b" data-reveal style="--s:1.30;--o:37.66;--d:55.84;--c:#2E4566">
+            <span class="chip" aria-hidden="true"></span>
+            <div class="book"><p class="t">置身事内：中国政府与经济发展</p><p class="a">兰小欢</p><p class="c mono"><span>10.06 借出</span><span>11.03 续借</span></p></div>
+            <div class="line" aria-hidden="true"><i class="track"></i><i class="gone"></i><i class="ext"></i><i class="end"></i></div>
+            <div class="duecol"><span class="stamp" style="--tilt:1deg">11.17</span><span class="rest">周二 · 还有 6 天</span></div>
+            <div class="act"><p class="why">已续借过一次</p></div>
+          </li>
+          <li class="loan" id="b-c" data-reveal data-renew="79.22" data-date="12.05" data-days="24" data-dow="周六" style="--s:24.68;--d:61.04;--c:#2F4B3B">
+            <span class="chip" aria-hidden="true"></span>
+            <div class="book"><p class="t">额尔古纳河右岸</p><p class="a">迟子建</p><p class="c mono"><span>10.24 借出</span><span>I247.57/C552</span></p></div>
+            <div class="line" aria-hidden="true"><i class="track"></i><i class="gone"></i><i class="ext"></i><i class="end"></i></div>
+            <div class="duecol"><span class="stamp" style="--tilt:-1deg">11.21</span><span class="rest">周六 · 还有 <span class="d">10</span> 天</span></div>
+            <div class="act"><button class="btn btn-line pressable" type="button" data-renew-btn aria-label="续借《额尔古纳河右岸》，应还日延到 12 月 5 日">续借到 12.05</button></div>
+          </li>
+          <li class="loan" id="b-d" data-reveal data-renew="97.40" data-date="12.19" data-days="38" data-dow="周六" style="--s:42.86;--d:79.22;--c:#C9A33E">
+            <span class="chip" aria-hidden="true"></span>
+            <div class="book"><p class="t">杂草的故事</p><p class="a">理查德·梅比</p><p class="c mono"><span>11.07 借出</span><span>Q949.4/M451</span></p></div>
+            <div class="line" aria-hidden="true"><i class="track"></i><i class="gone"></i><i class="ext"></i><i class="end"></i></div>
+            <div class="duecol"><span class="stamp" style="--tilt:2deg">12.05</span><span class="rest">周六 · 还有 <span class="d">24</span> 天</span></div>
+            <div class="act"><button class="btn btn-line pressable" type="button" data-renew-btn aria-label="续借《杂草的故事》，应还日延到 12 月 19 日">续借到 12.19</button></div>
+          </li>
+        </ol>
+      </div>
+      <p class="foot-note legend"><span><i class="l1"></i>已经借了的日子</span><span><i class="l2"></i>还能留着的日子</span><span><i class="l3"></i>续借出来的 14 天</span></p>
+    </section>
+
+    <aside>
+      <section aria-labelledby="h-holds" data-reveal style="--delay:120ms">
+        <div class="sec-head"><h2 id="h-holds">预约</h2><span>2 本</span></div>
+        <div class="ticket">
+          <div class="head"><p class="k">已到馆 · 取书凭条</p>
+          <p class="t">克拉拉与太阳</p><p class="a">石黑一雄</p></div>
+          <p class="row"><span>到馆</span><span class="stamp" style="--tilt:-2deg">11.10</span></p>
+          <p class="row" style="margin-top:.5rem"><span>保留到</span><b>11.15 周日</b></p>
+        </div>
+        <div class="hold2">
+          <p class="t">我的阿勒泰</p><p class="a">李娟</p>
+          <div class="queue" aria-hidden="true"><i></i><i class="me"></i><i></i><i></i></div>
+          <p>排第 2 位 · 馆里 3 本都借出了 · 预计 11 月下旬</p>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-hours" data-reveal style="--delay:180ms">
+        <div class="sec-head"><h2 id="h-hours">开放时间</h2></div>
+        <table class="hours">
+          <tr class="off"><th scope="row">周一</th><td>闭馆</td></tr>
+          <tr><th scope="row">周二至周五</th><td>9:00 – 20:00</td></tr>
+          <tr class="go"><th scope="row">周六</th><td>9:00 – 17:00</td></tr>
+          <tr><th scope="row">周日</th><td>9:00 – 17:00</td></tr>
+        </table>
+        <p class="addr">青梧路 27 号 2 层。门口的还书箱全天可投，次日上午入账。</p>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<footer><div class="wrap"><p>到期日以馆内系统为准。本页是界面演示：书目真实，借阅记录与日期均为示例。</p></div></footer>
+
+<script>
+/*MOTION_JS*/
+</script>
+<script>
+(function () {
+  var top = document.getElementById('top');
+  addEventListener('scroll', function () { top.classList.toggle('scrolled', scrollY > 8); }, { passive: true });
+
+  var nEl = document.getElementById('n'), cnt = document.getElementById('cnt'), acts = document.getElementById('acts'), say = document.getElementById('say');
+
+  function thump(el) {   // 盖章：从大、斜、透明"啪"地落下
+    Motion.spring(el, [
+      { transform: 'scale(1.9) rotate(-14deg)', opacity: 0 },
+      { transform: 'scale(1) rotate(' + (el.style.getPropertyValue('--tilt') || '-1.5deg') + ')', opacity: 1 }
+    ], 'bouncy');
+  }
+
+  function renew(li, delay) {
+    if (!li || !li.dataset.renew) return;
+    setTimeout(function () {
+      var end = li.querySelector('.end'), ext = li.querySelector('.ext');
+      var old = getComputedStyle(li).getPropertyValue('--d').trim();
+      Motion.flip([end], function () { li.style.setProperty('--o', old); li.style.setProperty('--d', li.dataset.renew); }, 'smooth');
+      Motion.spring(ext, [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], 'smooth');
+      var st = li.querySelector('.stamp'); st.textContent = li.dataset.date; st.style.setProperty('--tilt', '-3deg'); thump(st);
+      var d = li.querySelector('.rest .d'); d.dataset.from = d.textContent; delete d.dataset.counted;
+      Motion.count(d, { to: +li.dataset.days, from: +d.textContent, duration: 700 });
+      var c = li.querySelector('.c'); c.innerHTML = c.firstElementChild.outerHTML + '<span>11.11 续借</span>';
+      li.querySelector('.act').innerHTML = '<p class="why">今天续借了</p>';
+      delete li.dataset.renew;
+      sync();
+    }, delay || 0);
+  }
+
+  function sync() {
+    var left = document.querySelectorAll('.loan[data-renew]').length;
+    nEl.textContent = left; cnt.textContent = left;
+    Motion.spring(nEl, [{ transform: 'translateY(-60%)', opacity: 0 }, { transform: 'none', opacity: 1 }], 'snappy');
+    if (left === 0) {
+      say.innerHTML = '还<b>《长安的荔枝》</b>——有 2 位读者在等它，不能续借。顺便取走已经到馆的<b>《克拉拉与太阳》</b>，它只留到周日。另外 2 本今天续借好了，最早的要到 <b class="mono">12.05</b>。';
+      Motion.swap(function () { acts.innerHTML = '<span class="hint">续借都用完了。周六见。</span>'; });
+    }
+  }
+
+  document.querySelectorAll('[data-renew-btn]').forEach(function (b) {
+    b.addEventListener('click', function () { renew(b.closest('.loan')); });
+  });
+  document.getElementById('renewAll').addEventListener('click', function () {
+    document.getElementById('b-c').scrollIntoView({ behavior: Motion.reduced ? 'auto' : 'smooth', block: 'center' });
+    document.querySelectorAll('.loan[data-renew]').forEach(function (li, i) { renew(li, 450 + i * 180); });
+  });
+})();
+</script>
+</body>
+</html>

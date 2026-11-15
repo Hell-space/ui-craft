@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>缓流器物 · 运营台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Serif+SC:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F3EE;
+  --surface:#FFFEFB;
+  --sunken:#EFECE5;
+  --ink:#1E1A16;
+  --ink-2:#57504A;
+  --ink-3:#8C847A;
+  --line:#E4DFD6;
+  --line-strong:#D3CCC0;
+  --accent:#9A4A22;
+  --accent-soft:#F3E6DC;
+  --accent-wash:rgba(154,74,34,.08);
+  --compare:#B5ADA2;
+  --up:#2F7350;
+  --down:#B0362C;
+  --warn:#A86B12;
+  --warn-soft:#F6EBD6;
+  --focus:#2D5D8A;
+
+  --sans:"Inter","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei UI","Microsoft YaHei","Noto Sans SC","Source Han Sans SC",system-ui,sans-serif;
+  --serif:"Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun",serif;
+
+  --r:6px;
+  --r-lg:10px;
+  --gap:20px;
+  --pad:24px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#16130F;
+    --surface:#1E1A16;
+    --sunken:#26211B;
+    --ink:#EEE8DF;
+    --ink-2:#B8AFA3;
+    --ink-3:#857C71;
+    --line:#2F2A23;
+    --line-strong:#3D362D;
+    --accent:#D98A5E;
+    --accent-soft:#3A2619;
+    --accent-wash:rgba(217,138,94,.10);
+    --compare:#5E564C;
+    --up:#6CB98C;
+    --down:#E57B6F;
+    --warn:#D9A24A;
+    --warn-soft:#352914;
+    --focus:#8DB7E0;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:14px;line-height:1.6;
+  font-feature-settings:"tnum" 1,"cv11" 1;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
+.num{font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:208px minmax(0,1fr);min-height:100vh}
+.side{
+  position:sticky;top:0;height:100vh;
+  border-right:1px solid var(--line);
+  padding:22px 14px 18px;display:flex;flex-direction:column;gap:28px;
+}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px}
+.brand svg{flex:none}
+.brand b{font-family:var(--serif);font-weight:600;font-size:16px;letter-spacing:.04em}
+.brand small{display:block;font-size:11px;color:var(--ink-3);letter-spacing:.14em;line-height:1.2;margin-top:2px}
+.nav{display:flex;flex-direction:column;gap:2px}
+.nav a{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 10px;border-radius:var(--r);text-decoration:none;color:var(--ink-2);
+  font-size:13.5px;transition:background .15s,color .15s;
+}
+.nav a:hover{background:var(--sunken);color:var(--ink)}
+.nav a[aria-current]{background:var(--surface);color:var(--ink);font-weight:500;box-shadow:inset 0 0 0 1px var(--line)}
+.nav .cnt{font-size:11.5px;color:var(--ink-3)}
+.nav .cnt.hot{color:var(--accent);font-weight:600}
+.nav-label{font-size:11px;color:var(--ink-3);letter-spacing:.12em;padding:0 10px 6px}
+.side-foot{margin-top:auto;padding:0 10px;font-size:12px;color:var(--ink-3);line-height:1.5}
+.side-foot .who{display:flex;align-items:center;gap:8px;color:var(--ink-2);margin-bottom:8px}
+.avatar{width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:12px;font-weight:600}
+
+.main{padding:28px 40px 56px;max-width:1260px;width:100%}
+
+/* ---------- top ---------- */
+.topline{display:flex;justify-content:space-between;align-items:center;gap:16px;font-size:12.5px;color:var(--ink-3);margin-bottom:18px}
+.topline .live{display:inline-flex;align-items:center;gap:6px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--up);box-shadow:0 0 0 3px color-mix(in srgb,var(--up) 18%,transparent)}
+.search{
+  display:flex;align-items:center;gap:8px;min-width:240px;
+  border:1px solid var(--line);background:var(--surface);border-radius:var(--r);
+  padding:6px 10px;color:var(--ink-3);
+}
+.search input{border:0;background:transparent;outline:0;font:inherit;color:var(--ink);width:100%}
+.search kbd{font-family:var(--sans);font-size:11px;border:1px solid var(--line);border-radius:4px;padding:0 5px;color:var(--ink-3)}
+
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:40px;align-items:end;padding-bottom:28px;border-bottom:1px solid var(--line)}
+.hero h1{font-family:var(--serif);font-weight:600;font-size:30px;line-height:1.3;letter-spacing:.01em;margin:0 0 10px}
+.brief{margin:0;max-width:40em;color:var(--ink-2);font-size:15px;line-height:1.75}
+.brief strong{color:var(--ink);font-weight:600}
+.brief .hl{color:var(--accent);font-weight:600}
+
+.goal{font-size:12.5px;color:var(--ink-2)}
+.goal-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.goal-head .big{font-size:22px;font-weight:600;color:var(--ink);letter-spacing:-.02em}
+.goal-head .big span{font-size:13px;color:var(--ink-3);font-weight:400;margin-left:4px;letter-spacing:0}
+.goal-bar{position:relative;height:8px;background:var(--sunken);border-radius:999px;overflow:visible}
+.goal-bar i{position:absolute;inset:0 auto 0 0;border-radius:999px;background:var(--ink)}
+.goal-bar .tick{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--accent);border-radius:1px}
+.goal-legend{display:flex;justify-content:space-between;margin-top:10px;gap:12px}
+.goal-legend em{font-style:normal;color:var(--accent)}
+
+/* ---------- KPI band ---------- */
+.kpis{
+  display:grid;grid-template-columns:repeat(6,minmax(0,1fr));
+  margin:28px 0 var(--gap);
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+}
+.kpi{padding:18px 20px 16px;border-left:1px solid var(--line);min-width:0}
+.kpi:first-child{border-left:0}
+.kpi .lab{font-size:12.5px;color:var(--ink-2);display:flex;justify-content:space-between;gap:6px;white-space:nowrap}
+.kpi .lab small{color:var(--ink-3);font-size:11.5px}
+.kpi .val{font-size:26px;font-weight:500;letter-spacing:-.025em;line-height:1.2;margin:8px 0 6px;white-space:nowrap}
+.kpi .val .u{font-size:15px;color:var(--ink-3);font-weight:400;margin-right:1px}
+.kpi .val .s{font-size:14px;color:var(--ink-3);font-weight:400;margin-left:2px}
+.delta{font-size:12px;display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+.delta.up{color:var(--up)}
+.delta.down{color:var(--down)}
+.delta .vs{color:var(--ink-3);margin-left:4px}
+.kpi svg.spark{display:block;width:100%;height:26px;margin-top:10px}
+
+/* ---------- grid / cards ---------- */
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--gap)}
+.c8{grid-column:span 8}.c4{grid-column:span 4}.c12{grid-column:span 12}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px var(--pad) var(--pad);min-width:0}
+.card-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
+.card-h h2{font-size:15px;font-weight:600;margin:0;line-height:1.4}
+.card-h p{margin:2px 0 0;font-size:12.5px;color:var(--ink-3)}
+.link{font-size:12.5px;color:var(--ink-2);text-decoration:none;white-space:nowrap;border-bottom:1px solid var(--line-strong);padding-bottom:1px}
+.link:hover{color:var(--accent);border-color:currentColor}
+
+.seg{display:inline-flex;background:var(--sunken);border-radius:var(--r);padding:2px}
+.seg button{border:0;background:transparent;padding:3px 10px;font-size:12.5px;color:var(--ink-2);border-radius:4px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(30,26,22,.08),0 0 0 1px var(--line)}
+
+/* trend chart */
+.legend{display:flex;gap:18px;font-size:12.5px;color:var(--ink-2);margin:-4px 0 8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:2px;background:var(--accent);border-radius:1px}
+.sw.cmp{background:none;border-top:2px dashed var(--compare);height:0}
+.chart-wrap{position:relative}
+#trend{display:block;width:100%;height:280px;overflow:visible}
+#trend text{font-family:var(--sans);font-size:11.5px;fill:var(--ink-3)}
+.tip{
+  position:absolute;pointer-events:none;top:0;left:0;
+  background:var(--ink);color:var(--bg);border-radius:var(--r);
+  padding:8px 10px;font-size:12px;line-height:1.55;white-space:nowrap;
+  opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;
+}
+.tip.on{opacity:1;transform:none}
+.tip b{font-weight:600;font-size:13px}
+.tip .m{opacity:.65}
+.trend-foot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-3)}
+.trend-foot b{display:block;color:var(--ink);font-size:16px;font-weight:500;letter-spacing:-.01em}
+
+/* todo */
+.todo{list-style:none;margin:0;padding:0;counter-reset:t}
+.todo li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;padding:13px 0;border-top:1px solid var(--line)}
+.todo li:first-child{border-top:0;padding-top:2px}
+.tag{font-size:11px;line-height:1;padding:4px 6px;border-radius:4px;white-space:nowrap;margin-top:3px;font-weight:500;align-self:start}
+.tag.urgent{background:var(--accent-soft);color:var(--accent)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tag.info{background:var(--sunken);color:var(--ink-2)}
+.todo h3{font-size:13.5px;font-weight:500;margin:0;line-height:1.5}
+.todo p{margin:2px 0 0;font-size:12.5px;color:var(--ink-3);line-height:1.6}
+.todo .act{display:inline-block;margin-top:6px;font-size:12.5px;color:var(--accent);text-decoration:none;font-weight:500}
+.todo .act:hover{text-decoration:underline;text-underline-offset:3px}
+
+/* channels */
+.ch{display:grid;grid-template-columns:5.5em minmax(0,1fr) 6.2em 3.4em;align-items:center;gap:10px;font-size:13px;padding:7px 0}
+.ch .bar{height:8px;background:var(--sunken);border-radius:2px;position:relative;overflow:hidden}
+.ch .bar i{position:absolute;inset:0 auto 0 0;background:var(--ink);border-radius:2px;opacity:.82}
+.ch:first-of-type .bar i{background:var(--accent);opacity:1}
+.ch .v{text-align:right}
+.ch .d{text-align:right;font-size:12px}
+.ch-note{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-2);line-height:1.65}
+
+/* presale */
+.count{display:flex;align-items:baseline;gap:6px;margin-bottom:14px}
+.count b{font-size:30px;font-weight:500;letter-spacing:-.03em;line-height:1}
+.count span{color:var(--ink-3);font-size:13px}
+.steps{list-style:none;margin:0;padding:0;font-size:12.5px}
+.steps li{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:10px;align-items:start;padding:6px 0;color:var(--ink-2)}
+.steps li .k{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line-strong);margin-top:5px;background:var(--surface)}
+.steps li.done .k{background:var(--ink);border-color:var(--ink)}
+.steps li.now .k{border-color:var(--accent);background:var(--accent);box-shadow:0 0 0 3px var(--accent-wash)}
+.steps li.now{color:var(--ink);font-weight:500}
+.steps li time{color:var(--ink-3);font-weight:400}
+.meter{margin:16px 0 4px}
+.meter-h{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-2);margin-bottom:6px}
+.meter-b{height:6px;background:var(--sunken);border-radius:999px;overflow:hidden}
+.meter-b i{display:block;height:100%;background:var(--accent);border-radius:999px}
+
+/* reviews */
+.dsr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:16px}
+.dsr div{background:var(--sunken);border-radius:var(--r);padding:8px 10px}
+.dsr small{display:block;font-size:11.5px;color:var(--ink-3)}
+.dsr b{font-size:17px;font-weight:500;letter-spacing:-.01em}
+.quote{margin:0;padding:12px 0;border-top:1px solid var(--line);font-size:13px;line-height:1.7}
+.quote:last-child{padding-bottom:0}
+.quote footer{font-size:12px;color:var(--ink-3);margin-top:4px;display:flex;justify-content:space-between;gap:8px}
+.stars{color:var(--accent);letter-spacing:1px;font-size:11px}
+.stars .off{color:var(--line-strong)}
+
+/* table */
+.tbl-wrap{overflow-x:auto;margin:0 calc(-1 * var(--pad));padding:0 var(--pad)}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:860px}
+th{font-weight:500;color:var(--ink-3);font-size:12px;text-align:right;padding:0 12px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;padding-left:0}
+th:last-child,td:last-child{padding-right:0}
+td{padding:12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap;vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr{transition:background .12s}
+tbody tr:hover{background:var(--accent-wash)}
+.prod{display:flex;align-items:center;gap:12px}
+.thumb{width:36px;height:36px;border-radius:var(--r);background:var(--sunken);display:grid;place-items:center;flex:none;color:var(--ink-2)}
+.prod b{font-weight:500;display:block;line-height:1.35}
+.prod small{color:var(--ink-3);font-size:12px}
+td.spark-cell svg{display:block;width:96px;height:24px;margin-left:auto}
+.cover{display:inline-flex;align-items:center;gap:8px;justify-content:flex-end}
+.cover .b{width:64px;height:5px;background:var(--sunken);border-radius:999px;position:relative;overflow:hidden}
+.cover .b i{position:absolute;inset:0 auto 0 0;background:var(--ink-3);border-radius:999px}
+.cover.low{color:var(--down);font-weight:500}
+.cover.low .b i{background:var(--down)}
+.cover.mid{color:var(--warn)}
+.cover.mid .b i{background:var(--warn)}
+th button{all:unset;cursor:pointer}
+th button:hover{color:var(--ink)}
+th button[aria-sort]::after{content:" ↓";color:var(--accent)}
+
+.foot{margin-top:28px;font-size:12px;color:var(--ink-3);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* ---------- responsive ---------- */
+@media (max-width:1280px){
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .kpi:nth-child(4){border-left:0}
+  .kpi:nth-child(n+4){border-top:1px solid var(--line)}
+}
+@media (max-width:1100px){
+  .shell{grid-template-columns:1fr}
+  .side{position:static;height:auto;flex-direction:row;align-items:center;gap:20px;padding:12px 20px;border-right:0;border-bottom:1px solid var(--line);overflow-x:auto}
+  .nav{flex-direction:row}
+  .nav a{white-space:nowrap;gap:6px}
+  .nav-label,.side-foot{display:none}
+  .main{padding:24px 24px 48px}
+  .hero{grid-template-columns:1fr;gap:24px}
+  .c8,.c4{grid-column:span 12}
+  .grid > .c4.trio{grid-column:span 6}
+  .grid > .c4.trio:last-of-type{grid-column:span 12}
+}
+@media (max-width:720px){
+  :root{--pad:18px;--gap:14px}
+  .main{padding:18px 16px 40px}
+  .topline .search{display:none}
+  .hero h1{font-size:24px}
+  .brief{font-size:14.5px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kpi{padding:14px 16px}
+  .kpi:nth-child(n){border-left:1px solid var(--line);border-top:1px solid var(--line)}
+  .kpi:nth-child(odd){border-left:0}
+  .kpi:nth-child(-n+2){border-top:0}
+  .kpi .val{font-size:22px}
+  .grid > .c4.trio{grid-column:span 12}
+  .trend-foot{grid-template-columns:1fr 1fr}
+  #trend{height:220px}
+  .brand small{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="side" aria-label="主导航">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true">
+        <rect width="28" height="28" rx="7" fill="var(--ink)"/>
+        <path d="M8 9h12l-4.6 7.2v3.3h-2.8v-3.3z" fill="none" stroke="var(--bg)" stroke-width="1.6" stroke-linejoin="round"/>
+        <circle cx="14" cy="22.4" r="1.3" fill="var(--accent)"/>
+      </svg>
+      <div><b>缓流器物</b><small>LENTO · 运营台</small></div>
+    </div>
+    <nav class="nav">
+      <div class="nav-label">工作台</div>
+      <a href="#" aria-current="page">今日概览</a>
+      <a href="#">订单 <span class="cnt hot">46</span></a>
+      <a href="#">商品</a>
+      <a href="#">库存 <span class="cnt hot">3</span></a>
+      <a href="#">营销活动</a>
+      <a href="#">客服与评价 <span class="cnt">12</span></a>
+      <a href="#">渠道</a>
+      <a href="#">数据报表</a>
+    </nav>
+    <div class="side-foot">
+      <div class="who"><span class="avatar">蔓</span>周蔓 · 运营负责人</div>
+      数据每 10 分钟同步<br>上次同步 08:40
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topline">
+      <span class="live"><span class="dot" aria-hidden="true"></span>2026 年 11 月 10 日 星期二 · 今日截至 08:40 已成交 <b class="num" style="color:var(--ink);font-weight:500">¥4,212</b> / 19 单</span>
+      <label class="search">
+        <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="search" placeholder="搜订单号、商品、顾客手机尾号" aria-label="搜索">
+        <kbd>/</kbd>
+      </label>
+    </div>
+
+    <section class="hero">
+      <div>
+        <h1>早上好，周蔓。明天就是双 11。</h1>
+        <p class="brief">
+          昨天全渠道成交 <strong class="num">¥63,840</strong>，比上周一多 12.4%，主要来自小程序的会员日。
+          预售定金已收 <strong class="num">1,286</strong> 笔，离 1,500 笔的目标还差 214 笔。
+          今天最要紧的是 <span class="hl">云雀细口壶·哑光黑</span>：预售已锁 212 件，在库只有 248 件，按现在的速度撑不过周四。
+        </p>
+      </div>
+      <div class="goal" aria-label="年度目标进度">
+        <div class="goal-head">
+          <span>2026 年度成交目标</span>
+          <span class="big num">¥1,684 万<span>/ 2,000 万</span></span>
+        </div>
+        <div class="goal-bar" role="img" aria-label="已完成 84.2%，时间进度 85.8%">
+          <i style="width:84.2%"></i>
+          <span class="tick" style="left:85.8%"></span>
+        </div>
+        <div class="goal-legend">
+          <span>已完成 <b class="num" style="color:var(--ink);font-weight:500">84.2%</b></span>
+          <span>时间进度 <em class="num">85.8%</em> · 落后 <b class="num" style="color:var(--ink);font-weight:500">¥31 万</b></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="kpis" aria-label="昨日核心指标">
+      <div class="kpi">
+        <div class="lab">成交额 <small>昨日</small></div>
+        <div class="val num"><span class="u">¥</span>63,840</div>
+        <span class="delta up">▲ 12.4%<span class="vs">较上周一</span></span>
+        <svg class="spark" data-spark="gmv" aria-hidden="true"></svg>
+      </div>
+      <div class="kpi">
+        <div class="lab">支付订单</div>
+        <div class="val num">297<span class="s">单</span></div>
+        <span class="delta up">▲ 9.6%<span class="vs">较上周一</span></span>
+        <svg class="spark" data-spark="orders" aria-hidden="true"></svg>
+      </div>
+      <div class="kpi">
+        <div class="lab">客单价</div>
+        <div class="val num"><span class="u">¥</span>215</div>
+        <span class="delta up">▲ 2.6%<span class="vs">较上周一</span></span>
+        <svg class="spark" data-spark="aov" aria-hidden="true"></svg>
+      </div>
+      <div class="kpi">
+        <div class="lab">访客转化率</div>
+        <div class="val num">2.71<span class="s">%</span></div>
+        <span class="delta down">▼ 0.18 pt<span class="vs">较上周一</span></span>
+        <svg class="spark" data-spark="cvr" aria-hidden="true"></svg>
+      </div>
+      <div class="kpi">
+        <div class="lab">退款率 <small>近 7 天</small></div>
+        <div class="val num">2.9<span class="s">%</span></div>
+        <span class="delta up" title="退款率下降是好事">▼ 0.4 pt<span class="vs">较前 7 天</span></span>
+        <svg class="spark" data-spark="refund" aria-hidden="true"></svg>
+      </div>
+      <div class="kpi">
+        <div class="lab">复购占比 <small>近 30 天</small></div>
+        <div class="val num">31.5<span class="s">%</span></div>
+        <span class="delta up">▲ 1.2 pt<span class="vs">较上月</span></span>
+        <svg class="spark" data-spark="repeat" aria-hidden="true"></svg>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="card c8" aria-labelledby="t-trend">
+        <div class="card-h">
+          <div>
+            <h2 id="t-trend">每日成交额</h2>
+            <p>全渠道，含预售定金；与去年同期按星期对齐</p>
+          </div>
+          <div class="seg" role="group" aria-label="时间范围">
+            <button type="button" data-range="14" aria-pressed="false">14 天</button>
+            <button type="button" data-range="30" aria-pressed="true">30 天</button>
+            <button type="button" data-range="90" aria-pressed="false">90 天</button>
+          </div>
+        </div>
+        <div class="legend"><span><i class="sw"></i>今年</span><span><i class="sw cmp"></i>去年同期</span></div>
+        <div class="chart-wrap">
+          <svg id="trend" role="img" aria-label="每日成交额折线图"></svg>
+          <div class="tip" id="tip"></div>
+        </div>
+        <div class="trend-foot">
+          <div>区间成交<b class="num" id="f-sum">—</b></div>
+          <div>日均<b class="num" id="f-avg">—</b></div>
+          <div>较去年同期<b class="num" id="f-yoy">—</b></div>
+        </div>
+      </section>
+
+      <section class="card c4" aria-labelledby="t-todo">
+        <div class="card-h">
+          <div>
+            <h2 id="t-todo">今天要处理</h2>
+            <p>按影响排序 · 5 项</p>
+          </div>
+          <a class="link" href="#">全部待办</a>
+        </div>
+        <ol class="todo">
+          <li>
+            <span class="tag urgent">库存</span>
+            <div>
+              <h3>云雀细口壶 600ml · 哑光黑 可售约 2.3 天</h3>
+              <p>在库 248，预售锁定 212。东莞窑口追加 300 件需 9 天，建议今天下单并把详情页发货时间改为 11 月 20 日前。</p>
+              <a class="act" href="#">发起补货 →</a>
+            </div>
+          </li>
+          <li>
+            <span class="tag urgent">物流</span>
+            <div>
+              <h3>46 单超过 48 小时未揽收</h3>
+              <p>集中在顺丰华东中转，已触发天猫延迟发货预警。</p>
+              <a class="act" href="#">查看订单 →</a>
+            </div>
+          </li>
+          <li>
+            <span class="tag warn">口碑</span>
+            <div>
+              <h3>平底滤杯 155 近 7 天 3 条差评提到“包装破损”</h3>
+              <p>同一批次 1027 发出，可能是新换的蜂窝纸托。</p>
+            </div>
+          </li>
+          <li>
+            <span class="tag warn">投放</span>
+            <div>
+              <h3>抖音千川 ROI 掉到 1.8，目标 2.5</h3>
+              <p>“磨豆机开箱”素材连续 3 天衰减，昨日花费 ¥3,420。</p>
+            </div>
+          </li>
+          <li>
+            <span class="tag info">活动</span>
+            <div>
+              <h3>尾款催付短信模板待审核</h3>
+              <p>需在今天 18:00 前提交，尾款 11 日 00:00 开放。</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section class="card c4 trio" aria-labelledby="t-ch">
+        <div class="card-h">
+          <div>
+            <h2 id="t-ch">渠道构成</h2>
+            <p>昨日成交额 · 较上周一</p>
+          </div>
+        </div>
+        <div id="channels"></div>
+        <p class="ch-note">小程序会员日拉动明显，新客占 38%。抖音连续两周下滑，与投放 ROI 下降同步。</p>
+      </section>
+
+      <section class="card c4 trio" aria-labelledby="t-1111">
+        <div class="card-h">
+          <div>
+            <h2 id="t-1111">双 11 进程</h2>
+            <p>天猫 + 小程序合并统计</p>
+          </div>
+          <a class="link" href="#">活动详情</a>
+        </div>
+        <div class="count"><b class="num" id="cd">15:20:00</b><span>距尾款开放</span></div>
+        <ol class="steps">
+          <li class="done"><span class="k"></span>预售开启 · 定金 ¥50 抵 ¥100<time>10/20</time></li>
+          <li class="done"><span class="k"></span>会员加购提醒已推送 1.2 万人<time>11/08</time></li>
+          <li class="now"><span class="k"></span>备货、客服排班、尾款催付<time>今天</time></li>
+          <li><span class="k"></span>尾款支付开放<time>11/11 00:00</time></li>
+          <li><span class="k"></span>预售订单 72 小时内发完<time>11/14</time></li>
+        </ol>
+        <div class="meter">
+          <div class="meter-h"><span>定金笔数</span><span class="num"><b style="color:var(--ink);font-weight:500">1,286</b> / 1,500</span></div>
+          <div class="meter-b"><i style="width:85.7%"></i></div>
+        </div>
+        <div class="meter">
+          <div class="meter-h"><span>预售锁定货值</span><span class="num"><b style="color:var(--ink);font-weight:500">¥38.6 万</b> / 45 万</span></div>
+          <div class="meter-b"><i style="width:85.8%"></i></div>
+        </div>
+      </section>
+
+      <section class="card c4 trio" aria-labelledby="t-rev">
+        <div class="card-h">
+          <div>
+            <h2 id="t-rev">口碑</h2>
+            <p>天猫店铺评分 · 近 30 天</p>
+          </div>
+          <a class="link" href="#">去回复</a>
+        </div>
+        <div class="dsr">
+          <div><small>描述相符</small><b class="num">4.89</b></div>
+          <div><small>服务态度</small><b class="num">4.86</b></div>
+          <div><small>物流服务</small><b class="num" style="color:var(--down)">4.71</b></div>
+        </div>
+        <blockquote class="quote">
+          壶嘴出水很细很稳，闷蒸时能控制到一圈一圈地画，比之前用的好太多。
+          <footer><span class="stars" aria-label="5 星">★★★★★</span><span>云雀细口壶 · 2 小时前</span></footer>
+        </blockquote>
+        <blockquote class="quote">
+          滤杯本身没问题，但盒子里的纸托塌了，杯沿磕掉一小块，有点心疼。
+          <footer><span class="stars" aria-label="2 星">★★<span class="off">★★★</span></span><span>平底滤杯 155 · 昨天</span></footer>
+        </blockquote>
+      </section>
+
+      <section class="card c12" aria-labelledby="t-sku">
+        <div class="card-h">
+          <div>
+            <h2 id="t-sku">商品表现</h2>
+            <p>近 7 天 · 可售天数 = 可用库存 ÷ 近 7 天日均销量（已扣预售锁定）</p>
+          </div>
+          <a class="link" href="#">全部 86 个 SKU</a>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">商品</th>
+                <th scope="col">售价</th>
+                <th scope="col"><button type="button" data-sort="units">销量</button></th>
+                <th scope="col"><button type="button" data-sort="gmv" aria-sort="descending">成交额</button></th>
+                <th scope="col">近 14 天走势</th>
+                <th scope="col">转化率</th>
+                <th scope="col"><button type="button" data-sort="cover">可售天数</button></th>
+              </tr>
+            </thead>
+            <tbody id="sku"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div class="foot">
+      <span>数据来源：天猫生意参谋、微信小程序后台、抖店、小红书商家版、京东商智，经内部数仓汇总。</span>
+      <span>口径说明 · 反馈问题</span>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const $ = s => document.querySelector(s);
+  const fmt = n => n.toLocaleString("zh-CN");
+  const yuan = n => "¥" + fmt(Math.round(n));
+  const wan = n => "¥" + (n/10000).toFixed(n >= 1e6 ? 0 : 1) + " 万";
+  const NS = "http://www.w3.org/2000/svg";
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  /* deterministic pseudo-random */
+  function rng(seed){ return () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }; }
+
+  /* ---------- daily GMV series: 90 days ending 2026-11-09 ---------- */
+  const END = new Date(2026, 10, 9);
+  const N = 90;
+  const r = rng(20261109);
+  const days = [];
+  for (let i = N - 1; i >= 0; i--){
+    const d = new Date(END); d.setDate(END.getDate() - i);
+    const dow = d.getDay();
+    const week = (dow === 0 || dow === 6) ? 1.13 : (dow === 5 ? 1.04 : 0.96);
+    const t = (N - 1 - i) / (N - 1);
+    let v = 50500 + t * 6500;
+    v *= week * (0.9 + r() * 0.2);
+    let ly = v * (0.86 + r() * 0.1);
+    const md = (d.getMonth() + 1) * 100 + d.getDate();
+    if (md === 1020){ v = 98600; ly = 81200; }
+    if (md === 1021){ v = 74300; ly = 66900; }
+    if (md === 1001 || md === 1002 || md === 1003){ v *= 1.22; ly *= 1.18; }
+    if (md === 1109){ v = 63840; ly = 57210; }
+    days.push({ d, v: Math.round(v), ly: Math.round(ly) });
+  }
+  const WK = "日一二三四五六";
+  const label = d => `${d.getMonth()+1}月${d.getDate()}日 周${WK[d.getDay()]}`;
+  const short = d => `${d.getMonth()+1}/${d.getDate()}`;
+
+  /* ---------- trend chart ---------- */
+  const svg = $("#trend"), tip = $("#tip");
+  let range = 30;
+  function el(tag, attrs, parent){
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function niceMax(m){ const step = 20000; return Math.ceil(m / step) * step; }
+
+  function drawTrend(){
+    const data = days.slice(-range);
+    const W = svg.clientWidth, H = svg.clientHeight;
+    const P = { l: 44, r: 8, t: 14, b: 26 };
+    const iw = W - P.l - P.r, ih = H - P.t - P.b;
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.innerHTML = "";
+    const max = niceMax(Math.max(...data.map(x => Math.max(x.v, x.ly))) * 1.04);
+    const x = i => P.l + (data.length === 1 ? 0 : i * iw / (data.length - 1));
+    const y = v => P.t + ih - v / max * ih;
+
+    // grid
+    const g = el("g", {}, svg);
+    for (let k = 0; k <= 4; k++){
+      const v = max * k / 4, yy = Math.round(y(v)) + .5;
+      el("line", { x1: P.l, x2: W - P.r, y1: yy, y2: yy, stroke: css("--line"), "stroke-width": 1, "stroke-dasharray": k === 0 ? "" : "2 3" }, g);
+      const t = el("text", { x: P.l - 10, y: yy + 4, "text-anchor": "end" }, g);
+      t.textContent = k === 0 ? "0" : (v / 10000) + "万";
+    }
+    // x ticks: mondays (or every 2 weeks for 90d)
+    let wk = 0;
+    data.forEach((p, i) => {
+      if (p.d.getDay() !== 1) return;
+      wk++;
+      if (range === 90 && wk % 2) return;
+      const t = el("text", { x: x(i), y: H - 6, "text-anchor": "middle" }, g);
+      t.textContent = short(p.d);
+    });
+
+    // last year dashed
+    const lyPath = data.map((p, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(p.ly).toFixed(1)).join("");
+    el("path", { d: lyPath, fill: "none", stroke: css("--compare"), "stroke-width": 1.5, "stroke-dasharray": "4 3", "stroke-linejoin": "round" }, svg);
+
+    // area + line
+    const line = data.map((p, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(p.v).toFixed(1)).join("");
+    const defs = el("defs", {}, svg);
+    const gr = el("linearGradient", { id: "ga", x1: 0, x2: 0, y1: 0, y2: 1 }, defs);
+    el("stop", { offset: "0", "stop-color": css("--accent"), "stop-opacity": .16 }, gr);
+    el("stop", { offset: "1", "stop-color": css("--accent"), "stop-opacity": 0 }, gr);
+    el("path", { d: line + `L${x(data.length-1)} ${P.t+ih}L${x(0)} ${P.t+ih}Z`, fill: "url(#ga)" }, svg);
+    el("path", { d: line, fill: "none", stroke: css("--accent"), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, svg);
+
+    // annotation: presale
+    const ai = data.findIndex(p => p.d.getMonth() === 9 && p.d.getDate() === 20);
+    if (ai >= 0){
+      const ax = x(ai), ay = y(data[ai].v);
+      el("circle", { cx: ax, cy: ay, r: 3.5, fill: css("--surface"), stroke: css("--accent"), "stroke-width": 1.5 }, svg);
+      const anchorEnd = ax > W - 120;
+      const t = el("text", { x: ax + (anchorEnd ? -8 : 8), y: ay + 4, "text-anchor": anchorEnd ? "end" : "start" }, svg);
+      t.setAttribute("style", "fill:" + css("--ink-2"));
+      t.textContent = "预售开启 " + wan(data[ai].v);
+    }
+    // last point
+    const li = data.length - 1;
+    el("circle", { cx: x(li), cy: y(data[li].v), r: 3.5, fill: css("--accent") }, svg);
+
+    // hover layer
+    const cross = el("line", { y1: P.t, y2: P.t + ih, stroke: css("--ink-3"), "stroke-width": 1, opacity: 0 }, svg);
+    const dot = el("circle", { r: 4, fill: css("--surface"), stroke: css("--accent"), "stroke-width": 2, opacity: 0 }, svg);
+    const hit = el("rect", { x: P.l, y: 0, width: iw, height: H, fill: "transparent", tabindex: 0 }, svg);
+    let cur = li;
+    function show(i){
+      cur = Math.max(0, Math.min(li, i));
+      const p = data[cur], xx = x(cur);
+      cross.setAttribute("x1", xx); cross.setAttribute("x2", xx); cross.setAttribute("opacity", .5);
+      dot.setAttribute("cx", xx); dot.setAttribute("cy", y(p.v)); dot.setAttribute("opacity", 1);
+      const diff = (p.v / p.ly - 1) * 100;
+      tip.innerHTML = `<span class="m">${label(p.d)}</span><br><b>${yuan(p.v)}</b><br><span class="m">去年同期 ${yuan(p.ly)} · ${diff >= 0 ? "+" : ""}${diff.toFixed(1)}%</span>`;
+      tip.classList.add("on");
+      const tw = tip.offsetWidth;
+      let left = xx + 12; if (left + tw > W) left = xx - tw - 12;
+      tip.style.left = left + "px";
+      tip.style.top = Math.max(0, y(p.v) - 70) + "px";
+    }
+    function hide(){ cross.setAttribute("opacity", 0); dot.setAttribute("opacity", 0); tip.classList.remove("on"); }
+    hit.addEventListener("pointermove", e => {
+      const rect = svg.getBoundingClientRect();
+      const px = e.clientX - rect.left;
+      show(Math.round((px - P.l) / iw * (data.length - 1)));
+    });
+    hit.addEventListener("pointerleave", hide);
+    hit.addEventListener("focus", () => show(cur));
+    hit.addEventListener("blur", hide);
+    hit.addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft"){ show(cur - 1); e.preventDefault(); }
+      if (e.key === "ArrowRight"){ show(cur + 1); e.preventDefault(); }
+    });
+
+    // footer stats
+    const sum = data.reduce((a, p) => a + p.v, 0), lsum = data.reduce((a, p) => a + p.ly, 0);
+    $("#f-sum").textContent = wan(sum);
+    $("#f-avg").textContent = yuan(sum / data.length);
+    const yoy = (sum / lsum - 1) * 100;
+    const fy = $("#f-yoy");
+    fy.textContent = (yoy >= 0 ? "+" : "") + yoy.toFixed(1) + "%";
+    fy.style.color = yoy >= 0 ? css("--up") : css("--down");
+  }
+
+  document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    range = +b.dataset.range; drawTrend();
+  }));
+
+  /* ---------- KPI sparklines (last 14 days) ---------- */
+  function spark(svgEl, vals, opts = {}){
+    const W = 100, H = 24, pad = 2;
+    svgEl.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svgEl.setAttribute("preserveAspectRatio", "none");
+    const mn = Math.min(...vals), mx = Math.max(...vals), span = mx - mn || 1;
+    const pts = vals.map((v, i) => [i * W / (vals.length - 1), pad + (H - 2 * pad) * (1 - (v - mn) / span)]);
+    svgEl.innerHTML = "";
+    el("path", { d: pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(""),
+      fill: "none", stroke: opts.color || css("--ink-3"), "stroke-width": 1.25, "vector-effect": "non-scaling-stroke", "stroke-linejoin": "round" }, svgEl);
+    const last = pts[pts.length - 1];
+    if (opts.dot !== false){
+      const c = el("circle", { cx: last[0], cy: last[1], r: 2, fill: opts.dotColor || css("--accent") }, svgEl);
+      c.setAttribute("vector-effect", "non-scaling-stroke");
+    }
+  }
+  const last14 = days.slice(-14).map(p => p.v);
+  const r2 = rng(77);
+  const kpiSeries = {
+    gmv: last14,
+    orders: last14.map(v => v / 214 * (0.95 + r2() * 0.1)),
+    aov: last14.map(() => 205 + r2() * 14),
+    cvr: last14.map((_, i) => 2.95 - i * 0.017 + r2() * 0.12),
+    refund: last14.map((_, i) => 3.4 - i * 0.04 + r2() * 0.15),
+    repeat: last14.map((_, i) => 30 + i * 0.1 + r2() * 0.6)
+  };
+  function drawSparks(){
+    document.querySelectorAll("[data-spark]").forEach(s => spark(s, kpiSeries[s.dataset.spark]));
+  }
+
+  /* ---------- channels ---------- */
+  const channels = [
+    ["天猫旗舰店", 28410, 6.8],
+    ["微信小程序", 14930, 41.2],
+    ["抖音小店", 12260, -14.5],
+    ["小红书店铺", 5980, 8.1],
+    ["京东自营", 2260, -2.3]
+  ];
+  const chTotal = channels.reduce((a, c) => a + c[1], 0);
+  $("#channels").innerHTML = channels.map(([n, v, d]) => `
+    <div class="ch">
+      <span>${n}</span>
+      <span class="bar" role="img" aria-label="${n}占比 ${(v/chTotal*100).toFixed(1)}%"><i style="width:${(v/channels[0][1]*100).toFixed(1)}%"></i></span>
+      <span class="v num">${yuan(v)}</span>
+      <span class="d num delta ${d >= 0 ? "up" : "down"}">${d >= 0 ? "+" : ""}${d}%</span>
+    </div>`).join("");
+
+  /* ---------- SKU table ---------- */
+  const ICON = {
+    kettle: '<path d="M6 12h10v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z M16 14c3 0 4-3 6-6 M8 12V10h6v2 M10 10V8.5h2V10" />',
+    dripper: '<path d="M5 9h14l-5 8h-4z M9 20h6 M12 17v3" />',
+    grinder: '<path d="M8 10h8v11H8z M12 10V6 M12 6h6 M18 6v2.5" /><circle cx="18" cy="9.5" r="1"/>',
+    filter: '<path d="M5 8h14l-6 12h-2z M8 8l3 6 M16 8l-3 6" />',
+    flat: '<path d="M5 9h14l-3 7H8z M8 19h8 M10 16v3 M14 16v3" />',
+    scale: '<path d="M4 15h16v4H4z M8 15c0-3 2-5 4-5s4 2 4 5 M10 17.2h4" />',
+    server: '<path d="M7 7h10l-1 13a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1z M17 10c2 0 2.5 3 0 4 M7 11h10" />'
+  };
+  const r3 = rng(4242);
+  const sku = [
+    { n: "云雀细口手冲壶 600ml", v: "哑光黑 · 不锈钢", ic: "kettle", p: 389, u: 186, cvr: 4.6, cover: 2.3 },
+    { n: "驿 · 手摇磨豆机 48mm", v: "钢芯 · 胡桃木柄", ic: "grinder", p: 699, u: 61, cvr: 2.1, cover: 18.4 },
+    { n: "漂白锥形滤纸 02", v: "100 张 · 日本产", ic: "filter", p: 22, u: 1140, cvr: 7.8, cover: 26.0 },
+    { n: "锥形滤杯 02", v: "树脂 · 透明", ic: "dripper", p: 59, u: 402, cvr: 5.2, cover: 11.6 },
+    { n: "计时电子秤 2kg", v: "0.1g 精度 · 充电款", ic: "scale", p: 169, u: 88, cvr: 3.4, cover: 5.8 },
+    { n: "平底滤杯 155", v: "陶瓷 · 釉白", ic: "flat", p: 128, u: 97, cvr: 3.1, cover: 14.2 },
+    { n: "玻璃分享壶 360ml", v: "耐热硼硅", ic: "server", p: 79, u: 133, cvr: 4.0, cover: 31.5 }
+  ].map(s => {
+    s.gmv = s.p * s.u;
+    const base = s.u / 7;
+    const trendUp = s.ic === "kettle" ? 0.06 : (s.ic === "flat" ? -0.03 : 0.01);
+    s.series = Array.from({ length: 14 }, (_, i) => base * (1 + trendUp * (i - 7)) * (0.8 + r3() * 0.4));
+    return s;
+  });
+  let sortKey = "gmv";
+  function drawTable(){
+    const rows = sku.slice().sort((a, b) => sortKey === "cover" ? a.cover - b.cover : b[sortKey] - a[sortKey]);
+    const maxCover = 30;
+    $("#sku").innerHTML = rows.map(s => {
+      const cls = s.cover < 4 ? "low" : (s.cover < 7 ? "mid" : "");
+      return `<tr>
+        <td><div class="prod"><span class="thumb"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">${ICON[s.ic]}</svg></span><div><b>${s.n}</b><small>${s.v}</small></div></div></td>
+        <td class="num">${yuan(s.p)}</td>
+        <td class="num">${fmt(s.u)}</td>
+        <td class="num" style="font-weight:500">${yuan(s.gmv)}</td>
+        <td class="spark-cell"><svg data-row="${s.n}" aria-hidden="true"></svg></td>
+        <td class="num">${s.cvr.toFixed(1)}%</td>
+        <td><span class="cover ${cls} num">${s.cover.toFixed(1)} 天<span class="b"><i style="width:${Math.min(100, s.cover / maxCover * 100)}%"></i></span></span></td>
+      </tr>`;
+    }).join("");
+    rows.forEach(s => {
+      const node = document.querySelector(`svg[data-row="${s.n}"]`);
+      spark(node, s.series, { color: s.cover < 4 ? css("--down") : css("--ink-2"), dotColor: s.cover < 4 ? css("--down") : css("--ink-2") });
+    });
+  }
+  document.querySelectorAll("th button").forEach(b => b.addEventListener("click", () => {
+    sortKey = b.dataset.sort;
+    document.querySelectorAll("th button").forEach(x => x.removeAttribute("aria-sort"));
+    b.setAttribute("aria-sort", sortKey === "cover" ? "ascending" : "descending");
+    drawTable();
+  }));
+
+  /* ---------- countdown to 11/11 00:00 (anchored to the demo date) ---------- */
+  const target = new Date(2026, 10, 11, 0, 0, 0);
+  const demoNow = new Date(2026, 10, 10, 8, 40, 0);
+  const t0 = Date.now();
+  function tick(){
+    let s = Math.max(0, Math.floor((target - demoNow - (Date.now() - t0)) / 1000));
+    const h = Math.floor(s / 3600); s -= h * 3600;
+    const m = Math.floor(s / 60); s -= m * 60;
+    $("#cd").textContent = [h, m, s].map(v => String(v).padStart(2, "0")).join(":");
+  }
+  tick(); setInterval(tick, 1000);
+
+  /* ---------- "/" focuses search ---------- */
+  document.addEventListener("keydown", e => {
+    if (e.key === "/" && document.activeElement.tagName !== "INPUT"){ e.preventDefault(); const i = document.querySelector(".search input"); if (i) i.focus(); }
+  });
+
+  /* ---------- render ---------- */
+  function all(){ drawTrend(); drawSparks(); drawTable(); }
+  all();
+  let raf;
+  new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(drawTrend); }).observe(svg);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", all);
+})();
+</script>
+</body>
+</html>

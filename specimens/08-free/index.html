@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一盏 · 功夫茶计时</title>
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Noto+Serif+SC:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:   #f3efe6;
+  --sunk:    #ebe5d8;
+  --card:    #faf7f1;
+  --ink:     #23201b;
+  --ink-2:   #5c5549;
+  --ink-3:   #8e8574;
+  --rule:    #dcd3c2;
+  --rule-2:  #c9bea9;
+  --accent:  #9a5b1e;
+  --accent-ink: #fff8ee;
+  --accent-soft: #9a5b1e14;
+  --glaze:   #ffffff;
+  --grain-o: .045;
+
+  --serif-zh: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --serif-en: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans:    -apple-system, "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+
+  --ease-out: cubic-bezier(.22,.8,.24,1);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper:   #171512;
+    --sunk:    #12100d;
+    --card:    #1e1b17;
+    --ink:     #ece5d8;
+    --ink-2:   #b2a894;
+    --ink-3:   #7c7363;
+    --rule:    #312c25;
+    --rule-2:  #463f35;
+    --accent:  #d49a57;
+    --accent-ink: #1a140c;
+    --accent-soft: #d49a571c;
+    --glaze:   #fff3df;
+    --grain-o: .06;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 15px/1.7 var(--sans);
+  font-feature-settings: "palt" 0;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+/* paper grain */
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  opacity: var(--grain-o);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: multiply;
+}
+@media (prefers-color-scheme: dark) { body::before { mix-blend-mode: screen; filter: invert(1); } }
+
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 1.5px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+.num { font-family: var(--serif-en); font-variant-numeric: tabular-nums lining-nums; }
+
+.app { position: relative; z-index: 1; max-width: 1232px; margin: 0 auto; padding: 28px 40px 64px; }
+
+/* ── header ─────────────────────────── */
+.top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 20px; border-bottom: 1px solid var(--rule);
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand svg { display: block; }
+.brand b { font: 600 20px/1 var(--serif-zh); letter-spacing: .12em; }
+.brand i { font: italic 400 14px/1 var(--serif-en); color: var(--ink-3); letter-spacing: .01em; }
+.meta { display: flex; align-items: center; gap: 20px; font-size: 13px; color: var(--ink-3); }
+.meta .sep { width: 1px; height: 12px; background: var(--rule-2); }
+.sound { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); padding: 4px 2px; }
+.sound:hover { color: var(--ink); }
+.sound[aria-pressed="false"] { color: var(--ink-3); }
+.sound[aria-pressed="false"] .wave { opacity: 0; }
+.sound .wave { transition: opacity .2s; }
+
+/* ── layout ─────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr) 288px;
+  gap: 56px;
+  margin-top: 40px;
+}
+.label {
+  font-size: 12px; letter-spacing: .14em; color: var(--ink-3);
+  margin: 0 0 14px; font-weight: 400;
+}
+
+/* ── tea list ───────────────────────── */
+.teas { list-style: none; margin: 0; padding: 0; }
+.tea {
+  display: block; width: 100%; text-align: left;
+  padding: 12px 14px 13px; margin: 0 -14px; width: calc(100% + 28px);
+  border-radius: 10px;
+  transition: background-color .18s var(--ease-out);
+}
+.tea:hover { background: var(--accent-soft); }
+.tea[aria-current="true"] { background: var(--card); box-shadow: 0 0 0 1px var(--rule), 0 1px 2px #2a1d0d0d, 0 6px 16px -10px #2a1d0d26; }
+.tea .row { display: flex; align-items: baseline; gap: 10px; }
+.tea .dot {
+  flex: none; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--liq); transform: translateY(-1px);
+  box-shadow: inset 0 0 0 1px #0000001a;
+}
+.tea .name { font: 400 16px/1.4 var(--serif-zh); letter-spacing: .02em; }
+.tea[aria-current="true"] .name { font-weight: 600; }
+.tea .sub { display: block; padding-left: 19px; font-size: 12px; color: var(--ink-3); line-height: 1.6; margin-top: 2px; }
+.tea .sub .num { font-size: 13px; }
+.teas-foot { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--rule); font-size: 12px; color: var(--ink-3); line-height: 1.8; }
+
+/* ── center ─────────────────────────── */
+.stage { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.origin { font-size: 12px; letter-spacing: .14em; color: var(--ink-3); }
+.title { font: 600 34px/1.25 var(--serif-zh); letter-spacing: .06em; margin: 8px 0 0; }
+.desc { max-width: 30em; margin: 14px 0 0; color: var(--ink-2); font-size: 15px; line-height: 1.85; text-wrap: pretty; }
+
+.cupwrap { position: relative; margin-top: 36px; width: 300px; height: 300px; }
+.cupwrap svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.tick { stroke: var(--rule-2); stroke-width: 1; transition: stroke .3s; }
+.tick.major { stroke-width: 1.5; }
+.tick.on { stroke: var(--ink); }
+.rim { fill: var(--card); stroke: var(--rule-2); stroke-width: 1; }
+.rim-in { fill: none; stroke: var(--rule); stroke-width: 1; }
+.liquor { transition: fill .6s var(--ease-out); }
+.arc { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
+.glaze { fill: var(--glaze); }
+
+.clock { margin-top: 26px; font: 400 76px/1 var(--serif-en); font-variant-numeric: tabular-nums lining-nums; letter-spacing: -.01em; font-optical-sizing: auto; }
+.clock .colon { display: inline-block; transform: translateY(-.06em); color: var(--ink-3); margin: 0 .02em; }
+.state { margin-top: 12px; font-size: 13px; color: var(--ink-3); letter-spacing: .08em; min-height: 1.7em; }
+.state b { color: var(--ink); font-weight: 400; }
+.state.ready b { color: var(--accent); }
+
+.controls { display: flex; align-items: center; gap: 12px; margin-top: 26px; }
+.nudge {
+  width: 52px; height: 44px; border-radius: 10px; color: var(--ink-2);
+  font-size: 14px; box-shadow: inset 0 0 0 1px var(--rule-2);
+  transition: background-color .15s, color .15s, box-shadow .15s;
+}
+.nudge:hover { color: var(--ink); background: var(--card); box-shadow: inset 0 0 0 1px var(--ink-3); }
+.nudge:active { transform: translateY(1px); }
+.nudge:disabled { opacity: .35; cursor: default; background: none; box-shadow: inset 0 0 0 1px var(--rule-2); color: var(--ink-2); }
+.primary {
+  min-width: 168px; height: 44px; padding: 0 22px; border-radius: 10px;
+  background: var(--ink); color: var(--paper);
+  font-size: 15px; letter-spacing: .12em;
+  box-shadow: 0 1px 0 #ffffff1a inset, 0 1px 2px #0000001f, 0 8px 18px -10px #00000066;
+  transition: background-color .2s var(--ease-out), transform .12s;
+}
+.primary:hover { background: color-mix(in srgb, var(--ink) 88%, var(--accent)); }
+.primary:active { transform: translateY(1px); }
+.primary.go { background: var(--accent); color: var(--accent-ink); }
+.primary.go:hover { background: color-mix(in srgb, var(--accent) 90%, var(--ink)); }
+.keys { margin-top: 14px; font-size: 12px; color: var(--ink-3); }
+kbd {
+  font: 11px/1 var(--sans); padding: 2px 5px 3px; border-radius: 4px;
+  box-shadow: inset 0 0 0 1px var(--rule-2), inset 0 -1px 0 var(--rule-2); color: var(--ink-2);
+  margin: 0 2px;
+}
+
+/* step rail */
+.rail { margin-top: 40px; width: 100%; max-width: 600px; }
+.rail ol { list-style: none; margin: 0; padding: 0 0 10px; display: flex; justify-content: safe center; overflow-x: auto; scrollbar-width: none; }
+.rail ol::-webkit-scrollbar { display: none; }
+.rail li { flex: none; }
+.step {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  width: 52px; padding: 8px 0 6px; border-radius: 8px; color: var(--ink-3);
+  transition: color .15s, background-color .15s;
+}
+.step:hover { color: var(--ink); background: var(--accent-soft); }
+.step .n { font-size: 12px; letter-spacing: .04em; }
+.step .s { font: 400 15px/1 var(--serif-en); font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.step .pip { width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--rule-2); transition: background-color .4s, box-shadow .4s; }
+.step.done .pip { background: var(--c); box-shadow: inset 0 0 0 1px #0000001a; }
+.step.cur { color: var(--ink); }
+.step.cur .s { color: var(--ink); }
+.step.cur .pip { box-shadow: inset 0 0 0 1.5px var(--accent); }
+.step.cur::after {
+  content: ""; position: absolute; left: 50%; bottom: -6px; width: 16px; height: 1.5px; margin-left: -8px;
+  background: var(--accent); border-radius: 1px;
+}
+.step.adj .s::after { content: "·"; color: var(--accent); margin-left: 1px; }
+
+/* ── right column ───────────────────── */
+.side section + section { margin-top: 36px; }
+.params { margin: 0; display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--rule); }
+.params div { padding: 12px 0 11px; border-bottom: 1px solid var(--rule); }
+.params div:nth-child(odd) { padding-right: 12px; }
+.params div:nth-child(even) { padding-left: 16px; border-left: 1px solid var(--rule); }
+.params dt { font-size: 12px; color: var(--ink-3); }
+.params dd { margin: 3px 0 0; font-size: 14px; }
+.params dd .num { font-size: 22px; line-height: 1.1; margin-right: 2px; }
+
+.loghead { display: flex; justify-content: space-between; align-items: baseline; }
+.clear { font-size: 12px; color: var(--ink-3); padding: 2px 0; }
+.clear:hover { color: var(--accent); }
+.clear[hidden] { display: none; }
+.log { list-style: none; margin: 0; padding: 0; }
+.entry { display: grid; grid-template-columns: 14px 1fr auto; column-gap: 12px; row-gap: 6px; align-items: baseline; padding: 12px 0; border-top: 1px solid var(--rule); }
+.entry:last-child { border-bottom: 1px solid var(--rule); }
+.entry .sw { width: 14px; height: 14px; border-radius: 50%; background: var(--c); transform: translateY(2px); box-shadow: inset 0 0 0 1px #0000001a, inset -2px -3px 4px #00000014; }
+.entry .what { font-size: 14px; }
+.entry .what .num { font-size: 15px; }
+.entry .what small { color: var(--ink-3); font-size: 12px; margin-left: 6px; }
+.entry .when { font-size: 13px; color: var(--ink-3); }
+.entry.fresh { animation: fresh 1.2s var(--ease-out); }
+@keyframes fresh { from { background: var(--accent-soft); } to { background: transparent; } }
+.tags { grid-column: 2 / 4; display: flex; gap: 6px; flex-wrap: wrap; }
+.tag {
+  font-size: 12px; line-height: 1; padding: 5px 9px 6px; border-radius: 999px; color: var(--ink-3);
+  box-shadow: inset 0 0 0 1px var(--rule);
+  transition: color .15s, background-color .15s, box-shadow .15s;
+}
+.tag:hover { color: var(--ink); box-shadow: inset 0 0 0 1px var(--rule-2); }
+.tag[aria-pressed="true"] { color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
+.empty { padding: 18px 0 4px; border-top: 1px solid var(--rule); color: var(--ink-3); font-size: 13px; line-height: 1.8; }
+
+.notes { position: relative; }
+textarea {
+  display: block; width: 100%; min-height: 128px; resize: vertical;
+  font: 400 15px/1.85 var(--serif-zh); color: var(--ink);
+  background: transparent; border: 0; padding: 0 0 0;
+  background-image: linear-gradient(transparent calc(1.85em - 1px), var(--rule) calc(1.85em - 1px), var(--rule) 1.85em, transparent 1.85em);
+  background-size: 100% 1.85em; background-attachment: local;
+  border-top: 1px solid var(--rule);
+  padding-top: 0;
+}
+textarea::placeholder { color: var(--ink-3); opacity: .8; }
+textarea:focus { outline: none; }
+.saved { position: absolute; right: 0; top: 0; font-size: 12px; color: var(--ink-3); opacity: 0; transition: opacity .4s; }
+.saved.show { opacity: 1; }
+
+.finish { margin-top: 28px; font: 400 15px/1.8 var(--serif-zh); color: var(--ink-2); }
+
+@media (max-width: 1080px) {
+  .grid { grid-template-columns: 210px minmax(0,1fr); gap: 44px; }
+  .side { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 44px; }
+  .side section + section { margin-top: 0; }
+  .side section:first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  .app { padding: 20px 16px 48px; }
+  .meta .date { display: none; }
+  .meta .sep { display: none; }
+  .grid { grid-template-columns: 1fr; gap: 36px; margin-top: 24px; }
+  .teas { display: flex; gap: 8px; overflow-x: auto; margin: 0 -16px; padding: 2px 16px 6px; scrollbar-width: none; }
+  .teas::-webkit-scrollbar { display: none; }
+  .teas li { flex: none; }
+  .tea { margin: 0; width: auto; padding: 8px 14px; white-space: nowrap; box-shadow: inset 0 0 0 1px var(--rule); }
+  .tea .sub, .teas-foot, .list .label { display: none; }
+  .title { font-size: 28px; }
+  .cupwrap { width: 248px; height: 248px; }
+  .clock { font-size: 64px; }
+  .keys { display: none; }
+  .step { width: 40px; }
+  .side { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+        <circle cx="13" cy="13" r="12" fill="none" stroke="currentColor" stroke-width="1.2"/>
+        <circle cx="13" cy="13" r="8.5" fill="var(--accent)"/>
+        <ellipse cx="10.4" cy="10" rx="3" ry="1.5" fill="var(--glaze)" opacity=".45" transform="rotate(-35 10.4 10)"/>
+      </svg>
+      <b>一盏</b><i>a gongfu tea timer</i>
+    </div>
+    <div class="meta">
+      <span class="date" id="date"></span>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="sound" id="sound" aria-pressed="true" title="出汤时轻响一声">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round">
+          <path d="M2.5 6h2.2L8 3.2v9.6L4.7 10H2.5z"/>
+          <path class="wave" d="M10.6 5.6a3.4 3.4 0 0 1 0 4.8M12.4 3.8a6 6 0 0 1 0 8.4"/>
+        </svg>
+        <span id="soundLabel">提示音</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <nav class="list" aria-label="茶单">
+      <h2 class="label">茶 单</h2>
+      <ul class="teas" id="teas"></ul>
+      <p class="teas-foot">参数以 110 ml 盖碗为准。<br>浓了就减一秒，淡了就加五秒，<br>茶是你的，不是表格的。</p>
+    </nav>
+
+    <section class="stage" aria-live="off">
+      <div class="origin" id="origin"></div>
+      <h1 class="title" id="title"></h1>
+      <p class="desc" id="desc"></p>
+
+      <div class="cupwrap">
+        <svg viewBox="0 0 320 320" role="img" aria-label="茶汤与浸泡进度">
+          <defs>
+            <radialGradient id="depth" cx="50%" cy="42%" r="60%">
+              <stop offset="0" stop-color="#fff" stop-opacity=".16"/>
+              <stop offset=".7" stop-color="#000" stop-opacity="0"/>
+              <stop offset="1" stop-color="#000" stop-opacity=".18"/>
+            </radialGradient>
+            <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter>
+          </defs>
+          <g id="ticks"></g>
+          <circle class="rim" cx="160" cy="160" r="124"/>
+          <circle class="rim-in" cx="160" cy="160" r="112"/>
+          <circle id="liquor" class="liquor" cx="160" cy="160" r="106" fill="#c98a3a" fill-opacity=".1"/>
+          <circle cx="160" cy="160" r="106" fill="url(#depth)" id="depthDisc" opacity=".1"/>
+          <ellipse class="glaze" cx="122" cy="108" rx="38" ry="12" transform="rotate(-32 122 108)" opacity=".22" filter="url(#soft)"/>
+          <circle id="arc" class="arc" cx="160" cy="160" r="138" transform="rotate(-90 160 160)"/>
+        </svg>
+      </div>
+
+      <div class="clock" id="clock" aria-hidden="true"></div>
+      <div class="state" id="state" role="status" aria-live="polite"></div>
+
+      <div class="controls">
+        <button class="nudge" id="minus" aria-label="减 5 秒"><span class="num">−5</span></button>
+        <button class="primary" id="primary"></button>
+        <button class="nudge" id="plus" aria-label="加 5 秒"><span class="num">+5</span></button>
+      </div>
+      <div class="keys"><kbd>空格</kbd> 开始 / 暂停　<kbd>[</kbd><kbd>]</kbd> 调整五秒　<kbd>N</kbd> 下一泡</div>
+
+      <div class="rail"><ol id="rail" aria-label="冲泡次序"></ol></div>
+      <p class="finish" id="finish" hidden></p>
+    </section>
+
+    <aside class="side">
+      <section>
+        <h2 class="label">冲 泡</h2>
+        <dl class="params" id="params"></dl>
+      </section>
+      <section>
+        <div class="loghead">
+          <h2 class="label">本 席</h2>
+          <button class="clear" id="clear" hidden>清空记录</button>
+        </div>
+        <ol class="log" id="log"></ol>
+      </section>
+      <section class="notes">
+        <h2 class="label"><label for="note">茶 记</label></h2>
+        <span class="saved" id="saved">已记下</span>
+        <textarea id="note" spellcheck="false" placeholder="叶底、回甘、窗外的天气……"></textarea>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+const TEAS = [
+  { id: "yinzhen", name: "白毫银针", origin: "福鼎 · 白茶 · 2025 春", liq: "#e3cf8f",
+    temp: 85, leaf: 5, ml: 110, vessel: "白瓷盖碗", rinse: 0,
+    steps: [45, 30, 40, 50, 65, 85, 110],
+    desc: "芽头肥壮，满披白毫。汤色杏黄而透，毫香里带一点清蜜。宜低温慢出，不必急。" },
+  { id: "longjing", name: "西湖龙井", origin: "杭州狮峰 · 绿茶 · 明前", liq: "#c9cc8a",
+    temp: 80, leaf: 3, ml: 110, vessel: "玻璃盖碗", rinse: 0,
+    steps: [50, 40, 55, 75, 100],
+    desc: "扁平光润，豆香清爽。水一烫就把鲜灵泡熟了，三泡之后滋味渐薄，留着看叶子也好。" },
+  { id: "dongding", name: "冻顶乌龙", origin: "南投鹿谷 · 乌龙 · 中焙", liq: "#d5a249",
+    temp: 95, leaf: 7, ml: 110, vessel: "朱泥壶", rinse: 5,
+    steps: [45, 25, 30, 40, 55, 75, 100, 130],
+    desc: "半球形，焙火中度。第一泡给叶子时间舒展，之后反而要快，焙香与熟果香交替出现。" },
+  { id: "dancong", name: "凤凰单丛 · 鸭屎香", origin: "潮州乌岽 · 乌龙", liq: "#c68637",
+    temp: 100, leaf: 7, ml: 110, vessel: "潮州手拉壶", rinse: 5,
+    steps: [10, 12, 15, 20, 25, 35, 45, 60, 80],
+    desc: "香气高扬，近栀子与蜜兰。出汤要利落，慢一秒就会露出苦底。" },
+  { id: "rougui", name: "武夷肉桂", origin: "武夷山马头岩 · 岩茶", liq: "#9a5523",
+    temp: 100, leaf: 8, ml: 110, vessel: "白瓷盖碗", rinse: 5,
+    steps: [10, 12, 15, 20, 25, 35, 50, 70],
+    desc: "岩韵在喉，桂皮的辛香在舌尖。沸水高冲，前几泡几乎即冲即出。" },
+  { id: "shoupu", name: "勐海熟普", origin: "西双版纳 · 黑茶 · 2016", liq: "#5b2a16",
+    temp: 100, leaf: 7, ml: 110, vessel: "紫砂壶", rinse: 10,
+    steps: [10, 10, 15, 20, 25, 35, 50, 70, 100, 140],
+    desc: "陈香、枣香，尾韵一丝木质。洗茶醒一醒，汤色红浓如酒，耐泡十余道。" },
+];
+const TAGS = ["香", "甜", "回甘", "涩", "薄"];
+const KEY = "yizhan.v1";
+
+/* ── state ─────────────────────────── */
+const saved = (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } })();
+const S = {
+  teaId: saved.teaId && TEAS.some(t => t.id === saved.teaId) ? saved.teaId : "dancong",
+  step: saved.step ?? 0,
+  adj: saved.adj ?? {},
+  log: saved.log ?? [],
+  note: saved.note ?? "",
+  muted: saved.muted ?? false,
+  phase: "idle",           // idle · running · paused · done · finished
+  endAt: 0,
+  remain: 0,               // ms
+};
+const persist = () => { try {
+  localStorage.setItem(KEY, JSON.stringify({ teaId: S.teaId, step: S.step, adj: S.adj, log: S.log, note: S.note, muted: S.muted }));
+} catch {} };
+
+const tea = () => TEAS.find(t => t.id === S.teaId);
+const plan = () => {
+  const t = tea();
+  const list = t.rinse ? [{ rinse: true, secs: t.rinse }] : [];
+  t.steps.forEach(s => list.push({ rinse: false, secs: s }));
+  return list.map((p, i) => ({ ...p, secs: Math.max(3, p.secs + ((S.adj[t.id] || {})[i] || 0)), adjusted: !!(S.adj[t.id] || {})[i] }));
+};
+const brewNo = i => tea().rinse ? i : i + 1;   // which infusion number step i is
+
+/* ── colour helpers ───────────────── */
+const hex = h => [1,3,5].map(i => parseInt(h.slice(i, i+2), 16));
+const mix = (a, b, t) => "#" + hex(a).map((v, i) => Math.round(v + (hex(b)[i] - v) * t).toString(16).padStart(2, "0")).join("");
+const PALE = "#f2e8cf";
+const liquorFor = (i) => {
+  const p = plan()[i];
+  if (p && p.rinse) return mix(tea().liq, PALE, .55);
+  const n = brewNo(i);
+  return mix(tea().liq, PALE, Math.min(.62, Math.max(0, (n - 2) * .075)));
+};
+
+/* ── dom ──────────────────────────── */
+const $ = id => document.getElementById(id);
+const el = (tag, attrs = {}, html = "") => { const e = document.createElement(tag); for (const k in attrs) e.setAttribute(k, attrs[k]); e.innerHTML = html; return e; };
+const fmt = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}<span class="colon">:</span>${String(s % 60).padStart(2, "0")}`; };
+const fmtPlain = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+const cn = n => "零一二三四五六七八九十".split("")[n] ?? (n < 20 ? "十" + "零一二三四五六七八九"[n - 10] : String(n));
+
+// date line
+(() => {
+  const d = new Date(), w = "日一二三四五六"[d.getDay()];
+  $("date").textContent = `${d.getMonth() + 1} 月 ${d.getDate()} 日 · 星期${w}`;
+})();
+
+// ticks
+const ARC_R = 138, ARC_L = 2 * Math.PI * ARC_R;
+const ticks = [];
+(() => {
+  const g = $("ticks");
+  for (let i = 0; i < 60; i++) {
+    const a = (i / 60) * 2 * Math.PI - Math.PI / 2, major = i % 15 === 0;
+    const r1 = 146, r2 = major ? 156 : 151;
+    const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    l.setAttribute("x1", 160 + r1 * Math.cos(a)); l.setAttribute("y1", 160 + r1 * Math.sin(a));
+    l.setAttribute("x2", 160 + r2 * Math.cos(a)); l.setAttribute("y2", 160 + r2 * Math.sin(a));
+    l.setAttribute("class", "tick" + (major ? " major" : ""));
+    g.appendChild(l); ticks.push(l);
+  }
+  $("arc").setAttribute("stroke-dasharray", `0 ${ARC_L}`);
+})();
+
+/* ── render ───────────────────────── */
+function renderTeas() {
+  const ul = $("teas"); ul.innerHTML = "";
+  TEAS.forEach(t => {
+    const li = el("li");
+    const b = el("button", { class: "tea", "aria-current": String(t.id === S.teaId), style: `--liq:${t.liq}` },
+      `<span class="row"><span class="dot"></span><span class="name">${t.name}</span></span>
+       <span class="sub"><span class="num">${t.temp}°</span> · <span class="num">${t.leaf}</span> g · ${t.steps.length} 泡</span>`);
+    b.addEventListener("click", () => chooseTea(t.id));
+    li.appendChild(b); ul.appendChild(li);
+  });
+}
+
+function renderTea() {
+  const t = tea();
+  $("origin").textContent = t.origin;
+  $("title").textContent = t.name;
+  $("desc").textContent = t.desc;
+  const ratio = Math.round(t.ml / t.leaf);
+  $("params").innerHTML = `
+    <div><dt>水温</dt><dd><span class="num">${t.temp}</span>℃</dd></div>
+    <div><dt>投茶</dt><dd><span class="num">${t.leaf}</span>克</dd></div>
+    <div><dt>器</dt><dd>${t.vessel}</dd></div>
+    <div><dt>茶水比</dt><dd><span class="num" style="font-size:17px">1 : ${ratio}</span></dd></div>`;
+}
+
+function renderRail() {
+  const ol = $("rail"); ol.innerHTML = "";
+  plan().forEach((p, i) => {
+    const done = i < S.step || (i === S.step && (S.phase === "done"));
+    const cls = ["step", done ? "done" : "", i === S.step && S.phase !== "finished" ? "cur" : "", p.adjusted ? "adj" : ""].join(" ");
+    const li = el("li");
+    const b = el("button", { class: cls, style: `--c:${liquorFor(i)}`, "aria-label": `${p.rinse ? "洗茶" : "第" + brewNo(i) + "泡"}，${p.secs} 秒`,
+      ...(i === S.step ? { "aria-current": "step" } : {}) },
+      `<span class="n">${p.rinse ? "洗" : brewNo(i)}</span><span class="pip"></span><span class="s">${p.secs}</span>`);
+    b.addEventListener("click", () => jump(i));
+    li.appendChild(b); ol.appendChild(li);
+  });
+}
+
+function renderLog(freshIdx = -1) {
+  const ol = $("log"); ol.innerHTML = "";
+  $("clear").hidden = !S.log.length;
+  if (!S.log.length) {
+    ol.appendChild(el("li", { class: "empty" }, "还没有出汤。<br>每一泡的颜色与滋味会留在这里。"));
+    return;
+  }
+  S.log.forEach((e, idx) => {
+    const t = TEAS.find(x => x.id === e.tea);
+    const li = el("li", { class: "entry" + (idx === freshIdx ? " fresh" : ""), style: `--c:${e.color}` },
+      `<span class="sw" aria-hidden="true"></span>
+       <span class="what">第${cn(e.n)}泡 · <span class="num">${e.secs}</span> 秒${t && e.tea !== S.teaId ? `<small>${t.name}</small>` : ""}</span>
+       <span class="when num">${e.at}</span>`);
+    const tags = el("div", { class: "tags", role: "group", "aria-label": "滋味" });
+    TAGS.forEach(tag => {
+      const on = e.tags.includes(tag);
+      const b = el("button", { class: "tag", "aria-pressed": String(on) }, tag);
+      b.addEventListener("click", () => {
+        e.tags = on ? e.tags.filter(x => x !== tag) : [...e.tags, tag];
+        persist(); renderLog();
+      });
+      tags.appendChild(b);
+    });
+    li.appendChild(tags); ol.appendChild(li);
+  });
+}
+
+function renderControls() {
+  const p = plan(), P = S.phase, btn = $("primary");
+  btn.classList.toggle("go", P === "done");
+  btn.textContent = { idle: "开始浸泡", running: "暂停", paused: "继续", done: S.step + 1 < p.length ? "下一泡" : "收 席", finished: "再来一席" }[P];
+  const lockNudge = P === "done" || P === "finished";
+  $("minus").disabled = lockNudge || (P === "idle" ? p[S.step].secs <= 5 : S.remain <= 1500);
+  $("plus").disabled = lockNudge;
+  const st = $("state"), cur = p[S.step];
+  st.classList.toggle("ready", P === "done");
+  const name = cur ? (cur.rinse ? "洗茶" : `第${cn(brewNo(S.step))}泡`) : "";
+  st.innerHTML = {
+    idle: `<b>${name}</b> · 注水后开始计时`,
+    running: `<b>${name}</b> · 浸泡中`,
+    paused: `<b>${name}</b> · 已暂停`,
+    done: cur && cur.rinse ? `<b>倒掉洗茶水</b> · 叶子醒了` : `<b>出汤</b> · 趁热分杯`,
+    finished: `<b>这一席尽了</b>`,
+  }[P];
+  const fin = $("finish");
+  fin.hidden = P !== "finished";
+  if (P === "finished") {
+    fin.textContent = `${tea().name}，共${cn(tea().steps.length)}泡。看看叶底，再写两句吧。`;
+  }
+}
+
+let lastShown = "";
+function renderTimer() {
+  const p = plan(), cur = p[S.step];
+  const total = cur ? cur.secs * 1000 : 1;
+  const remain = S.phase === "finished" ? 0 : S.remain;
+  const prog = S.phase === "finished" ? 1 : Math.min(1, Math.max(0, 1 - remain / total));
+  const txt = fmt(remain);
+  if (txt !== lastShown) { $("clock").innerHTML = txt; lastShown = txt; }
+  $("arc").setAttribute("stroke-dasharray", `${(prog * ARC_L).toFixed(2)} ${ARC_L}`);
+  $("arc").style.opacity = prog > 0 && S.phase !== "finished" ? 1 : 0;
+  const on = Math.round(prog * 60);
+  ticks.forEach((t, i) => t.classList.toggle("on", i < on && S.phase !== "finished"));
+  // liquor deepens as it steeps
+  const c = liquorFor(Math.min(S.step, p.length - 1));
+  const eased = 1 - Math.pow(1 - prog, 1.6);
+  const op = S.phase === "idle" ? .08 : .08 + .92 * eased;
+  const liq = $("liquor");
+  if (liq.getAttribute("fill") !== c) liq.setAttribute("fill", c);
+  liq.setAttribute("fill-opacity", op.toFixed(3));
+  $("depthDisc").setAttribute("opacity", op.toFixed(3));
+  document.title = S.phase === "running" ? `${fmtPlain(remain)} · 一盏` : S.phase === "done" ? "出汤 · 一盏" : "一盏 · 功夫茶计时";
+}
+
+function renderAll() { renderTeas(); renderTea(); renderRail(); renderLog(); renderControls(); renderTimer(); }
+
+/* ── timer ────────────────────────── */
+let raf = 0;
+function loop() {
+  S.remain = S.endAt - performance.now();
+  if (S.remain <= 0) { complete(); return; }
+  renderTimer();
+  if (S.remain <= 1500) $("minus").disabled = true;
+  raf = requestAnimationFrame(loop);
+}
+function start() {
+  if (S.phase === "idle") S.remain = plan()[S.step].secs * 1000;
+  S.endAt = performance.now() + S.remain;
+  S.phase = "running";
+  unlockAudio();
+  cancelAnimationFrame(raf); raf = requestAnimationFrame(loop);
+  renderControls();
+}
+function pause() {
+  cancelAnimationFrame(raf);
+  S.remain = S.endAt - performance.now();
+  S.phase = "paused"; renderControls(); renderTimer();
+}
+function complete() {
+  cancelAnimationFrame(raf);
+  S.remain = 0; S.phase = "done";
+  const p = plan()[S.step];
+  let fresh = -1;
+  if (!p.rinse) {
+    const d = new Date();
+    S.log.push({ tea: S.teaId, n: brewNo(S.step), secs: p.secs, color: liquorFor(S.step), tags: [],
+      at: `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}` });
+    fresh = S.log.length - 1; persist();
+  }
+  chime();
+  renderRail(); renderLog(fresh); renderControls(); renderTimer();
+}
+function next() {
+  const p = plan();
+  if (S.step + 1 >= p.length) { S.phase = "finished"; S.remain = 0; }
+  else { S.step++; S.phase = "idle"; S.remain = p[S.step].secs * 1000; }
+  persist(); renderRail(); renderControls(); renderTimer();
+}
+function primary() {
+  ({ idle: start, running: pause, paused: start, done: next, finished: restart })[S.phase]();
+}
+function restart() {
+  S.step = 0; S.phase = "idle"; S.remain = plan()[0].secs * 1000;
+  persist(); renderRail(); renderControls(); renderTimer();
+}
+function nudge(d) {
+  if (S.phase === "done" || S.phase === "finished") return;
+  const t = S.teaId; S.adj[t] = S.adj[t] || {};
+  const base = plan()[S.step].secs;
+  if (S.phase === "idle" && base + d < 5) return;
+  if (S.phase !== "idle" && S.remain + d * 1000 < 1000) return;
+  S.adj[t][S.step] = (S.adj[t][S.step] || 0) + d;
+  if (!S.adj[t][S.step]) delete S.adj[t][S.step];
+  if (S.phase === "idle") S.remain = plan()[S.step].secs * 1000;
+  else if (S.phase === "running") S.endAt += d * 1000;
+  else S.remain += d * 1000;
+  if (S.phase === "running") S.remain = S.endAt - performance.now();
+  persist(); renderRail(); renderControls(); renderTimer();
+}
+function jump(i) {
+  if (S.phase === "running" && !confirmLeave()) return;
+  cancelAnimationFrame(raf);
+  S.step = i; S.phase = "idle"; S.remain = plan()[i].secs * 1000;
+  persist(); renderRail(); renderControls(); renderTimer();
+}
+function confirmLeave() { return true; } // switching mid-steep is a deliberate act; no dialog
+function chooseTea(id) {
+  if (id === S.teaId) return;
+  cancelAnimationFrame(raf);
+  S.teaId = id; S.step = 0; S.phase = "idle"; S.remain = plan()[0].secs * 1000;
+  persist(); renderAll();
+}
+
+/* ── sound: a soft two-note bowl ──── */
+let ac = null;
+function unlockAudio() {
+  if (S.muted || ac) return;
+  try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch {}
+}
+function chime() {
+  if (S.muted) return;
+  unlockAudio(); if (!ac) return;
+  const now = ac.currentTime;
+  [[659.25, 0, .09], [987.77, .16, .06], [1318.5, .16, .018]].forEach(([f, t, g]) => {
+    const o = ac.createOscillator(), v = ac.createGain();
+    o.type = "sine"; o.frequency.value = f;
+    v.gain.setValueAtTime(0, now + t);
+    v.gain.linearRampToValueAtTime(g, now + t + .012);
+    v.gain.exponentialRampToValueAtTime(.0001, now + t + 2.4);
+    o.connect(v).connect(ac.destination); o.start(now + t); o.stop(now + t + 2.5);
+  });
+}
+function renderSound() {
+  $("sound").setAttribute("aria-pressed", String(!S.muted));
+  $("soundLabel").textContent = S.muted ? "静音" : "提示音";
+}
+
+/* ── wiring ───────────────────────── */
+$("primary").addEventListener("click", primary);
+$("minus").addEventListener("click", () => nudge(-5));
+$("plus").addEventListener("click", () => nudge(5));
+$("sound").addEventListener("click", () => { S.muted = !S.muted; persist(); renderSound(); if (!S.muted) { unlockAudio(); chime(); } });
+$("clear").addEventListener("click", () => { S.log = []; persist(); renderLog(); });
+
+const note = $("note"); note.value = S.note;
+let noteT = 0, savedT = 0;
+note.addEventListener("input", () => {
+  clearTimeout(noteT);
+  noteT = setTimeout(() => {
+    S.note = note.value; persist();
+    $("saved").classList.add("show"); clearTimeout(savedT);
+    savedT = setTimeout(() => $("saved").classList.remove("show"), 1400);
+  }, 500);
+});
+
+document.addEventListener("keydown", e => {
+  if (e.target.closest("textarea, input") || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.code === "Space") { e.preventDefault(); if (!e.repeat) primary(); }
+  else if (e.key === "[") nudge(-5);
+  else if (e.key === "]") nudge(5);
+  else if (e.key === "n" || e.key === "N") { if (S.phase !== "running") next(); }
+});
+
+// boot
+if (S.step >= plan().length) S.step = 0;
+S.remain = plan()[S.step].secs * 1000;
+renderSound();
+renderAll();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1785 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>黄铜钟城 · 关卡与塔坊</title>
+<script>document.documentElement.classList.add('js');setTimeout(function(){if(!window.Motion)document.documentElement.classList.add('no-motion')},1500)</script>
+<!--
+  《黄铜钟城》塔防：关卡选择 + 防御塔升级（原创世界观）
+  立场：是钟匠的表盘和锅炉的压力表——指针替玩家指路；而不是一套套着金色浮雕边框的蒸汽朋克 UI 皮肤。
+  贯穿装置：黄铜表盘上的指针。
+    · 地图：整座城就是一面钟。十二个关卡在钟面的十二个时位；时针指着"走到了哪一关"，分针就是光标，跟着焦点转。
+    · 塔坊：塔身上的压力表。预览升级时指针摆到新值，原值留下一根虚影；升级路线是两根从锅炉往上送汽的管道。
+  强调色：黄铜（oklch 0.80 0.11 82）。焦点用纸白圈 + 放大 + 指针；铜绿 = 变强 / 已通汽，铁锈红 = 变弱 / 不够，均另有 ▲▼ 和形状。
+  缩放：画面宽高比夹在 1.42–2.1 之间，所有尺寸用 cqh（画面高度的 1%），等于按屏幕高度缩放。
+  输入：键盘（方向键 / WASD、Enter、Esc、Q E、C、1 2 3）与标准手柄（十字键 / 左摇杆、A、B、X、LB RB、LT RT），按键提示随最后使用的设备即时切换。
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Serif+SC:wght@900&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   motion.css · 动效基础层
+   --------------------------------------------------------------------------
+   复制到项目里（或内联进 <style>），配合 assets/motion.js 使用。
+   - 弹簧缓动由 scripts/springs.py 从物理参数算出，不是手调的贝塞尔。
+   - 所有入场类在 prefers-reduced-motion 下退化为纯淡入。
+   - 没有 JS 时，所有内容直接可见（入场类只在 html.js 下才生效）；
+     JS 出错时，head 里的计时器在 1.5 秒后加 .no-motion，同样直接可见。
+   ========================================================================== */
+
+:root {
+  /* snappy: k=520 c=38，455ms，过冲 0.8%。按压回弹、开关、小元素进入 */
+  --spring-snappy: linear(0, 0.0312, 0.1015, 0.1984, 0.3055, 0.4131, 0.5109, 0.604, 0.686, 0.7563, 0.8128, 0.8614, 0.9004, 0.9298, 0.9537, 0.9716, 0.9847, 0.9937, 1.0001, 1.0042, 1.0066, 1.0078, 1.0082, 1.0079, 1.0074, 1.0066, 1.0057, 1.0048, 1.004, 1.0033, 1.0026, 1.002, 1.0016, 1.0012, 1.0008, 1.0006, 1.0004, 1.0002, 1.0001, 1.0001, 1);
+  --spring-snappy-dur: 455ms;
+  /* smooth: k=260 c=32，620ms，无过冲。面板、弹窗、卡片、布局变化 */
+  --spring-smooth: linear(0, 0.0275, 0.0921, 0.176, 0.2676, 0.3592, 0.4464, 0.5265, 0.5985, 0.6619, 0.717, 0.7644, 0.8048, 0.8389, 0.8675, 0.8914, 0.9113, 0.9277, 0.9412, 0.9523, 0.9614, 0.969, 0.975, 0.9799, 0.9838, 0.987, 0.9896, 0.9917, 0.9933, 0.9947, 0.9957, 0.9966, 0.9973, 0.9978, 0.9983, 0.9986, 0.9989, 0.9991, 0.9993, 0.9995, 1);
+  --spring-smooth-dur: 620ms;
+  /* bouncy: k=340 c=22，640ms，过冲 9.6%。落位、点赞、完成——有意的愉悦时刻 */
+  --spring-bouncy: linear(0, 0.0399, 0.1381, 0.2702, 0.4162, 0.5615, 0.6955, 0.8119, 0.9073, 0.9811, 1.0343, 1.0691, 1.0885, 1.0956, 1.0936, 1.0853, 1.0733, 1.0595, 1.0455, 1.0323, 1.0207, 1.011, 1.0034, 0.9978, 0.9941, 0.9919, 0.9909, 0.9909, 0.9916, 0.9927, 0.994, 0.9953, 0.9966, 0.9978, 0.9987, 0.9995, 1.0001, 1.0005, 1.0007, 1.0009, 1);
+  --spring-bouncy-dur: 640ms;
+  /* gentle: k=120 c=20，681ms，几乎无过冲。大面积入场、首屏编排 */
+  --spring-gentle: linear(0, 0.016, 0.0563, 0.1128, 0.179, 0.2502, 0.3229, 0.3944, 0.4631, 0.5277, 0.5876, 0.6437, 0.6929, 0.7369, 0.7759, 0.8102, 0.8402, 0.8662, 0.8886, 0.9078, 0.9242, 0.938, 0.9497, 0.9595, 0.9676, 0.9744, 0.9799, 0.9844, 0.9881, 0.9911, 0.9934, 0.9954, 0.9968, 0.9979, 0.9988, 0.9995, 0.9999, 1.0003, 1.0005, 1.0007, 1);
+  --spring-gentle-dur: 681ms;
+
+  /* 弹簧以外的曲线 */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);   /* 颜色、透明度 */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);    /* 快速到位的小位移 */
+  --ease-in-quart: cubic-bezier(0.5, 0, 0.75, 0);    /* 退出 */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);     /* 屏内往返 */
+
+  --stagger: 55ms;   /* 入场交错的步长 */
+}
+
+/* ---------------------------------------------------------------- 入场编排
+   给元素加 data-reveal（可选值 up / fade / scale / left / right / blur / mask），
+   用 style="--i:n" 或 motion.js 的 reveal() 自动编号控制先后。
+   html 没有 .js 类时内容直接可见——不会因为脚本失败而一片空白。 */
+.js [data-reveal] {
+  opacity: 0;
+  transition:
+    opacity 500ms var(--ease-out-quart),
+    transform var(--spring-gentle-dur) var(--spring-gentle),
+    filter 600ms var(--ease-out-quart),
+    clip-path 900ms var(--ease-out-expo);
+  transition-delay: calc(var(--i, 0) * var(--stagger) + var(--delay, 0ms));
+}
+.js [data-reveal=""], .js [data-reveal="up"] { transform: translateY(18px); }
+.js [data-reveal="scale"] { transform: scale(0.94); }
+.js [data-reveal="left"]  { transform: translateX(-24px); }
+.js [data-reveal="right"] { transform: translateX(24px); }
+.js [data-reveal="blur"]  { transform: translateY(8px); filter: blur(8px); }
+.js [data-reveal="mask"]  { opacity: 1; clip-path: inset(0 0 100% 0); transform: translateY(0.25em); }
+.js [data-reveal].is-in   { opacity: 1; transform: none; filter: none; clip-path: inset(0 0 0 0); }
+/* 失败保护：head 里的计时器发现 motion.js 没跑起来时加 .no-motion，一切直接显示 */
+.no-motion [data-reveal], .no-motion [data-split] .line > span, .no-motion .draw {
+  opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important; stroke-dashoffset: 0 !important;
+}
+
+/* 逐行（或逐字）揭开的大标题：<h1 data-split> 由 motion.js 拆成 .line > span */
+.js [data-split] .line { display: block; overflow: hidden; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.js [data-split] .line > span {
+  display: inline-block; transform: translateY(105%);
+  transition: transform 900ms var(--ease-out-expo);
+  transition-delay: calc(var(--i, 0) * 80ms + var(--delay, 0ms));
+}
+.js [data-split].is-in .line > span { transform: none; }
+
+/* ---------------------------------------------------------------- 微交互 */
+
+/* 可按压：所有按钮、可点卡片 */
+.pressable {
+  transition: transform var(--spring-snappy-dur) var(--spring-snappy),
+              background-color 160ms var(--ease-out-quart),
+              box-shadow 240ms var(--ease-out-quart);
+}
+.pressable:active { transform: scale(0.97); transition-duration: 80ms; }
+
+/* 悬浮抬起：可点击的卡片。阴影与位移一起变，像被拿起来 */
+.liftable {
+  transition: transform var(--spring-smooth-dur) var(--spring-smooth),
+              box-shadow 300ms var(--ease-out-quart),
+              border-color 200ms var(--ease-out-quart);
+}
+@media (hover: hover) {
+  .liftable:hover { transform: translateY(-3px); box-shadow: var(--shadow-lift, 0 1px 2px rgb(0 0 0 / .05), 0 12px 28px -8px rgb(0 0 0 / .18)); }
+}
+
+/* 跟随指针的光斑：卡片、按钮的高光。motion.js 的 spotlight() 写入 --mx / --my */
+.spotlight { position: relative; isolation: isolate; }
+.spotlight::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; z-index: -1; pointer-events: none;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, -20%),
+              color-mix(in srgb, var(--spot, #fff) 16%, transparent), transparent 70%);
+  opacity: 0; transition: opacity 300ms var(--ease-out-quart);
+}
+@media (hover: hover) { .spotlight:hover::before { opacity: 1; } }
+
+/* 下划线从左向右长出 */
+.ink-link { background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+            text-decoration: none; transition: background-size 400ms var(--ease-out-expo); }
+.ink-link:hover { background-size: 100% 1px; }
+
+/* 骨架屏微光 */
+.skeleton {
+  background: linear-gradient(100deg, var(--sk-base, #0000000d) 40%, var(--sk-hi, #00000005) 50%, var(--sk-base, #0000000d) 60%) 0 0 / 200% 100%;
+  animation: shimmer 1.4s linear infinite; border-radius: 6px;
+}
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* SVG 线条描绘：给 path 加 class="draw"，motion.js 会写入 --len */
+.js .draw { stroke-dasharray: var(--len, 1000); stroke-dashoffset: var(--len, 1000);
+            transition: stroke-dashoffset 1400ms var(--ease-out-expo); transition-delay: var(--delay, 0ms); }
+.js .draw.is-in, .js .is-in .draw { stroke-dashoffset: 0; }
+
+/* ---------------------------------------------------------------- 浮层：从 display:none 也能过渡 */
+[popover], dialog {
+  transition: opacity 180ms var(--ease-out-quart), transform var(--spring-smooth-dur) var(--spring-smooth),
+              overlay 200ms allow-discrete, display 200ms allow-discrete;
+  opacity: 0; transform: translateY(6px) scale(0.97);
+}
+[popover]:popover-open, dialog[open] {
+  opacity: 1; transform: none;
+  @starting-style { opacity: 0; transform: translateY(6px) scale(0.97); }
+}
+dialog::backdrop { background: rgb(0 0 0 / 0); transition: background-color 240ms, overlay 240ms allow-discrete, display 240ms allow-discrete; }
+dialog[open]::backdrop { background: rgb(10 8 6 / 0.45); @starting-style { background: rgb(0 0 0 / 0); } }
+
+/* ---------------------------------------------------------------- 滚动驱动（渐进增强） */
+@supports (animation-timeline: view()) {
+  /* 进入视口时随滚动淡入——不需要 JS；适合长页里的图与区块 */
+  .scroll-in { animation: scroll-in linear both; animation-timeline: view(); animation-range: entry 0% cover 30%; }
+  @keyframes scroll-in { from { opacity: 0; transform: translateY(32px) scale(0.98); } }
+  /* 阅读进度条 */
+  .scroll-progress { transform-origin: 0 50%; animation: grow-x linear both; animation-timeline: scroll(root); }
+  @keyframes grow-x { from { transform: scaleX(0); } }
+}
+
+/* ---------------------------------------------------------------- View Transitions */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 260ms; }
+::view-transition-group(*) { animation-timing-function: var(--spring-smooth); animation-duration: var(--spring-smooth-dur); }
+
+/* ---------------------------------------------------------------- 减弱动效 */
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal], .js [data-split] .line > span { transform: none !important; filter: none !important; clip-path: none !important; transition: opacity 300ms linear !important; transition-delay: 0ms !important; }
+  .js [data-split] .line > span { opacity: 1; }
+  .pressable:active, .liftable:hover { transform: none; }
+  .skeleton { animation: none; }
+  .js .draw { stroke-dashoffset: 0; transition: none; }
+  *, *::before, *::after { scroll-behavior: auto !important; }
+}
+
+
+/* ================================================================ tokens */
+:root {
+  color-scheme: dark;
+  --soot: oklch(0.145 0.012 60);          /* 工作台：煤烟色 */
+  --ground: oklch(0.19 0.012 60);         /* 街道 */
+  --iron: oklch(0.205 0.015 62);          /* 铸铁面板 */
+  --iron-raised: oklch(0.25 0.017 64);
+  --iron-line: oklch(1 0 0 / .09);
+  --brass: oklch(0.80 0.11 82);           /* 黄铜：唯一的强调色 */
+  --brass-mid: oklch(0.66 0.105 76);
+  --brass-deep: oklch(0.48 0.08 70);
+  --brass-hi: oklch(0.94 0.06 92);
+  --copper: oklch(0.62 0.12 48);          /* 蒸汽管道 */
+  --copper-deep: oklch(0.40 0.09 45);
+  --blued: oklch(0.36 0.09 258);          /* 发蓝钢：钟针 */
+  --patina: oklch(0.77 0.08 178);         /* 铜绿：变强、已通汽 */
+  --rust: oklch(0.71 0.15 35);            /* 铁锈：变弱、不够 */
+  --fire: oklch(0.78 0.15 60);            /* 炉火：当前关卡 */
+  --paper: oklch(0.95 0.014 85);          /* 纸白：文字、焦点 */
+  --paper-muted: oklch(0.79 0.02 80);
+  --paper-faint: oklch(0.64 0.02 75);
+  --ink-on-brass: oklch(0.27 0.05 60);
+
+  --font-title: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --font-roman: "Cinzel", "Trajan Pro", "Times New Roman", serif;
+  --font-ui: -apple-system, "Segoe UI Variable Text", "Segoe UI", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+
+  /* 在任何底上可读 */
+  --legible: 0 1px 0 rgb(0 0 0 / .75), 0 0 .6cqh rgb(0 0 0 / .6);
+  /* 刻在铜上的字 */
+  --engrave: 0 1px 0 oklch(0.96 0.06 90 / .5), 0 -1px 0 rgb(0 0 0 / .25);
+
+  /* 三种圆角 + 圆 */
+  --r-s: .5cqh; --r-m: 1cqh; --r-l: 1.6cqh;
+
+  /* 字号阶梯（cqh = 画面高度的 1%；1080p 下 1cqh = 10.8px） */
+  --t-xs: 1.7cqh;  --t-s: 2cqh;  --t-m: 2.6cqh;  --t-l: 4.4cqh;  --t-xl: 5cqh;  --t-hero: 10cqh;
+
+  --plate-shadow: inset 0 1px 0 oklch(1 0 0 / .07), 0 0 0 1px var(--iron-line), 0 2cqh 4cqh -2cqh rgb(0 0 0 / .7);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: oklch(0.11 0.01 60); overflow: hidden; }
+body { display: grid; place-items: center; font-family: var(--font-ui); color: var(--paper); -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+::selection { background: color-mix(in srgb, var(--brass) 30%, transparent); }
+svg { display: block; }
+[hidden] { display: none !important; }
+
+/* ================================================================ 画面：按高度缩放 */
+.game {
+  position: relative; width: 100vw; height: 100vh; height: 100dvh;
+  max-width: calc(100dvh * 2.1); max-height: calc(100vw / 1.42);
+  container-type: size; overflow: hidden; isolation: isolate;
+  background:
+    radial-gradient(60% 70% at 26% 30%, oklch(0.30 0.05 70 / .55), transparent 70%),   /* 台灯打在图纸上的光，左上 */
+    radial-gradient(50% 60% at 100% 100%, oklch(0.22 0.03 40 / .5), transparent 70%),
+    var(--soot);
+}
+.game::after {   /* 颗粒：消除色带，让底面像旧纸与铸铁 */
+  content: ""; position: absolute; inset: 0; z-index: 50; pointer-events: none; opacity: .28; mix-blend-mode: overlay;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------------- 公共：标签、面板、数字 */
+.label { font-size: var(--t-xs); letter-spacing: .12em; color: var(--paper-muted); }
+.num { font-variant-numeric: tabular-nums; }
+.plate {
+  position: relative; border-radius: var(--r-l);
+  background: linear-gradient(180deg, oklch(1 0 0 / .035), transparent 30%), color-mix(in srgb, var(--iron) 92%, transparent);
+  box-shadow: var(--plate-shadow);
+}
+.plate::before {   /* 嵌在铸铁里的一圈细黄铜线，四角各一颗铆钉 */
+  content: ""; position: absolute; inset: .8cqh; border-radius: var(--r-m); pointer-events: none;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brass-deep) 55%, transparent);
+  background:
+    radial-gradient(circle at .9cqh .9cqh, var(--brass-hi) 0 .15cqh, var(--brass-mid) .3cqh, transparent .4cqh),
+    radial-gradient(circle at calc(100% - .9cqh) .9cqh, var(--brass-hi) 0 .15cqh, var(--brass-mid) .3cqh, transparent .4cqh),
+    radial-gradient(circle at .9cqh calc(100% - .9cqh), var(--brass-hi) 0 .15cqh, var(--brass-mid) .3cqh, transparent .4cqh),
+    radial-gradient(circle at calc(100% - .9cqh) calc(100% - .9cqh), var(--brass-hi) 0 .15cqh, var(--brass-mid) .3cqh, transparent .4cqh);
+}
+.ico { width: 1em; height: 1em; flex: none; display: inline-block; vertical-align: -.14em; }
+
+/* ---------------- 按键提示 */
+.glyph {
+  display: inline-grid; place-items: center; min-width: 2.8cqh; height: 2.8cqh; padding: 0 .7cqh;
+  font: 700 1.6cqh/1 var(--font-ui); letter-spacing: 0; color: var(--ink-on-brass); white-space: nowrap;
+  background: linear-gradient(180deg, var(--brass-hi), var(--brass) 55%, var(--brass-mid));
+  border-radius: var(--r-s); box-shadow: inset 0 1px 0 oklch(1 0 0 / .55), 0 .25cqh 0 var(--brass-deep);
+}
+.is-pad .glyph.face { border-radius: 50%; padding: 0; width: 2.8cqh; }
+.prompts { display: flex; flex-wrap: wrap; align-items: center; column-gap: 2.2cqh; row-gap: 1cqh; font-size: var(--t-xs); color: var(--paper-muted); text-shadow: var(--legible); }
+.prompts > span { display: inline-flex; align-items: center; gap: .8cqh; white-space: nowrap; }
+.device {
+  margin-left: auto; padding: .6cqh 1.2cqh; border: 0; border-radius: var(--r-s); cursor: pointer; white-space: nowrap;
+  background: oklch(0 0 0 / .3); color: var(--paper-muted); font-size: var(--t-xs); box-shadow: inset 0 0 0 1px var(--iron-line);
+}
+.device:focus-visible, .tab:focus-visible, .chip:focus-visible { outline: .25cqh solid var(--paper); outline-offset: .3cqh; }
+
+/* ---------------- 全局：页签（Q / E · LB / RB） */
+.nav { position: absolute; z-index: 20; left: 4.6cqh; top: 3.6cqh; display: flex; align-items: center; gap: 1cqh; }
+.tabs { display: flex; gap: .4cqh; padding: .5cqh; border-radius: var(--r-m); background: oklch(0 0 0 / .35); box-shadow: inset 0 0 0 1px var(--iron-line); }
+.tab {
+  border: 0; cursor: pointer; padding: .9cqh 1.6cqh; border-radius: calc(var(--r-m) - .5cqh);
+  background: none; color: var(--paper-muted); font-size: var(--t-s); font-weight: 600; letter-spacing: .06em; white-space: nowrap;
+  transition: background-color 180ms var(--ease-out-quart), color 180ms var(--ease-out-quart);
+}
+.tab[aria-selected="true"] { color: var(--ink-on-brass); background: linear-gradient(180deg, var(--brass-hi), var(--brass) 60%, var(--brass-mid)); box-shadow: inset 0 1px 0 oklch(1 0 0 / .5), 0 .3cqh .6cqh rgb(0 0 0 / .4); }
+@media (hover: hover) { .tab:not([aria-selected="true"]):hover { color: var(--paper); background: oklch(1 0 0 / .06); } }
+.nav .glyph { min-width: 2.6cqh; height: 2.6cqh; }
+
+/* ---------------- 屏幕切换：地图推近到选中的街区，塔坊从稍远处靠过来 */
+.screen { position: absolute; inset: 0; opacity: 0; visibility: hidden;
+  transition: opacity 320ms var(--ease-out-quart), scale var(--spring-smooth-dur) var(--spring-smooth), visibility 0s linear 320ms; }
+.screen.is-active { opacity: 1; visibility: visible; scale: 1; transition-delay: 0s; }
+.scr-map:not(.is-active) { scale: 1.12; }
+.scr-shop:not(.is-active) { scale: .96; }
+
+/* ================================================================ 地图 */
+.scr-map {
+  display: grid; grid-template-columns: 84cqh minmax(0, 1fr); column-gap: 6cqh; align-items: center;
+  padding: 0 4.6cqh 0 5cqh;
+}
+.city { position: relative; width: 84cqh; height: 84cqh; margin-top: 4cqh; }
+.city > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.city .halo { position: absolute; inset: -8%; border-radius: 50%; z-index: -1; pointer-events: none;
+  background: radial-gradient(closest-side, oklch(0.42 0.07 72 / .35), transparent 75%); }
+
+/* SVG 图层 */
+#gearSpin { transform-box: view-box; transform-origin: 500px 500px; animation: spin 120s linear infinite; }
+@keyframes spin { to { rotate: 360deg; } }
+#hourHand, #minuteHand { transform-box: view-box; transform-origin: 500px 500px; }
+#hourHand { transition: transform 1100ms var(--spring-bouncy); }
+#minuteHand { transition: transform var(--spring-bouncy-dur) var(--spring-bouncy); }
+.steam-flow { stroke-dasharray: 5 26; animation: flow 1.6s linear infinite, fade-in 600ms var(--ease-out-quart) 1300ms backwards; }
+@keyframes flow { to { stroke-dashoffset: -31; } }
+.js .city .l-ground { animation: fade-in 700ms var(--ease-out-quart) both; }
+.js .city .l-wall   { animation: fade-in 500ms var(--ease-out-quart) both; }
+@keyframes fade-in { from { opacity: 0; } }
+
+/* 关卡节点：黄铜表盘的时标 */
+.nodes { position: absolute; inset: 0; }
+.node {
+  position: absolute; width: 9cqh; height: 9cqh; translate: -50% -50%; padding: 0; border: 0; border-radius: 50%;
+  background: none; cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent;
+  transition: scale var(--spring-snappy-dur) var(--spring-snappy);
+}
+.js .node { animation: node-in var(--spring-bouncy-dur) var(--spring-bouncy) backwards; animation-delay: calc(420ms + var(--i) * 45ms); }
+@keyframes node-in { from { scale: .2; opacity: 0; } }
+.node .cog { position: absolute; inset: -1.15cqh; width: calc(100% + 2.3cqh); height: calc(100% + 2.3cqh); color: var(--brass-mid); filter: drop-shadow(0 .3cqh .4cqh rgb(0 0 0 / .5)); }
+.node .disc {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(120% 90% at 35% 22%, var(--brass-hi), var(--brass) 38%, var(--brass-mid) 72%, var(--brass-deep));
+  box-shadow:
+    inset 0 0 0 .3cqh var(--brass-deep), inset 0 0 0 .5cqh oklch(0.90 0.08 88 / .55),
+    inset 0 -.7cqh 1cqh oklch(0.30 0.06 60 / .45),
+    0 .4cqh .6cqh rgb(0 0 0 / .55), 0 1.6cqh 2.4cqh -.8cqh rgb(0 0 0 / .6);
+  transition: box-shadow 200ms var(--ease-out-quart);
+}
+.node .rn { position: absolute; left: 0; right: 0; top: 2.05cqh; text-align: center; font: 700 2.9cqh/1 var(--font-roman); color: var(--ink-on-brass); text-shadow: var(--engrave); }
+.node .stars { position: absolute; left: 50%; bottom: 1.25cqh; translate: -50% 0; display: flex; gap: .1cqh; color: var(--ink-on-brass); }
+.node .stars svg { width: 1.6cqh; height: 1.6cqh; }
+.node .stars .off { color: oklch(0.42 0.06 65 / .55); }
+.node.locked .disc {
+  background: radial-gradient(120% 90% at 35% 22%, oklch(0.40 0.012 60), oklch(0.28 0.012 60) 55%, oklch(0.20 0.01 60));
+  box-shadow: inset 0 0 0 .3cqh oklch(0.16 0.01 60), inset 0 0 0 .45cqh oklch(1 0 0 / .08), 0 .4cqh .6cqh rgb(0 0 0 / .55);
+}
+.node.locked .rn { top: 2.9cqh; color: oklch(0.70 0.015 70); text-shadow: 0 -1px 0 rgb(0 0 0 / .6); }
+.node .lock { position: absolute; right: -.5cqh; bottom: -.3cqh; width: 3.2cqh; height: 3.2cqh; border-radius: 50%; display: grid; place-items: center;
+  background: var(--soot); box-shadow: 0 0 0 .2cqh oklch(0.38 0.012 60); color: var(--paper-muted); }
+.node .lock svg { width: 1.8cqh; height: 1.8cqh; }
+/* 当前关：炉火在表盘后面亮着，蒸汽从这里冒——全图唯一在"呼吸"的东西 */
+.node.current::before { content: ""; position: absolute; inset: -2.6cqh; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, oklch(0.78 0.15 60 / .65), oklch(0.78 0.15 60 / .18) 60%, transparent); animation: breathe 2.6s ease-in-out infinite; }
+@keyframes breathe { 50% { opacity: .55; scale: .92; } }
+.node .puff { position: absolute; left: 50%; top: -1cqh; width: 2.4cqh; height: 2.4cqh; margin-left: -1.2cqh; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, oklch(0.97 0.01 230 / .55), transparent); animation: puff 2.8s ease-out infinite; }
+.node .puff + .puff { animation-delay: 1.4s; }
+@keyframes puff { from { translate: 0 0; scale: .4; opacity: 0; } 20% { opacity: 1; } to { translate: .8cqh -5cqh; scale: 1.8; opacity: 0; } }
+/* 焦点：全屏最醒目——纸白圈、放大、分针指过来 */
+.node.is-focus { scale: 1.16; z-index: 3; }
+.node.is-focus .disc { box-shadow:
+    inset 0 0 0 .3cqh var(--brass-deep), inset 0 0 0 .5cqh oklch(0.90 0.08 88 / .55), inset 0 -.7cqh 1cqh oklch(0.30 0.06 60 / .45),
+    0 0 0 .45cqh var(--soot), 0 0 0 .8cqh var(--paper), 0 0 3.4cqh .4cqh oklch(0.92 0.08 88 / .45); }
+.node.is-focus.locked .disc { box-shadow: inset 0 0 0 .3cqh oklch(0.16 0.01 60), 0 0 0 .45cqh var(--soot), 0 0 0 .8cqh var(--paper), 0 0 3cqh oklch(1 0 0 / .25); }
+.node:active { scale: 1.04; transition-duration: 60ms; }
+.node.bump { animation: bump 300ms var(--ease-out-quart); }
+@keyframes bump { 25% { translate: calc(-50% - .7cqh) -50%; } 60% { translate: calc(-50% + .5cqh) -50%; } }
+
+.dname { position: absolute; translate: -50% -50%; white-space: nowrap; pointer-events: none; font-size: var(--t-xs); font-weight: 600; letter-spacing: .08em;
+  color: var(--paper-muted); text-shadow: var(--legible); transition: color 160ms var(--ease-out-quart); }
+.dname.locked { color: var(--paper-faint); font-weight: 400; }
+.dname.is-focus { color: var(--paper); }
+.js .dname { animation: fade-in 500ms var(--ease-out-quart) backwards; animation-delay: calc(700ms + var(--i) * 30ms); }
+
+.legend { position: absolute; left: 5cqh; bottom: 4cqh; display: grid; gap: .8cqh; font-size: var(--t-xs); color: var(--paper-muted); text-shadow: var(--legible); }
+.legend span { display: flex; align-items: center; gap: 1cqh; }
+.legend i { width: 2cqh; height: 2cqh; border-radius: 50%; flex: none; }
+.legend .l-done { background: radial-gradient(circle at 35% 25%, var(--brass-hi), var(--brass-mid)); }
+.legend .l-now { background: radial-gradient(circle at 35% 25%, var(--brass-hi), var(--brass-mid)); box-shadow: 0 0 1.2cqh .2cqh oklch(0.78 0.15 60 / .8); }
+.legend .l-lock { background: oklch(0.30 0.012 60); box-shadow: inset 0 0 0 .25cqh oklch(0.18 0.01 60); }
+.legend .l-pipe { width: 3.4cqh; height: .8cqh; border-radius: .4cqh; background: linear-gradient(var(--copper), var(--copper-deep)); }
+
+/* ---------------- 右栏：章节与关卡档案 */
+.side { height: 100%; min-width: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; row-gap: 2.4cqh; padding: 3.6cqh 0 3.4cqh; }
+.chapter { display: flex; align-items: flex-end; justify-content: space-between; gap: 2cqh; flex-wrap: wrap; }
+.chapter h1 { margin: .4cqh 0 0; font: 900 var(--t-l)/1 var(--font-title); letter-spacing: .1em; text-shadow: var(--legible); }
+.starmeter { display: grid; gap: .7cqh; min-width: 20cqh; }
+.starmeter .row { display: flex; align-items: baseline; justify-content: space-between; gap: 1.4cqh; }
+.starmeter b { font-size: var(--t-m); font-weight: 700; color: var(--brass); }
+.starmeter b small { font-size: var(--t-xs); font-weight: 400; color: var(--paper-muted); }
+.starmeter b .ico { width: .8em; height: .8em; vertical-align: -.02em; margin-right: .2em; }
+.track { position: relative; height: 1cqh; border-radius: .5cqh; background: oklch(0 0 0 / .45); box-shadow: inset 0 0 0 1px var(--iron-line); }
+.track i { position: absolute; inset: 0 auto 0 0; border-radius: inherit; width: calc(var(--v) * 1%);
+  background: linear-gradient(180deg, oklch(1 0 0 / .35), transparent 50%), var(--brass-mid); transition: width 1100ms var(--ease-out-quart) 300ms; }
+.js .track i { width: 0; }
+.js .is-in .track i, .no-motion .track i { width: calc(var(--v) * 1%); }
+.track .gate { position: absolute; top: -.5cqh; bottom: -.5cqh; width: .25cqh; left: calc(var(--g) * 1%); background: var(--paper); border-radius: .2cqh; }
+.starmeter .note { font-size: var(--t-xs); color: var(--paper-muted); }
+
+.dossier { min-height: 0; max-width: 66cqh; padding: 3.2cqh 3.2cqh 3cqh; display: grid; grid-template-rows: auto auto auto auto auto 1fr; row-gap: 1.9cqh; overflow: hidden; }
+.d-head { display: flex; flex-wrap: nowrap; align-items: flex-end; column-gap: 2.2cqh; row-gap: .4cqh; }
+.d-roman { font: 700 var(--t-hero)/.8 var(--font-roman); color: var(--brass); letter-spacing: .01em;
+  text-shadow: 0 -.15cqh 0 oklch(0.30 0.05 60), 0 .15cqh 0 oklch(0.95 0.06 90 / .35); }
+.d-roman.locked { color: oklch(0.42 0.015 70); }
+.d-title { padding-bottom: .3cqh; min-width: 0; }
+.d-title .label { display: flex; flex-wrap: wrap; column-gap: 1.2cqh; }
+.d-title h2 { margin: .8cqh 0 0; font: 900 var(--t-xl)/1 var(--font-title); letter-spacing: .08em; white-space: nowrap; }
+.state-tag { display: inline-flex; align-items: center; gap: .5cqh; color: var(--fire); font-weight: 600; letter-spacing: .08em; }
+.state-tag.done { color: var(--patina); }
+.state-tag.locked { color: var(--paper-faint); }
+.d-tag { margin: 0; font-size: var(--t-s); line-height: 1.6; color: var(--paper-muted); text-wrap: pretty; max-width: 34em; }
+.d-conds { margin: 0; padding: 0; list-style: none; display: grid; gap: 1cqh; }
+.d-conds li { display: flex; align-items: center; gap: 1.2cqh; font-size: var(--t-s); }
+.d-conds svg { width: 2.4cqh; height: 2.4cqh; flex: none; }
+.d-conds .got svg { color: var(--brass); filter: drop-shadow(0 0 .8cqh oklch(0.80 0.11 82 / .45)); }
+.d-conds .miss { color: var(--paper-muted); }
+.d-conds .miss svg { color: oklch(0.50 0.03 75); }
+.d-conds .why { margin-left: auto; font-size: var(--t-xs); color: var(--paper-faint); white-space: nowrap; }
+.d-facts { margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-block: 1px solid var(--iron-line); }
+.d-facts div { padding: 1.3cqh 0 1.3cqh 1.4cqh; border-left: 1px solid var(--iron-line); }
+.d-facts div:first-child { border-left: 0; padding-left: 0; }
+.d-facts dt { font-size: var(--t-xs); color: var(--paper-muted); white-space: nowrap; }
+.d-facts dd { margin: .5cqh 0 0; font-size: var(--t-m); font-weight: 700; font-variant-numeric: tabular-nums; }
+.d-foes { display: flex; flex-wrap: wrap; align-items: center; column-gap: 1cqh; row-gap: .8cqh; font-size: var(--t-xs); }
+.d-foes .label { margin-right: .6cqh; }
+.foe { display: inline-flex; align-items: baseline; gap: .5cqh; padding: .45cqh 1cqh; border-radius: var(--r-s); background: oklch(0 0 0 / .3); box-shadow: inset 0 0 0 1px var(--iron-line); white-space: nowrap; color: var(--paper); }
+.foe b { font-weight: 400; color: var(--paper-muted); font-variant-numeric: tabular-nums; }
+.foe.new { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fire) 60%, transparent); }
+.foe.new::after { content: "新"; font-size: 1.5cqh; color: var(--fire); font-weight: 700; }
+.d-foot { align-self: end; display: flex; align-items: center; justify-content: space-between; gap: 2cqh; flex-wrap: wrap; }
+.d-best { margin: 0; font-size: var(--t-xs); color: var(--paper-muted); line-height: 1.5; }
+.d-best b { display: block; font-size: var(--t-s); color: var(--paper); font-weight: 600; font-variant-numeric: tabular-nums; }
+.d-swap { animation: d-swap 260ms var(--ease-out-expo); }
+@keyframes d-swap { from { opacity: .2; translate: 0 .8cqh; } }
+
+/* 主按钮：黄铜铭牌，按下去会沉 */
+.go {
+  position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 1.2cqh; border: 0; cursor: pointer; white-space: nowrap;
+  padding: 1.4cqh 2.6cqh 1.4cqh 1.4cqh; border-radius: var(--r-m);
+  font: 900 var(--t-m)/1 var(--font-title); letter-spacing: .14em; color: var(--ink-on-brass);
+  background: linear-gradient(180deg, var(--brass-hi), var(--brass) 45%, var(--brass-mid));
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / .6), inset 0 -1px 0 oklch(0.4 0.07 70 / .5), 0 .6cqh 0 var(--brass-deep), 0 1.4cqh 2.4cqh -.8cqh rgb(0 0 0 / .7);
+  transition: translate 80ms var(--ease-out-quart), box-shadow 80ms var(--ease-out-quart);
+}
+.go .glyph { background: var(--ink-on-brass); color: var(--brass-hi); box-shadow: none; }
+.go:active, .go.pressed { translate: 0 .45cqh; box-shadow: inset 0 1px 0 oklch(1 0 0 / .6), 0 .15cqh 0 var(--brass-deep), 0 .6cqh 1.2cqh -.6cqh rgb(0 0 0 / .7); }
+.go:focus-visible { outline: .3cqh solid var(--paper); outline-offset: .4cqh; }
+.go[aria-disabled="true"] { cursor: not-allowed; color: var(--paper-faint); background: linear-gradient(180deg, oklch(0.32 0.012 60), oklch(0.25 0.012 60));
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / .08), 0 .6cqh 0 oklch(0.17 0.01 60); }
+.go[aria-disabled="true"] .glyph { background: oklch(0.38 0.012 60); color: var(--paper-faint); }
+.go .fill { position: absolute; inset: 0; width: calc(var(--hold, 0) * 100%); background: oklch(1 0 0 / .35); pointer-events: none; }
+.go > *:not(.fill) { position: relative; }
+
+.side .prompts { padding-left: .2cqh; }
+
+/* ================================================================ 塔坊 */
+.scr-shop {
+  display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(0, .98fr) minmax(0, 1.1fr); grid-template-rows: 9cqh minmax(0, 1fr) auto;
+  column-gap: 3.4cqh; row-gap: 2.4cqh; padding: 3.6cqh 4.6cqh 3.4cqh 5cqh;
+}
+.field { position: absolute; inset: -3%; z-index: -2; filter: blur(.7cqh) saturate(.8); opacity: .55; }
+.field svg { width: 100%; height: 100%; }
+.scr-shop::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(38% 55% at 21% 58%, oklch(0.55 0.13 62 / .32), transparent 70%),
+              linear-gradient(90deg, oklch(0.12 0.01 60 / .55), oklch(0.12 0.01 60 / .82) 45%, oklch(0.12 0.01 60 / .9)); }
+.battle { grid-column: 2; grid-row: 1; align-self: center; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 2.2cqh; row-gap: .4cqh; text-shadow: var(--legible); }
+.battle b { font: 900 var(--t-m)/1 var(--font-title); letter-spacing: .08em; white-space: nowrap; }
+.battle b .rn { font-family: var(--font-roman); font-weight: 700; color: var(--brass); margin-right: .6cqh; }
+.battle span { font-size: var(--t-xs); color: var(--paper-muted); white-space: nowrap; }
+.battle span .num { color: var(--paper); font-size: var(--t-s); font-weight: 600; }
+.purse { grid-column: 3; grid-row: 1; justify-self: end; align-self: center; display: flex; align-items: center; gap: 1.4cqh; padding: 1cqh 2cqh 1cqh 1.4cqh; }
+.purse::before { display: none; }
+.purse .coin { width: 4.2cqh; height: 4.2cqh; color: var(--brass); filter: drop-shadow(0 .3cqh .4cqh rgb(0 0 0 / .5)); transition: rotate 900ms var(--ease-out-expo); }
+.purse .amt { font: 700 var(--t-l)/1 var(--font-roman); font-variant-numeric: tabular-nums lining-nums; color: var(--brass-hi); min-width: 3.2ch; text-align: right; }
+.purse .unit { font-size: var(--t-xs); color: var(--paper-muted); }
+
+/* 左：塔 */
+.tower-col { grid-column: 1; grid-row: 2; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; row-gap: 1.6cqh; }
+.chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1cqh; }
+.chip { position: relative; display: grid; gap: .5cqh; text-align: left; padding: 1.1cqh 1.2cqh 1.1cqh 1.4cqh; border: 0; border-radius: var(--r-m); cursor: pointer;
+  background: oklch(0 0 0 / .32); box-shadow: inset 0 0 0 1px var(--iron-line); transition: background-color 160ms var(--ease-out-quart), box-shadow 160ms var(--ease-out-quart); }
+.chip b { font-size: var(--t-s); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip .pips { display: flex; gap: .9cqh; font-size: 1.6cqh; color: var(--paper-faint); white-space: nowrap; }
+.chip .pips i { font-style: normal; color: var(--paper-muted); }
+.chip .k { position: absolute; right: .8cqh; top: .8cqh; min-width: 2.3cqh; height: 2.3cqh; font-size: 1.4cqh; }
+.chip[aria-pressed="true"] { background: linear-gradient(180deg, oklch(0.80 0.11 82 / .2), oklch(0.80 0.11 82 / .08)); box-shadow: inset 0 0 0 .2cqh var(--brass), inset 0 1px 0 oklch(1 0 0 / .15); }
+@media (hover: hover) { .chip:not([aria-pressed="true"]):hover { background: oklch(1 0 0 / .05); } }
+.stage { position: relative; min-height: 0; }
+.stage svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.stage::before { content: ""; position: absolute; inset: 8% 6% 4%; z-index: -1; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, oklch(0.70 0.14 62 / .35), transparent 75%); }
+.twr { display: none; }
+.twr.on { display: inline; }
+.part { opacity: 0; scale: .7; transform-box: fill-box; transform-origin: 50% 100%;
+  transition: opacity 300ms var(--ease-out-quart), scale var(--spring-bouncy-dur) var(--spring-bouncy); }
+.part.owned { opacity: 1; scale: 1; }
+.part.ghost { opacity: .5; scale: 1; filter: drop-shadow(0 0 1cqh oklch(0.92 0.08 88 / .9)); animation: ghost 1.4s ease-in-out infinite; }
+@keyframes ghost { 50% { opacity: .3; } }
+.spin-slow { transform-box: fill-box; transform-origin: 50% 50%; animation: spin 14s linear infinite; }
+.chimney-puff { transform-box: fill-box; transform-origin: 50% 50%; animation: chpuff 2.6s ease-out infinite; }
+.chimney-puff:nth-of-type(2) { animation-delay: 1.3s; }
+@keyframes chpuff { from { translate: 0 0; scale: .4; opacity: 0; } 25% { opacity: .8; } to { translate: 18px -70px; scale: 2.2; opacity: 0; } }
+#needleLive, #needleGhost { transform-box: view-box; transform-origin: 200px 347px; }
+#needleLive { transition: transform var(--spring-bouncy-dur) var(--spring-bouncy); }
+#needleGhost { transition: transform 200ms var(--ease-out-quart); }
+.t-name { display: flex; align-items: flex-end; justify-content: space-between; gap: 2cqh; flex-wrap: wrap; }
+.t-name h2 { margin: 0; font: 900 var(--t-xl)/1 var(--font-title); letter-spacing: .08em; text-shadow: var(--legible); white-space: nowrap; }
+.t-name p { margin: .8cqh 0 0; font-size: var(--t-xs); color: var(--paper-muted); text-shadow: var(--legible); display: flex; flex-wrap: wrap; column-gap: 1.4cqh; }
+.t-name p span { white-space: nowrap; }
+.gauge-legend { display: grid; gap: .5cqh; font-size: var(--t-xs); color: var(--paper-muted); text-align: right; text-shadow: var(--legible); }
+.gauge-legend b { font: 700 var(--t-m)/1 var(--font-ui); font-variant-numeric: tabular-nums; color: var(--paper); }
+
+/* 中：两条路线——从锅炉往上送汽的两根管 */
+.routes { grid-column: 2; grid-row: 2; min-height: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto minmax(0, 1fr) auto; column-gap: 2.4cqh; }
+.r-head { padding: 0 0 1.6cqh; border-bottom: 1px solid var(--iron-line); margin-bottom: 1.4cqh; }
+.r-head .tag { display: inline-grid; place-items: center; width: 3cqh; height: 3cqh; border-radius: 50%; font: 700 1.8cqh/1 var(--font-roman);
+  color: var(--ink-on-brass); background: radial-gradient(circle at 35% 25%, var(--brass-hi), var(--brass-mid)); margin-right: 1cqh; vertical-align: middle; }
+.r-head h3 { margin: 0; font: 900 var(--t-m)/1.2 var(--font-title); letter-spacing: .06em; white-space: nowrap; display: flex; align-items: center; }
+.r-head p { margin: 1cqh 0 0; font-size: var(--t-xs); line-height: 1.5; color: var(--paper-muted); text-wrap: pretty; min-height: 3em; }
+.r-col { display: flex; flex-direction: column-reverse; min-height: 0; }
+.tier-row { display: flex; align-items: center; gap: 1.3cqh; }
+.pipe { position: relative; flex: 1 1 0; min-height: 1.6cqh; width: 1.5cqh; margin-left: 3cqh; border-radius: .3cqh;
+  background: linear-gradient(90deg, oklch(0.20 0.01 60), oklch(0.38 0.012 60) 45%, oklch(0.20 0.01 60)); box-shadow: 0 0 0 1px rgb(0 0 0 / .4); }
+.pipe::before { content: ""; position: absolute; left: -.35cqh; right: -.35cqh; top: 50%; height: .7cqh; margin-top: -.35cqh; border-radius: .2cqh;
+  background: linear-gradient(90deg, oklch(0.26 0.012 60), oklch(0.46 0.014 60) 45%, oklch(0.26 0.012 60)); }   /* 法兰 */
+.pipe .steam { position: absolute; inset: 0; border-radius: inherit; transform-origin: 50% 100%; scale: 1 0;
+  background: linear-gradient(90deg, var(--copper-deep), var(--copper) 38%, oklch(0.84 0.09 60) 50%, var(--copper-deep));
+  transition: scale 700ms var(--ease-out-quart); }
+.pipe .steam::after { content: ""; position: absolute; inset: 0; border-radius: inherit; opacity: .7; mix-blend-mode: screen;
+  background: linear-gradient(0deg, transparent 0 60%, oklch(0.98 0.01 80 / .75) 60% 75%, transparent 75%) 0 0 / 100% 2cqh repeat-y; animation: rise 900ms linear infinite; }
+@keyframes rise { to { background-position: 0 -2cqh; } }
+.pipe.hot .steam { scale: 1 1; }
+.pipe.preview { box-shadow: 0 0 0 1px rgb(0 0 0 / .4), 0 0 0 .2cqh oklch(0.80 0.11 82 / .7), 0 0 1.4cqh oklch(0.80 0.11 82 / .45); }
+
+.tier { display: flex; align-items: center; gap: 1.3cqh; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; outline: none; min-width: 0; -webkit-tap-highlight-color: transparent; }
+.wheel { position: relative; flex: none; width: 7.5cqh; height: 7.5cqh; border-radius: 50%;
+  --rim: oklch(0.38 0.012 60); --rim-hi: oklch(0.50 0.014 60); --hub: oklch(0.30 0.012 60); --hub-ink: var(--paper-faint);
+  transition: scale var(--spring-snappy-dur) var(--spring-snappy), box-shadow 200ms var(--ease-out-quart); filter: drop-shadow(0 .4cqh .5cqh rgb(0 0 0 / .55)); }
+.wheel svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.wheel .rn { position: absolute; inset: 0; display: grid; place-items: center; font: 700 1.9cqh/1 var(--font-roman); color: var(--hub-ink); }
+.wheel .badge { position: absolute; right: -.5cqh; bottom: -.3cqh; width: 2.6cqh; height: 2.6cqh; border-radius: 50%; display: none; place-items: center; }
+.wheel .badge svg { position: static; width: 1.6cqh; height: 1.6cqh; }
+.cap { display: grid; gap: .4cqh; min-width: 0; }
+.cap b { font-size: var(--t-s); line-height: 1.25; font-weight: 600; color: var(--paper-muted); }
+.cap .cost { display: flex; align-items: center; gap: .5cqh; font-size: var(--t-xs); font-variant-numeric: tabular-nums; color: var(--paper-muted); white-space: nowrap; }
+.cap .cost .ico { color: var(--brass-mid); }
+.cap .excl { font-size: 1.5cqh; letter-spacing: .06em; color: var(--paper-faint); white-space: nowrap; }
+
+.tier.owned .wheel { --rim: var(--brass-mid); --rim-hi: var(--brass-hi); --hub: var(--brass); --hub-ink: var(--ink-on-brass); }
+.tier.owned .wheel .badge { display: grid; background: var(--patina); color: oklch(0.22 0.04 178); box-shadow: 0 0 0 .25cqh var(--soot); }
+.tier.owned .cap b { color: var(--paper); }
+.tier.owned .cap .cost { color: var(--patina); }
+.tier.next .wheel { --rim: var(--brass-deep); --rim-hi: var(--brass); --hub: oklch(0.30 0.03 70); --hub-ink: var(--brass); }
+.tier.next.afford .wheel { box-shadow: 0 0 2.4cqh oklch(0.78 0.15 60 / .45); }
+.tier.next .cap b { color: var(--paper); }
+.tier.next.afford .cap .cost { color: var(--paper); }
+.tier.next.short .cap .cost { color: var(--rust); }
+.tier.excluded .wheel::after { content: ""; position: absolute; left: 8%; right: 8%; top: 50%; height: .5cqh; margin-top: -.25cqh; rotate: -40deg; border-radius: .3cqh; background: var(--rust); box-shadow: 0 0 0 .2cqh var(--soot); }
+.tier.excluded .cap b { text-decoration: line-through; text-decoration-color: var(--paper-faint); }
+/* 焦点：纸白圈 + 放大 + 左边一枚发蓝钢的指针 */
+.tier.is-focus .wheel { scale: 1.14; box-shadow: 0 0 0 .4cqh var(--soot), 0 0 0 .75cqh var(--paper), 0 0 3cqh oklch(0.92 0.08 88 / .4); }
+.tier.is-focus .wheel::before { content: ""; position: absolute; right: calc(100% + 1.1cqh); top: 50%; margin-top: -.9cqh; border: .9cqh solid transparent; border-right: 0; border-left: 1.4cqh solid var(--paper); }
+.tier.is-focus .cap b { color: var(--paper); }
+.tier:active .wheel { scale: 1.02; transition-duration: 60ms; }
+.tier.bump .wheel, .go.bump { animation: tbump 300ms var(--ease-out-quart); }
+@keyframes tbump { 25% { translate: -.7cqh 0; } 60% { translate: .5cqh 0; } }
+.tier.pop .wheel { animation: tpop var(--spring-bouncy-dur) var(--spring-bouncy); }
+@keyframes tpop { from { scale: 1.5; filter: brightness(1.8) drop-shadow(0 .4cqh .5cqh rgb(0 0 0 / .55)); } }
+
+.boiler { grid-column: 1 / -1; position: relative; margin-top: 0; height: 5.6cqh; border-radius: var(--r-m) var(--r-m) var(--r-l) var(--r-l);
+  display: flex; align-items: center; justify-content: center; gap: 1cqh; font-size: var(--t-xs); letter-spacing: .3em; color: var(--paper-muted);
+  background: linear-gradient(180deg, oklch(0.34 0.014 60), oklch(0.22 0.012 60)); box-shadow: inset 0 1px 0 oklch(1 0 0 / .12), 0 1cqh 2cqh -1cqh rgb(0 0 0 / .7); }
+.boiler::before { content: ""; position: absolute; left: 50%; bottom: .9cqh; width: 36%; height: 1.2cqh; translate: -50% 0; border-radius: .6cqh;
+  background: linear-gradient(90deg, oklch(0.55 0.16 45), var(--fire), oklch(0.55 0.16 45)); box-shadow: 0 0 1.6cqh oklch(0.78 0.15 60 / .7); opacity: .85; }
+.boiler span { position: relative; top: -.6cqh; }
+
+/* 右：选中这一级的详情 */
+.detail { grid-column: 3; grid-row: 2; min-height: 0; padding: 3cqh 3.2cqh 3cqh; display: grid; grid-template-rows: auto auto auto auto minmax(0, 1fr) auto; row-gap: 1.8cqh; overflow: hidden; }
+.dt-eyebrow { display: flex; flex-wrap: wrap; column-gap: 1.2cqh; align-items: center; }
+.dt-name { display: flex; align-items: baseline; justify-content: space-between; gap: 2cqh; flex-wrap: wrap; }
+.dt-name h3 { margin: 0; font: 900 var(--t-l)/1.1 var(--font-title); letter-spacing: .06em; white-space: nowrap; }
+.dt-state { font-size: var(--t-xs); font-weight: 600; letter-spacing: .08em; padding: .5cqh 1.1cqh; border-radius: var(--r-s); white-space: nowrap; background: oklch(0 0 0 / .3); }
+.dt-state.ok { color: var(--brass); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brass) 50%, transparent); }
+.dt-state.owned { color: var(--patina); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--patina) 50%, transparent); }
+.dt-state.bad { color: var(--rust); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rust) 50%, transparent); }
+.dt-state.mute { color: var(--paper-muted); box-shadow: inset 0 0 0 1px var(--iron-line); }
+.dt-text { margin: 0; font-size: var(--t-s); line-height: 1.6; color: var(--paper-muted); text-wrap: pretty; }
+.headline { display: flex; align-items: flex-end; gap: 2cqh; padding: 1.4cqh 0 1.6cqh; border-block: 1px solid var(--iron-line); }
+.headline .big { font: 700 7.2cqh/.85 var(--font-roman); font-variant-numeric: lining-nums; letter-spacing: -.01em; color: var(--patina); white-space: nowrap; }
+.headline .big.down { color: var(--rust); }
+.headline .big.flat { color: var(--paper); }
+.headline .big small { font-size: .5em; margin-left: .1em; }
+.headline .what { padding-bottom: .4cqh; font-size: var(--t-xs); color: var(--paper-muted); line-height: 1.5; }
+.headline .what b { display: block; font-size: var(--t-s); color: var(--paper); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stats { margin: 0; padding: 0; list-style: none; display: grid; align-content: start; gap: 1.5cqh; min-height: 0; }
+.stat { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; row-gap: .6cqh; }
+.stat .k { font-size: var(--t-xs); color: var(--paper-muted); white-space: nowrap; }
+.stat .v { font-size: var(--t-s); font-variant-numeric: tabular-nums; white-space: nowrap; display: flex; align-items: baseline; gap: .7cqh; }
+.stat .v .from { color: var(--paper-muted); }
+.stat .v .to { color: var(--paper); font-weight: 700; }
+.stat .v .u { font-size: 1.6cqh; color: var(--paper-faint); }
+.stat .v .d { min-width: 7.4cqh; text-align: right; font-size: var(--t-xs); font-weight: 700; }
+.stat .v .d.up { color: var(--patina); }
+.stat .v .d.down { color: var(--rust); }
+.stat .v .d.same { color: var(--paper-faint); font-weight: 400; }
+.bar { grid-column: 1 / -1; position: relative; height: 1.1cqh; border-radius: .55cqh; background: oklch(0 0 0 / .45); overflow: hidden; box-shadow: inset 0 0 0 1px var(--iron-line); }
+.bar i { position: absolute; top: 0; bottom: 0; transition: left 420ms var(--ease-out-quart), width 420ms var(--ease-out-quart); }
+.bar .base { left: 0; background: linear-gradient(180deg, oklch(1 0 0 / .35), transparent 50%), var(--brass-mid); border-radius: inherit; }
+.bar .delta.up { background: repeating-linear-gradient(-45deg, var(--patina) 0 .45cqh, oklch(0.58 0.07 178) .45cqh .9cqh); }
+.bar .delta.down { background: repeating-linear-gradient(-45deg, var(--rust) 0 .35cqh, transparent .35cqh .8cqh); }
+.bar .ticks { left: 0; right: 0; background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), rgb(0 0 0 / .5) calc(10% - 1px) 10%); }
+.buy { display: flex; align-items: center; justify-content: space-between; gap: 2cqh; flex-wrap: wrap; }
+.price { display: grid; gap: .5cqh; }
+.price .amt { display: flex; align-items: center; gap: .8cqh; font: 700 var(--t-m)/1 var(--font-ui); font-variant-numeric: tabular-nums; color: var(--paper); }
+.price .amt .ico { color: var(--brass); width: 2.8cqh; height: 2.8cqh; }
+.price .after { font-size: var(--t-xs); color: var(--paper-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.price .after.bad { color: var(--rust); }
+.price.short .amt { color: var(--rust); }
+
+.scr-shop .prompts { grid-column: 1 / -1; grid-row: 3; }
+.js .scr-shop.is-active .col { animation: col-in var(--spring-smooth-dur) var(--spring-smooth) backwards; animation-delay: calc(var(--i) * 70ms + 80ms); }
+@keyframes col-in { from { opacity: 0; translate: 0 2cqh; } }
+
+/* ================================================================ 飘字、提示、震动 */
+.pop { position: absolute; z-index: 30; pointer-events: none; font: 700 3.2cqh/1 var(--font-ui); font-variant-numeric: tabular-nums; text-shadow: var(--legible); white-space: nowrap; }
+.pop.spend { color: var(--brass-hi); }
+.pop.warn { color: var(--rust); font-size: 2.4cqh; }
+.pop.gain { color: var(--patina); }
+.toast { position: absolute; z-index: 40; left: 50%; bottom: 10cqh; translate: -50% 1cqh; opacity: 0; pointer-events: none;
+  padding: 1.3cqh 2.4cqh; border-radius: var(--r-m); font-size: var(--t-s); white-space: nowrap;
+  background: oklch(0.13 0.01 60 / .92); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brass-deep) 70%, transparent), 0 1.4cqh 3cqh -1cqh rgb(0 0 0 / .8);
+  transition: opacity 200ms var(--ease-out-quart), translate var(--spring-snappy-dur) var(--spring-snappy); }
+.toast.on { opacity: 1; translate: -50% 0; }
+.toast b { color: var(--brass); font-weight: 600; }
+
+/* ================================================================ 竖屏：塔防是横屏游戏 */
+.rotate { display: none; }
+@media (orientation: portrait) and (max-width: 820px) {
+  html:not(.force-land) .rotate { position: fixed; inset: 0; z-index: 100; display: grid; place-content: center; justify-items: center; gap: 20px; padding: 32px 16px; text-align: center;
+    background: radial-gradient(70% 50% at 50% 35%, oklch(0.30 0.05 70 / .6), transparent 70%), var(--soot); }
+  html:not(.force-land) .game { visibility: hidden; }
+  .rotate svg { width: 120px; height: 120px; color: var(--brass); animation: tilt 2.4s var(--ease-in-out) infinite; }
+  @keyframes tilt { 0%, 30% { rotate: 0deg; } 60%, 100% { rotate: 90deg; } }
+  .rotate h2 { margin: 0; font: 900 26px/1.3 var(--font-title); letter-spacing: .1em; }
+  .rotate p { margin: 0; max-width: 18em; font-size: 16px; line-height: 1.6; color: var(--paper-muted); }
+  .rotate button { margin-top: 8px; min-height: 44px; padding: 0 20px; border: 0; border-radius: 10px; font-size: 16px; color: var(--paper);
+    background: oklch(0 0 0 / .35); box-shadow: inset 0 0 0 1px var(--iron-line); cursor: pointer; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #gearSpin, .steam-flow, .node.current::before, .node .puff, .pipe .steam::after, .spin-slow, .chimney-puff, .part.ghost, .rotate svg { animation: none !important; }
+  .node .puff, .chimney-puff { display: none; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.4l2.85 6.1 6.65.75-4.95 4.5 1.4 6.55L12 16.95 6.05 20.3l1.4-6.55L2.5 9.25l6.65-.75z"/></symbol>
+    <symbol id="i-star-o" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" d="M12 3.6l2.5 5.4 5.9.65-4.4 4 1.25 5.8L12 16.5l-5.25 2.95L8 13.65l-4.4-4 5.9-.65z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><path id="gearIconPath" fill="currentColor" fill-rule="evenodd" d=""/></symbol>
+  </defs>
+</svg>
+
+<main class="game" id="game" aria-label="黄铜钟城">
+  <!-- 全局页签：Q / E（LB / RB） -->
+  <div class="nav" data-reveal="left" style="--delay:0ms">
+    <span class="glyph" data-kb="Q" data-pad="LB">Q</span>
+    <div class="tabs" role="tablist" aria-label="界面">
+      <button class="tab" role="tab" id="tabMap" aria-selected="true" aria-controls="scrMap" type="button">城区地图</button>
+      <button class="tab" role="tab" id="tabShop" aria-selected="false" aria-controls="scrShop" type="button">塔的升级</button>
+    </div>
+    <span class="glyph" data-kb="E" data-pad="RB">E</span>
+  </div>
+
+  <!-- ============================================================ 关卡选择 -->
+  <section class="screen scr-map is-active" id="scrMap" role="tabpanel" aria-labelledby="tabMap">
+    <div class="city" id="city">
+      <div class="halo"></div>
+      <svg viewBox="0 0 1000 1000" aria-hidden="true">
+        <defs>
+          <radialGradient id="gDial" cx=".38" cy=".3" r=".8"><stop offset="0" stop-color="oklch(0.97 0.012 88)"/><stop offset=".7" stop-color="oklch(0.88 0.02 82)"/><stop offset="1" stop-color="oklch(0.74 0.03 75)"/></radialGradient>
+          <radialGradient id="gCap" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="oklch(0.95 0.06 92)"/><stop offset=".6" stop-color="oklch(0.72 0.1 78)"/><stop offset="1" stop-color="oklch(0.45 0.08 70)"/></radialGradient>
+          <linearGradient id="gHand" x1="0" x2="1"><stop offset="0" stop-color="oklch(0.28 0.07 258)"/><stop offset=".5" stop-color="oklch(0.48 0.11 255)"/><stop offset="1" stop-color="oklch(0.24 0.06 258)"/></linearGradient>
+          <clipPath id="cityClip"><circle cx="500" cy="500" r="461"/></clipPath>
+          <filter id="handShadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="10" stdDeviation="6" flood-color="#000" flood-opacity=".6"/></filter>
+          <path id="canalPath" d="M30 600 C 200 540, 300 700, 470 760 S 760 700, 980 820"/>
+        </defs>
+        <g class="l-wall" id="wall"></g>
+        <g class="l-ground" clip-path="url(#cityClip)">
+          <circle cx="500" cy="500" r="461" fill="oklch(0.19 0.012 60)"/>
+          <g id="blocks"></g>
+          <use href="#canalPath" fill="none" stroke="oklch(0.27 0.045 205)" stroke-width="30"/>
+          <use href="#canalPath" fill="none" stroke="oklch(0.40 0.05 200 / .55)" stroke-width="3" stroke-dasharray="18 14"/>
+          <circle cx="500" cy="500" r="272" fill="none" stroke="oklch(0.17 0.011 60)" stroke-width="30"/>
+          <circle cx="500" cy="500" r="360" fill="none" stroke="oklch(0.165 0.011 60)" stroke-width="36"/>
+          <circle cx="500" cy="500" r="360" fill="none" stroke="oklch(1 0 0 / .05)" stroke-width="1.5" stroke-dasharray="10 12"/>
+          <text font-size="17" letter-spacing="9" fill="oklch(0.62 0.05 200)" style="font-family:var(--font-ui)"><textPath href="#canalPath" startOffset="12%">发条河</textPath></text>
+        </g>
+        <g id="pipes"></g>
+        <g class="l-tower">
+          <circle cx="500" cy="500" r="132" fill="oklch(0.17 0.012 60)" stroke="oklch(0.48 0.08 70 / .7)" stroke-width="2"/>
+          <g id="gearSpin"><path id="bigGear" fill="oklch(0.31 0.04 72)" stroke="oklch(0.50 0.08 70)" stroke-width="1.5" fill-rule="evenodd"/></g>
+          <circle cx="500" cy="500" r="90" fill="url(#gDial)" stroke="oklch(0.72 0.1 78)" stroke-width="6"/>
+          <circle cx="500" cy="500" r="84" fill="none" stroke="oklch(0.45 0.08 70 / .5)" stroke-width="1"/>
+          <g id="dialTicks"></g>
+        </g>
+        <!-- 影子由外层 g 投出：光源固定在上方，指针转到哪影子都朝下 -->
+        <g filter="url(#handShadow)"><g id="hourHand" style="transform:rotate(0deg)">
+          <path d="M500 528 L494 500 L496.5 384 L484 366 L500 335 L516 366 L503.5 384 L506 500 Z" fill="url(#gHand)" stroke="oklch(0.88 0.07 88 / .9)" stroke-width="1.6" stroke-linejoin="round"/>
+        </g></g>
+        <g filter="url(#handShadow)"><g id="minuteHand" style="transform:rotate(0deg)">
+          <circle cx="500" cy="538" r="10" fill="url(#gHand)" stroke="oklch(0.88 0.07 88 / .9)" stroke-width="1.6"/>
+          <path d="M500 548 L496.2 500 L497.4 304 L489 304 L500 280 L511 304 L502.6 304 L503.8 500 Z" fill="url(#gHand)" stroke="oklch(0.88 0.07 88 / .9)" stroke-width="1.6" stroke-linejoin="round"/>
+        </g></g>
+        <circle cx="500" cy="500" r="14" fill="url(#gCap)"/>
+        <circle cx="500" cy="500" r="4" fill="oklch(0.25 0.04 60)"/>
+      </svg>
+      <div class="nodes" id="nodes"></div>
+    </div>
+
+    <div class="side">
+      <header class="chapter" data-reveal="right" style="--delay:260ms">
+        <div>
+          <p class="label" style="margin:0">第一章 · 十二个时位</p>
+          <h1>黄铜钟城</h1>
+        </div>
+        <div class="starmeter" id="starmeter">
+          <div class="row"><span class="label">已得</span><b><svg class="ico"><use href="#i-star"/></svg><span class="num" id="starN">14</span><small> / 36</small></b></div>
+          <div class="track" style="--v:38.9;--g:66.7" aria-hidden="true"><i></i><span class="gate"></span></div>
+          <span class="note" id="starNote">第二章需要 24 颗，还差 10 颗</span>
+        </div>
+      </header>
+
+      <article class="dossier plate" id="dossier" data-reveal="right" style="--delay:360ms" aria-label="关卡档案"></article>
+
+      <footer class="prompts" data-reveal="fade" style="--delay:620ms">
+        <span><span class="glyph" data-kb="方向键" data-pad="十字键">方向键</span>选择街区</span>
+        <span><span class="glyph face" data-kb="Enter" data-pad="A">Enter</span><span id="pGo">出发</span></span>
+        <span><span class="glyph face" data-kb="C" data-pad="X">C</span>回到当前</span>
+        <button class="device" type="button" data-device>按键提示：键盘</button>
+      </footer>
+    </div>
+
+    <div class="legend" aria-hidden="true" data-reveal="fade" style="--delay:800ms">
+      <span><i class="l-done"></i>已通过</span>
+      <span><i class="l-now"></i>下一站</span>
+      <span><i class="l-lock"></i>未通汽</span>
+      <span><i class="l-pipe"></i>已通汽的管道</span>
+    </div>
+  </section>
+
+  <!-- ============================================================ 塔的升级 -->
+  <section class="screen scr-shop" id="scrShop" role="tabpanel" aria-labelledby="tabShop" inert>
+    <div class="field" aria-hidden="true">
+      <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+        <rect width="1600" height="900" fill="oklch(0.2 0.014 60)"/>
+        <g fill="oklch(0.29 0.02 66)">
+          <rect x="40" y="60" width="300" height="180" rx="8"/><rect x="380" y="40" width="260" height="210" rx="8"/><rect x="980" y="60" width="240" height="160" rx="8"/>
+          <rect x="1260" y="40" width="300" height="220" rx="8"/><rect x="60" y="560" width="280" height="260" rx="8"/><rect x="900" y="600" width="320" height="240" rx="8"/><rect x="1280" y="560" width="280" height="300" rx="8"/>
+        </g>
+        <path d="M-20 420 H 520 Q 600 420 600 500 V 760 Q 600 860 700 860 H 1650" fill="none" stroke="oklch(0.36 0.03 70)" stroke-width="90"/>
+        <path d="M760 -20 V 330 Q 760 420 680 420" fill="none" stroke="oklch(0.36 0.03 70)" stroke-width="90"/>
+        <path d="M-20 420 H 520 Q 600 420 600 500 V 760 Q 600 860 700 860 H 1650" fill="none" stroke="oklch(0.70 0.1 80 / .35)" stroke-width="4" stroke-dasharray="20 22"/>
+        <g fill="oklch(0.78 0.15 60)"><circle cx="460" cy="320" r="26"/><circle cx="720" cy="560" r="26"/><circle cx="880" cy="320" r="26"/><circle cx="420" cy="540" r="18" fill="oklch(0.6 0.03 70)"/></g>
+      </svg>
+    </div>
+
+    <div class="battle col" style="--i:0">
+      <b id="bLevel"><span class="rn">VII</span>发条巷</b>
+      <span>第 <span class="num" id="bWave">6</span> / <span id="bWaves">15</span> 波</span>
+      <span>钟楼耐久 <span class="num">17</span> / 20</span>
+    </div>
+    <div class="purse plate col" style="--i:0" aria-live="polite">
+      <svg class="coin" id="coin"><use href="#i-gear"/></svg>
+      <span class="amt num" id="gears">415</span><span class="unit">齿轮</span>
+    </div>
+
+    <div class="tower-col col" style="--i:1">
+      <div class="chips" id="chips" role="group" aria-label="场上的塔"></div>
+      <div class="stage" id="stage">
+        <svg viewBox="0 0 400 470" aria-hidden="true">
+          <defs>
+            <linearGradient id="gBrassH" x1="0" x2="1"><stop offset="0" stop-color="oklch(0.45 0.08 70)"/><stop offset=".22" stop-color="oklch(0.72 0.1 78)"/><stop offset=".42" stop-color="oklch(0.94 0.06 92)"/><stop offset=".62" stop-color="oklch(0.76 0.105 80)"/><stop offset="1" stop-color="oklch(0.42 0.075 68)"/></linearGradient>
+            <linearGradient id="gBrassV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="oklch(0.94 0.06 92)"/><stop offset=".4" stop-color="oklch(0.76 0.105 80)"/><stop offset="1" stop-color="oklch(0.42 0.075 68)"/></linearGradient>
+            <linearGradient id="gCopperH" x1="0" x2="1"><stop offset="0" stop-color="oklch(0.36 0.08 45)"/><stop offset=".4" stop-color="oklch(0.70 0.12 52)"/><stop offset=".6" stop-color="oklch(0.58 0.12 48)"/><stop offset="1" stop-color="oklch(0.34 0.08 45)"/></linearGradient>
+            <linearGradient id="gCopperV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="oklch(0.74 0.11 55)"/><stop offset=".45" stop-color="oklch(0.58 0.12 48)"/><stop offset="1" stop-color="oklch(0.32 0.08 45)"/></linearGradient>
+            <linearGradient id="gIronH" x1="0" x2="1"><stop offset="0" stop-color="oklch(0.20 0.01 60)"/><stop offset=".4" stop-color="oklch(0.40 0.014 62)"/><stop offset="1" stop-color="oklch(0.18 0.01 60)"/></linearGradient>
+            <linearGradient id="gIronV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="oklch(0.38 0.014 62)"/><stop offset="1" stop-color="oklch(0.18 0.01 60)"/></linearGradient>
+            <radialGradient id="gFire" cx=".5" cy=".7" r=".7"><stop offset="0" stop-color="oklch(0.95 0.1 90)"/><stop offset=".45" stop-color="oklch(0.78 0.16 58)"/><stop offset="1" stop-color="oklch(0.45 0.15 35)"/></radialGradient>
+            <radialGradient id="gPuff"><stop offset="0" stop-color="oklch(0.97 0.01 230 / .7)"/><stop offset="1" stop-color="oklch(0.97 0.01 230 / 0)"/></radialGradient>
+            <radialGradient id="gDial2" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="oklch(0.97 0.012 88)"/><stop offset="1" stop-color="oklch(0.80 0.025 80)"/></radialGradient>
+          </defs>
+          <!-- 地面接触影 -->
+          <ellipse cx="200" cy="440" rx="168" ry="16" fill="rgb(0 0 0 / .55)"/>
+
+          <!-- ======== 黄铜汽炮 -->
+          <g class="twr" data-tower="cannon">
+            <g class="part" data-part="a2">
+              <rect x="94" y="196" width="48" height="108" rx="14" fill="url(#gBrassH)"/>
+              <rect x="94" y="214" width="48" height="7" fill="url(#gCopperH)"/><rect x="94" y="280" width="48" height="7" fill="url(#gCopperH)"/>
+              <path d="M118 196 V 176 H 150" fill="none" stroke="url(#gCopperV)" stroke-width="10" stroke-linecap="round"/>
+            </g>
+            <rect x="152" y="96" width="26" height="80" fill="url(#gIronH)"/>
+            <rect x="145" y="88" width="40" height="13" rx="3" fill="url(#gBrassH)"/>
+            <circle class="chimney-puff" cx="165" cy="80" r="14" fill="url(#gPuff)"/>
+            <circle class="chimney-puff" cx="165" cy="80" r="14" fill="url(#gPuff)"/>
+            <rect x="138" y="160" width="124" height="148" rx="24" fill="url(#gBrassH)"/>
+            <rect x="138" y="182" width="124" height="9" fill="url(#gCopperH)"/><rect x="138" y="280" width="124" height="9" fill="url(#gCopperH)"/>
+            <g fill="oklch(0.92 0.06 90)"><circle cx="150" cy="186.5" r="2.4"/><circle cx="174" cy="186.5" r="2.4"/><circle cx="200" cy="186.5" r="2.4"/><circle cx="226" cy="186.5" r="2.4"/><circle cx="250" cy="186.5" r="2.4"/>
+              <circle cx="150" cy="284.5" r="2.4"/><circle cx="174" cy="284.5" r="2.4"/><circle cx="200" cy="284.5" r="2.4"/><circle cx="226" cy="284.5" r="2.4"/><circle cx="250" cy="284.5" r="2.4"/></g>
+            <g transform="rotate(-24 246 214)">
+              <rect x="232" y="196" width="146" height="36" rx="8" fill="url(#gCopperV)"/>
+              <rect x="282" y="193" width="9" height="42" rx="2" fill="url(#gBrassV)"/>
+              <rect x="368" y="189" width="20" height="50" rx="5" fill="url(#gBrassV)"/>
+              <rect x="386" y="200" width="4" height="28" fill="oklch(0.15 0.01 60)"/>
+            </g>
+            <circle cx="246" cy="214" r="19" fill="url(#gBrassV)" stroke="oklch(0.42 0.075 68)" stroke-width="2"/>
+            <circle cx="246" cy="214" r="6" fill="oklch(0.30 0.05 60)"/>
+          </g>
+
+          <!-- ======== 齿轮弩 -->
+          <g class="twr" data-tower="ballista">
+            <rect x="186" y="176" width="28" height="132" fill="url(#gBrassH)"/>
+            <path d="M64 214 Q 200 120 336 214" fill="none" stroke="url(#gBrassV)" stroke-width="16" stroke-linecap="round"/>
+            <path d="M64 214 L 200 246 L 336 214" fill="none" stroke="oklch(0.92 0.02 85 / .8)" stroke-width="2.5"/>
+            <g class="part" data-part="b2"><g stroke="oklch(0.25 0.04 60)" stroke-width="2.5"><line x1="110" y1="174" x2="114" y2="186"/><line x1="140" y1="160" x2="143" y2="172"/><line x1="170" y1="152" x2="171" y2="164"/><line x1="230" y1="152" x2="229" y2="164"/><line x1="260" y1="160" x2="257" y2="172"/><line x1="290" y1="174" x2="286" y2="186"/></g></g>
+            <rect x="195" y="96" width="10" height="152" rx="2" fill="url(#gCopperH)"/>
+            <path d="M200 76 L 212 102 L 188 102 Z" fill="oklch(0.85 0.06 88)"/>
+            <g class="part" data-part="a1"><path d="M200 70 L 216 104 L 184 104 Z" fill="none" stroke="oklch(0.94 0.06 92)" stroke-width="3"/><path d="M186 100 l -8 6 M214 100 l 8 6" stroke="oklch(0.94 0.06 92)" stroke-width="3"/></g>
+            <g class="part" data-part="b1"><g transform="rotate(-18 120 150)"><rect x="70" y="140" width="90" height="20" rx="4" fill="url(#gBrassV)"/><rect x="60" y="136" width="16" height="28" rx="3" fill="url(#gCopperV)"/><circle cx="66" cy="150" r="6" fill="oklch(0.55 0.08 230)"/></g></g>
+            <g class="part" data-part="b3"><circle cx="300" cy="118" r="30" fill="oklch(0.62 0.07 230 / .35)" stroke="url(#gBrassV)" stroke-width="7"/><path d="M285 106 a 18 18 0 0 1 18 -6" fill="none" stroke="oklch(1 0 0 / .6)" stroke-width="3" stroke-linecap="round"/></g>
+            <g class="part" data-part="a2"><rect x="228" y="226" width="56" height="70" rx="8" fill="url(#gIronH)"/><g fill="url(#gBrassV)"><rect x="236" y="236" width="40" height="8" rx="2"/><rect x="236" y="252" width="40" height="8" rx="2"/><rect x="236" y="268" width="40" height="8" rx="2"/></g></g>
+            <g class="part" data-part="a3"><g class="spin-slow"><path class="gear-sm" fill="oklch(0.80 0.11 82)" fill-rule="evenodd" data-gear="128,256,10,22,16,6"/></g></g>
+            <g class="spin-slow"><path class="gear-sm" fill="oklch(0.66 0.105 76)" fill-rule="evenodd" data-gear="200,262,18,48,40,14"/></g>
+          </g>
+
+          <!-- ======== 雾钟 -->
+          <g class="twr" data-tower="bell">
+            <path d="M118 310 V 176 Q 200 84 282 176 V 310" fill="none" stroke="url(#gIronH)" stroke-width="18"/>
+            <rect x="182" y="108" width="36" height="16" rx="4" fill="url(#gBrassH)"/>
+            <g class="part" data-part="b1"><path d="M282 190 Q 330 180 352 140 L 372 154 Q 344 214 282 226 Z" fill="url(#gBrassV)"/></g>
+            <g class="part" data-part="b2"><g fill="none" stroke="url(#gCopperV)" stroke-width="9" stroke-linecap="round"><path d="M118 210 Q 80 210 80 250 V 300"/><path d="M118 246 Q 98 246 98 270 V 300"/></g></g>
+            <path d="M146 272 Q 146 168 200 162 Q 254 168 254 272 L 268 292 L 132 292 Z" fill="url(#gBrassH)"/>
+            <g class="part" data-part="a1"><rect x="128" y="284" width="144" height="12" rx="4" fill="url(#gCopperH)"/></g>
+            <rect x="140" y="196" width="120" height="6" fill="oklch(0.42 0.075 68 / .7)"/>
+            <circle cx="200" cy="300" r="9" fill="url(#gIronV)"/>
+            <g class="part" data-part="a2"><g fill="url(#gBrassH)"><rect x="300" y="236" width="18" height="70" rx="5"/><rect x="324" y="252" width="18" height="54" rx="5"/></g></g>
+            <g class="part" data-part="a3"><path d="M164 150 Q 200 130 236 150" fill="none" stroke="oklch(0.94 0.06 92)" stroke-width="5" stroke-linecap="round"/><path d="M150 128 Q 200 100 250 128" fill="none" stroke="oklch(0.94 0.06 92 / .6)" stroke-width="4" stroke-linecap="round"/></g>
+            <g class="part" data-part="b3"><g fill="none" stroke="oklch(0.77 0.08 178 / .7)" stroke-width="3"><ellipse cx="200" cy="300" rx="150" ry="22"/><ellipse cx="200" cy="300" rx="186" ry="30" stroke-opacity=".45"/></g></g>
+            <circle class="chimney-puff" cx="104" cy="300" r="18" fill="url(#gPuff)"/>
+            <circle class="chimney-puff" cx="300" cy="300" r="18" fill="url(#gPuff)"/>
+          </g>
+
+          <!-- ======== 共用：炮座与压力表（升级预览时指针摆到新值） -->
+          <rect x="108" y="300" width="184" height="96" rx="12" fill="url(#gIronH)"/>
+          <rect x="108" y="304" width="184" height="8" fill="url(#gBrassH)"/><rect x="108" y="384" width="184" height="8" fill="url(#gBrassH)"/>
+          <path d="M68 440 L332 440 L312 396 L88 396 Z" fill="url(#gIronV)"/>
+          <rect x="86" y="390" width="228" height="10" rx="3" fill="url(#gBrassV)"/>
+          <g fill="oklch(0.70 0.1 78)"><circle cx="104" cy="420" r="3.5"/><circle cx="140" cy="420" r="3.5"/><circle cx="176" cy="420" r="3.5"/><circle cx="224" cy="420" r="3.5"/><circle cx="260" cy="420" r="3.5"/><circle cx="296" cy="420" r="3.5"/></g>
+          <!-- 汽炮在炮座前面的部件：炉膛（A III）、擒纵轮 / 游丝 / 陀飞轮（B） -->
+          <g class="twr" data-tower="cannon">
+            <g class="part" data-part="a3">
+              <rect x="156" y="402" width="88" height="30" rx="5" fill="url(#gFire)"/>
+              <g stroke="oklch(0.22 0.02 50)" stroke-width="4"><line x1="178" y1="402" x2="178" y2="432"/><line x1="200" y1="402" x2="200" y2="432"/><line x1="222" y1="402" x2="222" y2="432"/></g>
+            </g>
+            <g class="part" data-part="b1"><g class="spin-slow"><path class="gear-sm" fill="url(#gBrassH)" fill-rule="evenodd" data-gear="306,330,15,34,27,9"/></g></g>
+            <g class="part" data-part="b2"><path d="M306 326 a4 4 0 1 1 -4 4 a8 8 0 1 1 8 8 a12 12 0 1 1 -12 -12 a16 16 0 1 1 16 16" fill="none" stroke="oklch(0.94 0.06 92)" stroke-width="1.8"/></g>
+            <g class="part" data-part="b3"><g class="spin-slow"><circle cx="306" cy="330" r="44" fill="none" stroke="url(#gCopperV)" stroke-width="5"/><g stroke="oklch(0.62 0.12 48)" stroke-width="3"><line x1="306" y1="286" x2="306" y2="374"/><line x1="268" y1="352" x2="344" y2="308"/><line x1="268" y1="308" x2="344" y2="352"/></g></g></g>
+          </g>
+          <circle cx="200" cy="347" r="34" fill="url(#gDial2)" stroke="url(#gBrassV)" stroke-width="6"/>
+          <path d="M229 347 A29 29 0 0 1 225.11 361.5" fill="none" stroke="oklch(0.62 0.17 30)" stroke-width="5"/>
+          <g id="gaugeTicks"></g>
+          <g id="needleGhost" style="transform:rotate(-120deg)"><line x1="200" y1="347" x2="200" y2="321" stroke="oklch(0.35 0.06 258 / .35)" stroke-width="3" stroke-linecap="round"/></g>
+          <g id="needleLive" style="transform:rotate(-120deg)"><path d="M198 349 L200 318 L202 349 Z" fill="oklch(0.36 0.09 258)" stroke="oklch(0.36 0.09 258)" stroke-width="2" stroke-linejoin="round"/></g>
+          <circle cx="200" cy="347" r="4.5" fill="url(#gBrassV)"/>
+        </svg>
+      </div>
+      <div class="t-name">
+        <div>
+          <h2 id="tName">黄铜汽炮</h2>
+          <p id="tMeta"></p>
+        </div>
+        <div class="gauge-legend" id="gaugeLegend"></div>
+      </div>
+    </div>
+
+    <div class="routes col" style="--i:2" id="routes" role="group" aria-label="升级路线"></div>
+
+    <article class="detail plate col" style="--i:3" id="detail" aria-label="升级详情"></article>
+
+    <footer class="prompts col" style="--i:4">
+      <span><span class="glyph" data-kb="方向键" data-pad="十字键">方向键</span>选择升级</span>
+      <span><span class="glyph face" data-kb="Enter" data-pad="A">Enter</span><span id="pBuy">安装</span></span>
+      <span><span class="glyph" data-kb="1 2 3" data-pad="LT RT">1 2 3</span>换一座塔</span>
+      <span><span class="glyph face" data-kb="Esc" data-pad="B">Esc</span>回到地图</span>
+      <button class="device" type="button" data-device>按键提示：键盘</button>
+    </footer>
+  </section>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</main>
+
+<div class="rotate" role="dialog" aria-label="请横屏游玩">
+  <svg viewBox="0 0 120 120" aria-hidden="true"><rect x="38" y="14" width="44" height="92" rx="8" fill="none" stroke="currentColor" stroke-width="5"/><circle cx="60" cy="94" r="4" fill="currentColor"/></svg>
+  <h2>把手机横过来</h2>
+  <p>钟城的十二个街区要在一面横放的屏幕上才看得全。</p>
+  <button type="button" id="forceLand">仍然竖着看</button>
+</div>
+
+<script>
+/* ==========================================================================
+   motion.js · 无依赖的小型动效运行库（约 4KB 压缩前）
+   --------------------------------------------------------------------------
+   配合 assets/motion.css。用法：
+
+   <head> 里尽早放这一行（避免内容先闪一下再被藏起来；1.5 秒内本库没跑起来就全部直接显示）：
+     document.documentElement.classList.add('js');
+     setTimeout(function(){ if(!window.Motion) document.documentElement.classList.add('no-motion') }, 1500);
+   <body> 末尾内联本文件。注意：本文件和它的注释里都不能出现字面的 script 结束标签。默认在 DOMContentLoaded 时自动执行 Motion.auto()；
+          若要手动控制，在本文件之前设 window.MOTION_MANUAL = true。
+
+   Motion.auto()                 一次装好下面所有能力
+   Motion.reveal(root?)          [data-reveal] [data-split] .draw 进入视口时加 .is-in；
+                                 同一个 [data-stagger] 容器里的子项自动编号 --i
+   Motion.split(el)              把标题按 <br> 拆成行（data-split），或 data-split="words" 按词
+   Motion.count(el, opts?)       数字滚动到目标值：<span data-count="4113.6" data-decimals="2">
+   Motion.spring(el, kf, name?)  用弹簧缓动跑 WAAPI 动画，name = snappy|smooth|bouncy|gentle
+   Motion.flip(els, mutate, name?) 布局变化动画（FLIP）：先记位置→改 DOM→从旧位置弹到新位置
+   Motion.swap(fn)               用 View Transition 包住一次 DOM 更新，不支持时直接执行
+   Motion.spotlight(sel?)        .spotlight 元素跟随指针写入 --mx / --my
+   Motion.reduced                是否开启了"减弱动态效果"
+
+   所有函数在减弱动效时退化为直接到终态（或只做透明度）。
+   ========================================================================== */
+(function () {
+  'use strict';
+  var root = document.documentElement;
+  root.classList.add('js');
+  var mq = window.matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+
+  function css(name, fallback) {
+    var v = getComputedStyle(root).getPropertyValue(name).trim();
+    return v || fallback;
+  }
+  function springOf(name) {
+    name = name || 'smooth';
+    return {
+      easing: css('--spring-' + name, 'cubic-bezier(0.2, 0.8, 0.2, 1)'),
+      duration: parseFloat(css('--spring-' + name + '-dur', '600')) || 600
+    };
+  }
+
+  /* ---------------------------------------------------------------- 拆行 */
+  function split(el) {
+    if (!el || el.dataset.splitDone) return;
+    el.dataset.splitDone = '1';
+    var mode = el.getAttribute('data-split');
+    var label = el.textContent.replace(/\s+/g, ' ').trim();
+    if (!el.getAttribute('aria-label')) el.setAttribute('aria-label', label);
+    var parts;
+    if (mode === 'words') {
+      // 中文按字、西文按词（有 Intl.Segmenter 时用它）
+      var text = el.textContent;
+      if (window.Intl && Intl.Segmenter) {
+        parts = Array.from(new Intl.Segmenter(undefined, { granularity: 'word' }).segment(text), function (s) { return s.segment; });
+      } else {
+        parts = text.split(/(\s+)/);
+      }
+      el.innerHTML = '';
+      var n = 0;
+      parts.forEach(function (p) {
+        if (/^\s+$/.test(p)) { el.appendChild(document.createTextNode(p)); return; }
+        var line = document.createElement('span'); line.className = 'line'; line.style.display = 'inline-block';
+        var inner = document.createElement('span'); inner.textContent = p; inner.style.setProperty('--i', n++);
+        line.appendChild(inner); el.appendChild(line);
+      });
+    } else {
+      var html = el.innerHTML.split(/<br\s*\/?>/i);
+      el.innerHTML = html.map(function (h, i) {
+        return '<span class="line" aria-hidden="true"><span style="--i:' + i + '">' + h.trim() + '</span></span>';
+      }).join('');
+    }
+  }
+
+  /* ---------------------------------------------------------------- 进入视口 */
+  var io = null;
+  function onEnter(entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var t = e.target;
+      t.classList.add('is-in');
+      if (t.hasAttribute('data-count')) count(t);
+      t.querySelectorAll && t.querySelectorAll('[data-count]').forEach(function (c) { count(c); });
+      io.unobserve(t);
+    });
+  }
+  function reveal(scope) {
+    scope = scope || document;
+    scope.querySelectorAll('[data-split]').forEach(split);
+    scope.querySelectorAll('[data-stagger]').forEach(function (box) {
+      var kids = box.querySelectorAll(':scope > [data-reveal], :scope > * > [data-reveal]');
+      kids.forEach(function (k, i) { if (!k.style.getPropertyValue('--i')) k.style.setProperty('--i', i); });
+    });
+    scope.querySelectorAll('.draw').forEach(function (p) {
+      if (p.getTotalLength) { try { p.style.setProperty('--len', Math.ceil(p.getTotalLength()) + 1); } catch (e) {} }
+    });
+    var targets = scope.querySelectorAll('[data-reveal], [data-split], [data-count], .draw, [data-observe]');
+    if (!('IntersectionObserver' in window)) { targets.forEach(function (t) { t.classList.add('is-in'); }); return; }
+    // 阈值用 0 + 底部收进 6%：元素上沿一进入可视区下方 94% 就开始入场。
+    // 不用比例阈值——高的卡片要露出 12% 才触发，会在首屏留下一块空白。
+    io = io || new IntersectionObserver(onEnter, { rootMargin: '0px 0px -6% 0px', threshold: 0 });
+    targets.forEach(function (t) { io.observe(t); });
+  }
+
+  /* ---------------------------------------------------------------- 数字滚动 */
+  function count(el, opts) {
+    if (el.dataset.counted) return;
+    el.dataset.counted = '1';
+    opts = opts || {};
+    var to = parseFloat(opts.to != null ? opts.to : el.dataset.count);
+    var from = parseFloat(opts.from != null ? opts.from : (el.dataset.from || 0));
+    var dec = opts.decimals != null ? opts.decimals : parseInt(el.dataset.decimals || '0', 10);
+    var dur = opts.duration || parseInt(el.dataset.duration || '1100', 10);
+    var fmt = new Intl.NumberFormat(opts.locale || undefined, { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    if (isNaN(to)) return;
+    el.style.fontVariantNumeric = 'tabular-nums';
+    if (mq.matches) { el.textContent = fmt.format(to); return; }
+    var t0 = performance.now();
+    (function frame(now) {
+      var p = Math.min(1, (now - t0) / dur);
+      var k = 1 - Math.pow(1 - p, 4);            // ease-out-quart：前快后慢，最后几位数字慢慢停稳
+      el.textContent = fmt.format(from + (to - from) * k);
+      if (p < 1) requestAnimationFrame(frame);
+    })(t0);
+  }
+
+  /* ---------------------------------------------------------------- 弹簧动画 */
+  function spring(el, keyframes, name, extra) {
+    if (!el || !el.animate) return null;
+    var s = springOf(name);
+    if (mq.matches) {
+      var last = Array.isArray(keyframes) ? keyframes[keyframes.length - 1] : keyframes;
+      return el.animate([last, last], { duration: 1, fill: 'forwards' });
+    }
+    var o = { duration: s.duration, easing: s.easing, fill: 'both' };
+    for (var k in extra || {}) o[k] = extra[k];
+    return el.animate(keyframes, o);
+  }
+
+  /* ---------------------------------------------------------------- FLIP 布局动画 */
+  function flip(els, mutate, name) {
+    els = Array.prototype.slice.call(els);
+    var first = els.map(function (e) { return e.getBoundingClientRect(); });
+    mutate();
+    if (mq.matches) return;
+    els.forEach(function (e, i) {
+      var last = e.getBoundingClientRect(), f = first[i];
+      var dx = f.left - last.left, dy = f.top - last.top;
+      var sx = last.width ? f.width / last.width : 1, sy = last.height ? f.height / last.height : 1;
+      if (!dx && !dy && sx === 1 && sy === 1) return;
+      spring(e, [
+        { transformOrigin: '0 0', transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')' },
+        { transformOrigin: '0 0', transform: 'none' }
+      ], name || 'smooth', { fill: 'none' });
+    });
+  }
+
+  /* ---------------------------------------------------------------- View Transition */
+  function swap(fn) {
+    if (document.startViewTransition && !mq.matches) return document.startViewTransition(fn);
+    fn(); return null;
+  }
+
+  /* ---------------------------------------------------------------- 指针光斑 */
+  function spotlight(sel) {
+    if (!matchMedia('(hover: hover)').matches) return;
+    document.querySelectorAll(sel || '.spotlight').forEach(function (el) {
+      el.addEventListener('pointermove', function (e) {
+        var r = el.getBoundingClientRect();
+        el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
+  }
+
+  function auto() { reveal(); spotlight(); }
+
+  window.Motion = { auto: auto, reveal: reveal, split: split, count: count, spring: spring, flip: flip,
+                    swap: swap, spotlight: spotlight, get reduced() { return mq.matches; } };
+
+  if (!window.MOTION_MANUAL) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', auto);
+    else auto();
+  }
+})();
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
+  var game = $('#game');
+  var MINUS = '−';
+
+  /* ================================================================ 几何工具 */
+  function P(r, deg) { var a = deg * Math.PI / 180; return [500 + r * Math.sin(a), 500 - r * Math.cos(a)]; }
+  function pt(p) { return p[0].toFixed(1) + ' ' + p[1].toFixed(1); }
+  function sect(r1, r2, a1, a2) {
+    var large = (a2 - a1) > 180 ? 1 : 0;
+    return 'M' + pt(P(r2, a1)) + ' A' + r2 + ' ' + r2 + ' 0 ' + large + ' 1 ' + pt(P(r2, a2)) +
+           ' L' + pt(P(r1, a2)) + ' A' + r1 + ' ' + r1 + ' 0 ' + large + ' 0 ' + pt(P(r1, a1)) + ' Z';
+  }
+  function gearPath(cx, cy, n, ro, ri, hole) {
+    var d = '', s = Math.PI * 2 / n;
+    for (var i = 0; i < n; i++) {
+      var a = i * s - Math.PI / 2;
+      var pts = [[ri, a - s * .5], [ro, a - s * .2], [ro, a + s * .2], [ri, a + s * .5]];
+      pts.forEach(function (q, k) {
+        var x = cx + q[0] * Math.cos(q[1]), y = cy + q[0] * Math.sin(q[1]);
+        d += (i === 0 && k === 0 ? 'M' : 'L') + x.toFixed(2) + ' ' + y.toFixed(2) + ' ';
+      });
+    }
+    d += 'Z';
+    if (hole) d += ' M' + (cx + hole) + ' ' + cy + ' A' + hole + ' ' + hole + ' 0 1 0 ' + (cx - hole) + ' ' + cy + ' A' + hole + ' ' + hole + ' 0 1 0 ' + (cx + hole) + ' ' + cy + ' Z';
+    return d;
+  }
+  function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  var ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+  function star(on) { return '<svg aria-hidden="true" class="' + (on ? 'on' : 'off') + '"><use href="#i-' + (on ? 'star' : 'star-o') + '"/></svg>'; }
+
+  $('#gearIconPath').setAttribute('d', gearPath(12, 12, 9, 11, 8.4, 3.6));
+  $('#bigGear').setAttribute('d', gearPath(500, 500, 30, 126, 114, 92));
+  $$('.gear-sm').forEach(function (g) { var a = g.dataset.gear.split(',').map(Number); g.setAttribute('d', gearPath(a[0], a[1], a[2], a[3], a[4], a[5])); });
+  (function gaugeTicks() {             /* 压力表刻度：−120° 到 +120°，每 30° 一格 */
+    var s = '';
+    for (var d = -120; d <= 120; d += 30) {
+      var a = d * Math.PI / 180, r1 = d % 60 === 0 ? 21 : 24;
+      s += '<line x1="' + (200 + r1 * Math.sin(a)).toFixed(1) + '" y1="' + (347 - r1 * Math.cos(a)).toFixed(1) + '" x2="' + (200 + 29 * Math.sin(a)).toFixed(1) + '" y2="' + (347 - 29 * Math.cos(a)).toFixed(1) +
+           '" stroke="oklch(0.30 0.04 60)" stroke-width="' + (d % 60 === 0 ? 2.4 : 1.4) + '" stroke-linecap="round"/>';
+    }
+    $('#gaugeTicks').innerHTML = s;
+  })();
+
+  /* ================================================================ 关卡数据（星数加总 = 14） */
+  var L = [
+    { name: '黄铜码头', st: 'done', got: [1, 1, 1], waves: 8, gates: 1, gears: 250, foes: [['发条鼠', 38], ['铁皮兵', 6]], best: ['耐久 20 / 20', '用时 07:12'], c3: '8 分钟内完成',
+      tag: '货船在这里卸下第一批齿轮。敌人从海上来，只有一条路。' },
+    { name: '煤烟街', st: 'done', got: [1, 1, 1], waves: 10, gates: 1, gears: 260, foes: [['发条鼠', 52], ['铁皮兵', 12]], best: ['耐久 19 / 20', '用时 09:31'], c3: '10 分钟内完成',
+      tag: '烟囱挡住了视线，射程长的塔更吃香。' },
+    { name: '齿轮市集', st: 'done', got: [1, 1, 0], waves: 10, gates: 3, gears: 280, foes: [['发条鼠', 60], ['铁皮兵', 14]], best: ['耐久 16 / 20', '用了 5 座塔'], c3: '只用 3 座塔', why3: '用了 5 座',
+      tag: '三条小巷在集市中心交汇，敌人会分流。' },
+    { name: '汽笛桥', st: 'done', got: [1, 1, 1], waves: 12, gates: 1, gears: 280, foes: [['发条鼠', 58], ['铁皮兵', 20], ['汽笛鸦', 18]], best: ['耐久 20 / 20', '用时 12:40'], c3: '13 分钟内完成',
+      tag: '桥面很窄，溅射伤害在这里最划算。' },
+    { name: '铸钟厂', st: 'done', got: [1, 0, 0], waves: 12, gates: 2, gears: 300, foes: [['铁皮兵', 44], ['发条鼠', 40]], best: ['耐久 9 / 20', '建了 2 座雾钟'], c3: '不建造雾钟', why2: '剩 9', why3: '建了 2 座',
+      tag: '铁皮兵第一次成群出现。护甲厚，单发伤害高的塔才打得动。' },
+    { name: '游丝巷', st: 'done', got: [1, 0, 1], waves: 14, gates: 1, gears: 300, foes: [['发条鼠', 80], ['铁皮兵', 26], ['汽笛鸦', 22]], best: ['耐久 12 / 20', '用时 15:48'], c3: '16 分钟内完成', why2: '剩 12',
+      tag: '巷子弯成游丝的形状，是全城最长的一条路。' },
+    { name: '发条巷', st: 'current', got: [0, 0, 0], waves: 15, gates: 2, gears: 300, foes: [['发条鼠', 96], ['铁皮兵', 30], ['蒸汽甲虫', 4, 1]], best: null, c3: '18 分钟内完成',
+      tag: '两个入口在钟匠铺前汇合。蒸汽甲虫第一次出现，背着自己的锅炉，打穿它会炸开。' },
+    { name: '擒纵塔', st: 'locked', waves: 15, gates: 2, gears: 320, c3: '18 分钟内完成', need: '通过 VII 发条巷后开放',
+      tag: '敌人每走一段就停一拍，像擒纵轮一样。' },
+    { name: '摆锤广场', st: 'locked', waves: 16, gates: 2, gears: 320, c3: '20 分钟内完成', need: '通过 VIII 擒纵塔后开放',
+      tag: '广场中央的摆锤会周期性扫过道路。' },
+    { name: '锅炉区', st: 'locked', waves: 16, gates: 3, gears: 340, c3: '20 分钟内完成', need: '通过 IX 摆锤广场后开放',
+      tag: '沿着蒸汽管道建塔，会被加压。' },
+    { name: '天文台', st: 'locked', waves: 18, gates: 2, gears: 340, c3: '22 分钟内完成', need: '通过 X 锅炉区后开放',
+      tag: '夜战。所有塔射程减半，直到点亮穹顶的灯。' },
+    { name: '正午钟楼', st: 'locked', waves: 20, gates: 4, gears: 400, c3: '25 分钟内完成', need: '通过 XI 天文台，且累计 30 颗星（现有 14）', boss: 1,
+      tag: '钟楼报时之前，守住最后一座塔。' }
+  ];
+  L.forEach(function (l, i) {
+    l.i = i; l.rn = ROMAN[i]; l.ang = (i + 1) * 30;
+    var p = P(360, l.ang); l.x = p[0]; l.y = p[1];
+    l.stars = l.got ? l.got.reduce(function (a, b) { return a + b; }, 0) : 0;
+  });
+  var totalStars = L.reduce(function (a, l) { return a + l.stars; }, 0);   /* 14 */
+  var curLevel = 6;
+
+  /* ================================================================ 画城 */
+  (function buildCity() {
+    var wall = '<circle cx="500" cy="500" r="477" fill="none" stroke="oklch(0.25 0.017 64)" stroke-width="30"/>' +
+               '<circle cx="500" cy="500" r="492" fill="none" stroke="oklch(0.66 0.105 76)" stroke-width="3"/>' +
+               '<circle cx="500" cy="500" r="462" fill="none" stroke="oklch(0.48 0.08 70)" stroke-width="2"/>';
+    for (var m = 0; m < 60; m++) {
+      var hr = m % 5 === 0, a = P(hr ? 466 : 471, m * 6), b = P(hr ? 488 : 482, m * 6);
+      wall += '<line x1="' + a[0].toFixed(1) + '" y1="' + a[1].toFixed(1) + '" x2="' + b[0].toFixed(1) + '" y2="' + b[1].toFixed(1) + '" stroke="' +
+              (hr ? 'oklch(0.80 0.11 82)' : 'oklch(0.55 0.07 72)') + '" stroke-width="' + (hr ? 5 : 1.6) + '" stroke-linecap="round"/>';
+    }
+    $('#wall').innerHTML = wall;
+
+    var R = rng(1907), html = '';
+    var bands = [[140, 254, 2], [289, 340, 2], [380, 455, 3]];
+    L.forEach(function (l) {
+      var c = l.ang, lit = l.st !== 'locked';
+      bands.forEach(function (bd, bi) {
+        var r1 = bd[0], r2 = bd[1];
+        var rings = bi === 0 ? [[r1, 194], [200, r2]] : [[r1, r2]];
+        rings.forEach(function (rr) {
+          var mid = (rr[0] + rr[1]) / 2, gap = 7 / mid * 180 / Math.PI;
+          var a1 = c - 15 + gap, a2 = c + 15 - gap, k = 1 + Math.floor(R() * (bi === 2 ? 3 : 2)), w = (a2 - a1) / k;
+          for (var j = 0; j < k; j++) {
+            var b1 = a1 + j * w + (j ? gap * .5 : 0), b2 = a1 + (j + 1) * w - (j < k - 1 ? gap * .5 : 0);
+            var park = R() < .09, Lv = lit ? (.26 + R() * .07) : (.205 + R() * .04);
+            var fill = park ? (lit ? 'oklch(0.33 0.045 168)' : 'oklch(0.24 0.02 200)') : (lit ? 'oklch(' + Lv.toFixed(3) + ' 0.026 66)' : 'oklch(' + Lv.toFixed(3) + ' 0.01 250)');
+            html += '<path d="' + sect(rr[0], rr[1], b1, b2) + '" fill="' + fill + '" stroke="oklch(1 0 0 / .045)" stroke-width="1"/>';
+            if (lit && !park) {            /* 亮着的窗：通了汽的街区才有灯 */
+              var n = R() < .5 ? 1 : 2;
+              for (var q = 0; q < n; q++) {
+                var wp = P(rr[0] + 6 + R() * (rr[1] - rr[0] - 12), b1 + 1 + R() * (b2 - b1 - 2));
+                html += '<rect x="' + (wp[0] - 2.5).toFixed(1) + '" y="' + (wp[1] - 2.5).toFixed(1) + '" width="5" height="5" fill="oklch(0.84 0.13 75 / ' + (.45 + R() * .45).toFixed(2) + ')"/>';
+              }
+            }
+          }
+        });
+      });
+    });
+    $('#blocks').innerHTML = html;
+
+    var ticks = '';
+    for (var t = 0; t < 12; t++) { var p1 = P(72, t * 30), p2 = P(t % 3 ? 80 : 84, t * 30);
+      ticks += '<line x1="' + p1[0].toFixed(1) + '" y1="' + p1[1].toFixed(1) + '" x2="' + p2[0].toFixed(1) + '" y2="' + p2[1].toFixed(1) + '" stroke="oklch(0.30 0.04 60)" stroke-width="' + (t % 3 ? 2.5 : 5) + '" stroke-linecap="round"/>'; }
+    $('#dialTicks').innerHTML = ticks;
+
+    /* 蒸汽管：钟楼锅炉 → I → … → VII 通汽；之后是冷的铁管 */
+    var pipes = '', feedA = P(134, 30), feedB = P(318, 30);
+    pipes += '<path d="M' + pt(feedA) + ' L' + pt(feedB) + '" stroke="oklch(0.40 0.09 45)" stroke-width="16" stroke-linecap="round" fill="none"/>';
+    pipes += '<path class="draw" style="--delay:250ms" d="M' + pt(feedA) + ' L' + pt(feedB) + '" stroke="oklch(0.66 0.12 50)" stroke-width="9" stroke-linecap="round" fill="none"/>';
+    pipes += '<path class="steam-flow" d="M' + pt(feedA) + ' L' + pt(feedB) + '" stroke="oklch(0.97 0.01 80 / .65)" stroke-width="4" stroke-linecap="round" fill="none"/>';
+    for (var s = 0; s < 11; s++) {
+      var A = L[s], B = L[s + 1], d = 'M' + pt(P(360, A.ang)) + ' A360 360 0 0 1 ' + pt(P(360, B.ang));
+      if (s < curLevel) {
+        pipes += '<path d="' + d + '" stroke="oklch(0.40 0.09 45)" stroke-width="16" fill="none"/>';
+        pipes += '<path class="draw" style="--delay:' + (380 + s * 110) + 'ms" d="' + d + '" stroke="oklch(0.66 0.12 50)" stroke-width="9" fill="none"/>';
+        pipes += '<path class="steam-flow" d="' + d + '" stroke="oklch(0.97 0.01 80 / .6)" stroke-width="4" stroke-linecap="round" fill="none"/>';
+      } else {
+        pipes += '<path d="' + d + '" stroke="oklch(0.30 0.012 60)" stroke-width="9" fill="none" stroke-dasharray="22 8"/>';
+      }
+    }
+    $('#pipes').innerHTML = pipes;
+  })();
+
+  /* ================================================================ 节点 */
+  var nodesEl = $('#nodes'), nodes = [], names = [];
+  L.forEach(function (l, i) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'node ' + l.st + (l.stars === 3 ? ' perfect' : '');
+    b.style.left = (l.x / 10) + '%'; b.style.top = (l.y / 10) + '%'; b.style.setProperty('--i', i);
+    var label = l.rn + ' ' + l.name + '，' + (l.st === 'locked' ? '未开放' : l.st === 'current' ? '下一站，未挑战' : '已通过，' + l.stars + ' 颗星');
+    b.setAttribute('aria-label', label);
+    var inner = '';
+    if (l.stars === 3) inner += '<svg class="cog" viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" d="' + gearPath(50, 50, 16, 50, 44, 40) + '"/></svg>';
+    inner += '<span class="disc"></span><span class="rn" aria-hidden="true">' + l.rn + '</span>';
+    if (l.st === 'locked') inner += '<span class="lock" aria-hidden="true"><svg><use href="#i-lock"/></svg></span>';
+    else inner += '<span class="stars" aria-hidden="true">' + [0, 1, 2].map(function (k) { return star(l.got[k]); }).join('') + '</span>';
+    if (l.st === 'current') inner += '<span class="puff"></span><span class="puff"></span>';
+    b.innerHTML = inner;
+    /* 鼠标：悬停即选中，点一下出发；触屏：第一下选中看档案，再点一下出发 */
+    var armed = false;
+    b.addEventListener('pointerdown', function (e) { armed = e.pointerType === 'mouse' || mapI === i; });
+    b.addEventListener('click', function (e) { if (e.detail === 0) return; if (armed && mapI === i) startLevel(); else focusMap(i); });
+    b.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') focusMap(i, true); });
+    b.addEventListener('focus', function () { if (mapI !== i) focusMap(i, true); });
+    nodesEl.appendChild(b); nodes.push(b);
+
+    var n = document.createElement('span'), p = P(272, l.ang);
+    n.className = 'dname' + (l.st === 'locked' ? ' locked' : '');
+    n.style.left = (p[0] / 10) + '%'; n.style.top = (p[1] / 10) + '%'; n.style.setProperty('--i', i);
+    n.textContent = l.name; n.setAttribute('aria-hidden', 'true');
+    nodesEl.appendChild(n); names.push(n);
+  });
+
+  /* ================================================================ 档案 */
+  var dossier = $('#dossier');
+  function renderDossier(l) {
+    var locked = l.st === 'locked', html = '';
+    var stateTag = locked ? '<span class="state-tag locked"><svg class="ico"><use href="#i-lock"/></svg>未开放</span>'
+      : l.st === 'current' ? '<span class="state-tag">下一站 · 未挑战</span>'
+      : '<span class="state-tag done">已通过 · ' + l.stars + ' / 3 星</span>';
+    html += '<div class="d-head"><div class="d-roman' + (locked ? ' locked' : '') + '" aria-hidden="true">' + l.rn + '</div>' +
+            '<div class="d-title"><p class="label" style="margin:0"><span>第 ' + l.rn + ' 时位</span>' + stateTag + '</p><h2>' + l.name + '</h2></div></div>';
+    html += '<p class="d-tag">' + l.tag + '</p>';
+    var conds = ['守住钟楼', '钟楼耐久不少于 15', l.c3], whys = [null, l.why2, l.why3];
+    html += '<ul class="d-conds" aria-label="三星条件">' + conds.map(function (c, k) {
+      var on = l.got && l.got[k];
+      return '<li class="' + (on ? 'got' : 'miss') + '">' + star(on) + '<span>' + c + '</span>' + (whys[k] && !on ? '<span class="why">上次' + whys[k] + '</span>' : '') + '</li>';
+    }).join('') + '</ul>';
+    html += '<dl class="d-facts"><div><dt>波次</dt><dd>' + l.waves + '</dd></div><div><dt>入口</dt><dd>' + l.gates + '</dd></div>' +
+            '<div><dt>起始齿轮</dt><dd>' + l.gears + '</dd></div><div><dt>钟楼耐久</dt><dd>20</dd></div></dl>';
+    if (locked) html += '<div class="d-foes"><span class="label">敌人</span><span class="foe" style="color:var(--paper-muted)">开放后可见</span></div>';
+    else html += '<div class="d-foes"><span class="label">敌人</span>' + l.foes.map(function (f) {
+      return '<span class="foe' + (f[2] ? ' new' : '') + '">' + f[0] + '<b>×' + f[1] + '</b></span>'; }).join('') + '</div>';
+    var best = locked ? '<p class="d-best"><b>' + l.need + '</b>' + (l.boss ? '首领关 · 正午报时' : '管道还没通汽') + '</p>'
+      : l.best ? '<p class="d-best">最好成绩<b>' + l.best.join('　') + '</b></p>'
+      : '<p class="d-best">还没有成绩<b>新敌人：蒸汽甲虫</b></p>';
+    var btn = locked ? '<button class="go" id="goBtn" type="button" aria-disabled="true"><span class="glyph face" data-kb="Enter" data-pad="A">' + glyph('Enter', 'A') + '</span><span>未开放</span></button>'
+      : '<button class="go" id="goBtn" type="button"><span class="glyph face" data-kb="Enter" data-pad="A">' + glyph('Enter', 'A') + '</span><span>' + (l.st === 'current' ? '出发' : '再战一次') + '</span></button>';
+    html += '<div class="d-foot">' + best + btn + '</div>';
+    dossier.innerHTML = html;
+    dossier.classList.remove('d-swap'); void dossier.offsetWidth; dossier.classList.add('d-swap');
+    $('#goBtn').addEventListener('click', startLevel);
+    $('#pGo').textContent = locked ? '未开放' : l.st === 'current' ? '出发' : '再战';
+  }
+
+  /* ================================================================ 地图焦点：分针就是光标 */
+  var mapI = curLevel, minuteAngle = 0;
+  var hourHand = $('#hourHand'), minuteHand = $('#minuteHand');
+  function focusMap(i, quiet, keepHand) {
+    mapI = i;
+    nodes.forEach(function (n, k) { n.classList.toggle('is-focus', k === i); n.tabIndex = k === i ? 0 : -1; });
+    names.forEach(function (n, k) { n.classList.toggle('is-focus', k === i); });
+    if (!keepHand) {                  /* 走最短的弧 */
+      var target = L[i].ang, d = ((target - minuteAngle) % 360 + 540) % 360 - 180;
+      minuteAngle += d;
+      minuteHand.style.transform = 'rotate(' + minuteAngle + 'deg)';
+    }
+    if (!quiet && screen === 'map' && document.activeElement !== nodes[i] && game.contains(document.activeElement)) nodes[i].focus({ preventScroll: true });
+    renderDossier(L[i]);
+  }
+  function moveMap(dir) {
+    var v = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[dir], from = L[mapI], best = -1, bestScore = Infinity;
+    L.forEach(function (l, k) {
+      if (k === mapI) return;
+      var dx = l.x - from.x, dy = l.y - from.y, dist = Math.hypot(dx, dy), cos = (dx * v[0] + dy * v[1]) / dist;
+      if (cos < .35) return;                                  /* 只看前方约 70° 扇面 */
+      var score = dist * (1 + 2.2 * (1 - cos));
+      if (score < bestScore) { bestScore = score; best = k; }
+    });
+    if (best < 0) { bump(nodes[mapI]); return; }
+    focusMap(best);
+    nodes[best].focus({ preventScroll: true });
+  }
+  function bump(el) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+  function startLevel() {
+    var l = L[mapI], btn = $('#goBtn');
+    if (l.st === 'locked') {
+      bump(nodes[mapI]); if (btn) bump(btn);
+      toast('<b>' + l.rn + ' ' + l.name + '</b>　' + l.need);
+      return;
+    }
+    if (btn) { btn.classList.add('pressed'); setTimeout(function () { btn.classList.remove('pressed'); }, 120); }
+    battleLevel = mapI;
+    setTimeout(function () { show('shop'); }, 140);
+  }
+
+  /* ================================================================ 塔的数据（属性 = 基础 + 已装各级） */
+  var gears = 415, battleLevel = curLevel;
+  var TOWERS = [
+    { id: 'cannon', name: '黄铜汽炮', where: '钟匠铺前 · 东口', role: '单发重击，带溅射', a: 1, b: 0,
+      base: { dmg: 40, rate: .8, range: 3.2, splash: .6 },
+      stats: [{ k: 'dmg', t: '伤害', dec: 0, max: 160 }, { k: 'rate', t: '射速', u: '发/秒', dec: 2, max: 2.4 }, { k: 'range', t: '射程', u: '格', dec: 1, max: 6 }, { k: 'splash', t: '溅射半径', u: '格', dec: 1, max: 1.6 }],
+      head: { k: 'dps', t: '每秒伤害', rel: true, max: 120, dec: 1 },
+      routes: [
+        { name: '高压锅炉', desc: '压力更高，打得更重，装填更慢。', tiers: [
+          { name: '加压阀', cost: 180, add: { dmg: 8 }, text: '锅炉压力提到 1.2 倍，每发多 8 点伤害。' },
+          { name: '双联汽缸', cost: 340, add: { dmg: 24, splash: .3 }, mul: { rate: .875 }, text: '再并一组汽缸：炮弹更重、炸得更开，装填慢八分之一。' },
+          { name: '过热锅炉', cost: 760, add: { dmg: 58, splash: .3, range: .4 }, mul: { rate: .86 }, text: '蒸汽烧到发红。命中后留下 3 秒灼烧，专克蒸汽甲虫的锅炉。' }] },
+        { name: '擒纵连射', desc: '用钟表的擒纵机构管节拍，射得更快。', tiers: [
+          { name: '擒纵轮', cost: 220, add: { rate: .2 }, text: '装上擒纵轮，节拍更稳：每秒多打 0.2 发。' },
+          { name: '游丝调速', cost: 410, add: { rate: .35, range: .4 }, text: '游丝把节拍再调细；炮管加长，射程多 0.4 格。' },
+          { name: '陀飞轮', cost: 820, add: { rate: .85 }, text: '整套机芯装进旋转的框架。每第 5 发连射 3 发。' }] }
+      ] },
+    { id: 'ballista', name: '齿轮弩', where: '汽笛桥头 · 北口', role: '远射、穿透', a: 0, b: 2,
+      base: { dmg: 22, rate: 1.4, range: 4.5, pierce: 2 },
+      stats: [{ k: 'dmg', t: '伤害', dec: 0, max: 80 }, { k: 'rate', t: '射速', u: '发/秒', dec: 2, max: 2.4 }, { k: 'range', t: '射程', u: '格', dec: 1, max: 9 }, { k: 'pierce', t: '穿透', u: '个', dec: 0, max: 10 }],
+      head: { k: 'dps', t: '每秒伤害', rel: true, max: 120, dec: 1 },
+      routes: [
+        { name: '链式齿弹', desc: '一箭串起更多敌人。', tiers: [
+          { name: '锯齿箭头', cost: 150, add: { pierce: 1, dmg: 4 }, text: '箭头加一圈锯齿，多穿透 1 个敌人。' },
+          { name: '链轮弹匣', cost: 360, add: { pierce: 2, rate: .2 }, text: '链轮自动上箭，多穿透 2 个，射速 +0.2。' },
+          { name: '回旋飞齿', cost: 740, add: { pierce: 4, dmg: 18 }, text: '箭在最后一个目标处折返一次，回程还能再穿。' }] },
+        { name: '望远瞄具', desc: '看得更远，打得更准。', tiers: [
+          { name: '黄铜望远镜', cost: 160, add: { range: .8 }, text: '射程多 0.8 格。' },
+          { name: '游标刻度', cost: 300, add: { dmg: 10 }, text: '弓臂上刻了游标，每箭多 10 点伤害。' },
+          { name: '天文镜', cost: 700, add: { range: 1.5, dmg: 20 }, text: '能打到雾里看不见的敌人。射程再多 1.5 格。' }] }
+      ] },
+    { id: 'bell', name: '雾钟', where: '钟匠铺后 · 汇合口', role: '减速，不造成伤害', a: 0, b: 0,
+      base: { slow: .3, dur: 1.5, range: 2.5, rate: .5 },
+      stats: [{ k: 'slow', t: '减速', u: '%', pct: true, dec: 0, max: .8 }, { k: 'dur', t: '持续', u: '秒', dec: 1, max: 4 }, { k: 'range', t: '范围', u: '格', dec: 1, max: 6 }, { k: 'rate', t: '鸣响', u: '次/秒', dec: 2, max: 1 }],
+      head: { k: 'slow', t: '减速', rel: false, pct: true, max: .8, dec: 0 },
+      routes: [
+        { name: '低音铜钟', desc: '钟声更沉，敌人慢得更久。', tiers: [
+          { name: '加厚钟壁', cost: 120, add: { slow: .1 }, text: '钟壁加厚，减速多 10 个百分点。' },
+          { name: '共鸣腔', cost: 280, add: { slow: .1, dur: .5 }, text: '侧面加两根共鸣管，减速再多 10 点，持续多半秒。' },
+          { name: '大报时', cost: 650, add: { slow: .15, dur: 1 }, text: '每第 4 次鸣响，范围里所有敌人原地停 1 秒。' }] },
+        { name: '回声', desc: '钟声传得更远、更密。', tiers: [
+          { name: '喇叭口', cost: 140, add: { range: .6 }, text: '加一个黄铜喇叭口，范围多 0.6 格。' },
+          { name: '回声管', cost: 300, add: { range: .6, rate: .15 }, text: '回声管让钟声来回两次，鸣响更密。' },
+          { name: '全城钟网', cost: 690, add: { range: 1.5 }, text: '与范围内所有雾钟同步鸣响，减速可以叠加。' }] }
+      ] }
+  ];
+  function statsOf(t, a, b) {
+    var s = {}, k; for (k in t.base) s[k] = t.base[k];
+    var used = [];
+    for (var i = 0; i < a; i++) used.push(t.routes[0].tiers[i]);
+    for (var j = 0; j < b; j++) used.push(t.routes[1].tiers[j]);
+    used.forEach(function (u) { for (var k2 in u.add || {}) s[k2] += u.add[k2]; });
+    used.forEach(function (u) { for (var k3 in u.mul || {}) s[k3] *= u.mul[k3]; });
+    if (s.dmg != null) s.dps = s.dmg * s.rate;
+    return s;
+  }
+  function fmtStat(def, v) {
+    var x = def.pct ? v * 100 : v;
+    return x.toFixed(def.dec);
+  }
+  function lvl(t, r) { return r === 0 ? t.a : t.b; }
+  function tierState(t, r, i) {
+    var mine = lvl(t, r), other = lvl(t, 1 - r), tier = t.routes[r].tiers[i];
+    if (mine > i) return 'owned';
+    if (i === 2 && other === 3) return 'excluded';
+    if (mine === i) return gears >= tier.cost ? 'next afford' : 'next short';
+    return 'locked';
+  }
+  function targetLevels(t, r, i) {           /* 选中这一级后两条路的等级（含前置） */
+    var a = t.a, b = t.b;
+    if (r === 0) a = Math.max(a, i + 1); else b = Math.max(b, i + 1);
+    return [a, b];
+  }
+
+  /* ================================================================ 塔坊渲染 */
+  var towerI = 0, sel = { r: 0, t: 1 }, routesEl = $('#routes'), detail = $('#detail');
+  function wheelSVG() {
+    var spokes = '';
+    for (var k = 0; k < 5; k++) { var a = k * 72 * Math.PI / 180;
+      spokes += '<line x1="' + (50 + 20 * Math.sin(a)).toFixed(1) + '" y1="' + (50 - 20 * Math.cos(a)).toFixed(1) + '" x2="' + (50 + 40 * Math.sin(a)).toFixed(1) + '" y2="' + (50 - 40 * Math.cos(a)).toFixed(1) + '"/>'; }
+    return '<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="43" style="fill:oklch(0.16 0.01 60);stroke:var(--rim);stroke-width:9"/>' +
+           '<circle cx="50" cy="50" r="47.5" style="fill:none;stroke:var(--rim-hi);stroke-width:1.5;stroke-opacity:.7"/>' +
+           '<g style="stroke:var(--rim);stroke-width:7;stroke-linecap:round">' + spokes + '</g>' +
+           '<circle cx="50" cy="50" r="23" style="fill:var(--hub);stroke:var(--rim-hi);stroke-width:1.5"/></svg>';
+  }
+  function buildRoutes() {
+    var t = TOWERS[towerI], html = '';
+    t.routes.forEach(function (rt, r) {
+      html += '<div class="r-head" style="grid-column:' + (r + 1) + ';grid-row:1"><h3><span class="tag">' + 'AB'[r] + '</span>' + rt.name + '</h3><p>' + rt.desc + '</p></div>';
+    });
+    t.routes.forEach(function (rt, r) {
+      html += '<div class="r-col" style="grid-column:' + (r + 1) + ';grid-row:2">';
+      rt.tiers.forEach(function (tr, i) {
+        html += '<div class="pipe" data-r="' + r + '" data-i="' + i + '"><span class="steam"></span></div>';
+        html += '<div class="tier-row"><button type="button" class="tier" data-r="' + r + '" data-i="' + i + '">' +
+                '<span class="wheel">' + wheelSVG() + '<span class="rn">' + ROMAN[i] + '</span><span class="badge"><svg><use href="#i-check"/></svg></span></span>' +
+                '<span class="cap"><b>' + tr.name + '</b><span class="cost"></span>' + (i === 2 ? '<span class="excl">封顶 · 二选一</span>' : '') + '</span></button></div>';
+      });
+      html += '</div>';
+    });
+    html += '<div class="boiler" style="grid-row:3" aria-hidden="true"><span>锅 炉</span></div>';
+    routesEl.innerHTML = html;
+    $$('.tier', routesEl).forEach(function (b) {
+      var r = +b.dataset.r, i = +b.dataset.i;
+      var armed = false;
+      b.addEventListener('pointerdown', function (e) { armed = e.pointerType === 'mouse' || (sel.r === r && sel.t === i); });
+      b.addEventListener('click', function (e) {
+        if (e.detail === 0) return;                       /* 键盘触发的 click 已由 act() 处理 */
+        if (!armed || sel.r !== r || sel.t !== i) { selectTier(r, i); return; }
+        if (i === 2 && tierState(TOWERS[towerI], r, i) === 'next afford') toast('封顶级要<b>按住</b>右边的安装按钮');
+        else tryBuy(false);
+      });
+      b.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') selectTier(r, i, true); });
+      b.addEventListener('focus', function () { if (sel.r !== r || sel.t !== i) selectTier(r, i, true); });
+    });
+  }
+  function refreshRoutes() {
+    var t = TOWERS[towerI];
+    $$('.tier', routesEl).forEach(function (b) {
+      var r = +b.dataset.r, i = +b.dataset.i, st = tierState(t, r, i), tr = t.routes[r].tiers[i];
+      b.className = 'tier ' + st + (sel.r === r && sel.t === i ? ' is-focus' : '');
+      b.tabIndex = sel.r === r && sel.t === i ? 0 : -1;
+      var cost = $('.cost', b);
+      if (st === 'owned') cost.innerHTML = '已安装';
+      else if (st === 'excluded') cost.innerHTML = '已被路线 ' + 'AB'[1 - r] + ' 封顶';
+      else cost.innerHTML = '<svg class="ico"><use href="#i-gear"/></svg>' + tr.cost;
+      b.setAttribute('aria-label', '路线 ' + 'AB'[r] + ' 第 ' + ROMAN[i] + ' 级 ' + tr.name + '，' +
+        ({ owned: '已安装', excluded: '已封顶', locked: '需先装前一级', 'next afford': '可安装，' + tr.cost + ' 齿轮', 'next short': '齿轮不够，差 ' + (tr.cost - gears) }[st]));
+    });
+    $$('.pipe', routesEl).forEach(function (p) {
+      var r = +p.dataset.r, i = +p.dataset.i, mine = lvl(t, r);
+      p.classList.toggle('hot', mine > i);
+      p.classList.toggle('preview', sel.r === r && i <= sel.t && mine <= i && tierState(t, r, sel.t) !== 'excluded');
+    });
+  }
+  function chipHTML(t, k) {
+    return '<span class="glyph k" data-kb="' + (k + 1) + '" data-pad="' + ['LT', '', 'RT'][k] + '">' + (k + 1) + '</span><b>' + t.name + '</b>' +
+      '<span class="pips"><span>A <i>' + (t.a ? ROMAN[t.a - 1] : '—') + '</i></span><span>B <i>' + (t.b ? ROMAN[t.b - 1] : '—') + '</i></span></span>';
+  }
+  function buildChips() {
+    var c = $('#chips'); c.innerHTML = '';
+    TOWERS.forEach(function (t, k) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'chip';
+      b.setAttribute('aria-pressed', k === towerI ? 'true' : 'false');
+      b.setAttribute('aria-label', t.name + '，' + t.where);
+      b.innerHTML = chipHTML(t, k);
+      b.addEventListener('click', function () { setTower(k); });
+      c.appendChild(b);
+    });
+    syncGlyphs();
+  }
+  function setTower(k) {
+    towerI = (k + TOWERS.length) % TOWERS.length;
+    var t = TOWERS[towerI];
+    $$('.chip').forEach(function (c, j) { c.setAttribute('aria-pressed', j === towerI ? 'true' : 'false'); });
+    $$('.twr').forEach(function (g) { g.classList.toggle('on', g.dataset.tower === t.id); });
+    $('#tName').textContent = t.name;
+    $('#tMeta').innerHTML = '<span>' + t.where + '</span><span>' + t.role + '</span>';
+    buildRoutes();
+    /* 默认焦点：第一个买得起的下一级，否则第一个下一级 */
+    var pick = null;
+    [0, 1].forEach(function (r) { var i = lvl(t, r); if (i < 3 && !pick && tierState(t, r, i) === 'next afford') pick = [r, i]; });
+    [0, 1].forEach(function (r) { var i = lvl(t, r); if (i < 3 && !pick && tierState(t, r, i) !== 'excluded') pick = [r, i]; });
+    pick = pick || [0, 2];
+    selectTier(pick[0], pick[1], true);
+    $('.stage').animate && !Motion.reduced && $('.stage').animate([{ opacity: .3, translate: '0 1.5cqh' }, { opacity: 1, translate: '0 0' }], { duration: 420, easing: 'cubic-bezier(.16,1,.3,1)' });
+  }
+  function selectTier(r, i, quiet) {
+    if (sel.r !== r || sel.t !== i) endHold();      /* 换了选中项，正在按住的安装作废 */
+    sel = { r: r, t: i };
+    refreshRoutes();
+    renderDetail();
+    var b = $('.tier[data-r="' + r + '"][data-i="' + i + '"]', routesEl);
+    if (!quiet && b && screen === 'shop' && game.contains(document.activeElement)) b.focus({ preventScroll: true });
+  }
+  function renderDetail() {
+    var t = TOWERS[towerI], r = sel.r, i = sel.t, tr = t.routes[r].tiers[i], st = tierState(t, r, i);
+    var cur = statsOf(t, t.a, t.b), tl = (st === 'owned' || st === 'excluded') ? [t.a, t.b] : targetLevels(t, r, i), nx = statsOf(t, tl[0], tl[1]);
+    var prereq = [], mine = lvl(t, r);
+    for (var p = mine; p < i; p++) prereq.push(t.routes[r].tiers[p]);
+    var stateHTML = {
+      owned: '<span class="dt-state owned">已安装</span>',
+      excluded: '<span class="dt-state mute">路线 ' + 'AB'[1 - r] + ' 已封顶</span>',
+      locked: '<span class="dt-state mute">需先装 ' + prereq.map(function (x) { return x.name; }).join('、') + '</span>',
+      'next afford': '<span class="dt-state ok">可以安装</span>',
+      'next short': '<span class="dt-state bad">齿轮不够</span>'
+    }[st];
+    var html = '<div class="dt-eyebrow label"><span>路线 ' + 'AB'[r] + ' · ' + t.routes[r].name + '</span><span>第 ' + ROMAN[i] + ' 级</span></div>';
+    html += '<div class="dt-name"><h3>' + tr.name + '</h3>' + stateHTML + '</div>';
+    html += '<p class="dt-text">' + tr.text + '</p>';
+
+    /* 主角：这一级让塔变强多少 */
+    var h = t.head, hv0 = cur[h.k], hv1 = nx[h.k], big, cls = 'flat', what;
+    if (Math.abs(hv1 - hv0) < 1e-9) { big = (h.pct ? (hv0 * 100).toFixed(0) + '<small>%</small>' : hv0.toFixed(h.dec)); what = h.t + '<b>' + (st === 'owned' ? '已计入当前属性' : '不变') + '</b>'; }
+    else if (h.rel) { var pc = Math.round((hv1 / hv0 - 1) * 100); cls = pc >= 0 ? '' : 'down'; big = (pc >= 0 ? '+' : MINUS) + Math.abs(pc) + '<small>%</small>';
+      what = h.t + '<b>' + hv0.toFixed(h.dec) + ' → ' + hv1.toFixed(h.dec) + '</b>'; }
+    else { var dd = (hv1 - hv0) * 100; cls = dd >= 0 ? '' : 'down'; big = (dd >= 0 ? '+' : MINUS) + Math.abs(dd).toFixed(0) + '<small>%</small>';
+      what = h.t + '<b>' + (hv0 * 100).toFixed(0) + '% → ' + (hv1 * 100).toFixed(0) + '%</b>'; }
+    html += '<div class="headline"><span class="big ' + cls + '">' + big + '</span><span class="what">' + what + (prereq.length > 0 && st === 'locked' ? '<br>含前置 ' + prereq.map(function (x) { return x.name; }).join('、') : '') + '</span></div>';
+
+    html += '<ul class="stats">' + t.stats.map(function (def) {
+      var a = cur[def.k], b = nx[def.k], same = Math.abs(a - b) < 1e-9, up = b > a;
+      var A = fmtStat(def, a), B = fmtStat(def, b), D = def.pct ? Math.abs((b - a) * 100).toFixed(0) : Math.abs(b - a).toFixed(def.dec);
+      var lo = Math.min(a, b) / def.max * 100, hi = Math.max(a, b) / def.max * 100;
+      lo = Math.min(lo, 100); hi = Math.min(hi, 100);
+      return '<li class="stat"><span class="k">' + def.t + '</span><span class="v">' +
+        (same ? '<span class="to">' + A + '</span>' + (def.u ? '<span class="u">' + def.u + '</span>' : '') + '<span class="d same">不变</span>'
+              : '<span class="from">' + A + '</span><span class="u">→</span><span class="to">' + B + '</span>' + (def.u ? '<span class="u">' + def.u + '</span>' : '') +
+                '<span class="d ' + (up ? 'up' : 'down') + '">' + (up ? '▲ +' : '▼ ' + MINUS) + D + '</span>') +
+        '</span><span class="bar" aria-hidden="true"><i class="base" style="width:' + lo.toFixed(1) + '%"></i>' +
+        (same ? '' : '<i class="delta ' + (up ? 'up' : 'down') + '" style="left:' + lo.toFixed(1) + '%;width:' + (hi - lo).toFixed(1) + '%"></i>') +
+        '<i class="ticks"></i></span></li>';
+    }).join('') + '</ul>';
+
+    /* 花费与按钮 */
+    var total = prereq.reduce(function (s, x) { return s + x.cost; }, 0) + (st === 'locked' ? tr.cost : 0);
+    var priceHTML, btnHTML, hold = i === 2 && (st === 'next afford');
+    if (st === 'owned') { priceHTML = '<div class="price"><span class="amt"><svg class="ico"><use href="#i-gear"/></svg>' + tr.cost + '</span><span class="after">已付，计入当前属性</span></div>';
+      btnHTML = '<button class="go" type="button" id="buyBtn" aria-disabled="true"><span class="glyph face" data-kb="Enter" data-pad="A">' + glyph('Enter', 'A') + '</span><span>已安装</span></button>'; }
+    else if (st === 'excluded') { priceHTML = '<div class="price"><span class="amt" style="color:var(--paper-muted)"><svg class="ico"><use href="#i-gear"/></svg>' + tr.cost + '</span><span class="after">两条路线只能封顶一条</span></div>';
+      btnHTML = '<button class="go" type="button" id="buyBtn" aria-disabled="true"><span class="glyph face" data-kb="Enter" data-pad="A">' + glyph('Enter', 'A') + '</span><span>不能安装</span></button>'; }
+    else if (st === 'locked') { priceHTML = '<div class="price' + (total > gears ? ' short' : '') + '"><span class="amt"><svg class="ico"><use href="#i-gear"/></svg>' + tr.cost + '</span><span class="after">连同前置共 ' + total + '，现有 ' + gears + '</span></div>';
+      btnHTML = '<button class="go" type="button" id="buyBtn" aria-disabled="true"><span class="glyph face" data-kb="Enter" data-pad="A">' + glyph('Enter', 'A') + '</span><span>先装前一级</span></button>'; }
+    else if (st === 'next short') { priceHTML = '<div class="price short"><span class="amt"><svg class="ico"><use href="#i-gear"/></svg>' + tr.cost + '</span><span class="after bad">还差 ' + (tr.cost - gears) + ' 齿轮</span></div>';
+      btnHTML = '<button class="go" type="button" id="buyBtn" aria-disabled="true"><span class="glyph face" data-kb="Enter" data-pad="A">' + glyph('Enter', 'A') + '</span><span>齿轮不够</span></button>'; }
+    else { priceHTML = '<div class="price"><span class="amt"><svg class="ico"><use href="#i-gear"/></svg>' + tr.cost + '</span><span class="after">装完剩 ' + (gears - tr.cost) + ' 齿轮</span></div>';
+      btnHTML = '<button class="go" type="button" id="buyBtn"><span class="fill"></span><span class="glyph face" data-kb="Enter" data-pad="A">' + glyph('Enter', 'A') + '</span><span>' + (hold ? '按住安装' : '安装') + '</span></button>'; }
+    html += '<div class="buy">' + priceHTML + btnHTML + '</div>';
+    if (hold) html += '<p class="label" style="margin:-.6cqh 0 0;letter-spacing:.04em">装上之后，路线 ' + 'AB'[1 - r] + ' 的第 III 级会被封住。</p>';
+    detail.innerHTML = html;
+    detail.style.gridTemplateRows = hold ? 'auto auto auto auto minmax(0,1fr) auto auto' : '';
+    $('#pBuy').textContent = hold ? '按住安装' : '安装';
+
+    var bb = $('#buyBtn');
+    if (hold) {                       /* 封顶级：按住 0.9 秒 */
+      bb.addEventListener('pointerdown', function (e) { if (e.button === 0) { holdSrc = 'pointer'; tryBuy(true); } });
+      bb.addEventListener('pointerup', function () { if (holdSrc === 'pointer') endHold(); });
+      bb.addEventListener('pointerleave', function () { if (holdSrc === 'pointer') endHold(); });
+    } else {
+      bb.addEventListener('click', function (e) { if (e.detail !== 0) tryBuy(false); });
+    }
+
+    /* 压力表：虚影留在当前值，指针摆到新值 */
+    var ang = function (v) { return -120 + 240 * Math.min(1, v / h.max); };
+    $('#needleGhost').style.transform = 'rotate(' + ang(hv0) + 'deg)';
+    $('#needleLive').style.transform = 'rotate(' + ang(hv1) + 'deg)';
+    $('#gaugeLegend').innerHTML = '<span>' + h.t + '</span><b>' + (h.pct ? (hv0 * 100).toFixed(0) + '%' : hv0.toFixed(h.dec)) + '</b>';
+
+    /* 塔身：已装的部件实，预览的部件半透明地亮着 */
+    $$('.part', $('#stage')).forEach(function (pEl) {
+      var key = pEl.dataset.part, rr = key[0] === 'a' ? 0 : 1, n = +key[1];
+      var inTower = pEl.closest('.twr').dataset.tower === t.id;
+      var owned = inTower && lvl(t, rr) >= n, ghost = inTower && !owned && tl[rr] >= n && st !== 'owned' && st !== 'excluded';
+      pEl.classList.toggle('owned', owned); pEl.classList.toggle('ghost', ghost);
+    });
+  }
+
+  /* ================================================================ 购买（第 III 级需要按住） */
+  var holdSrc = null, holdT0 = 0, holdRaf = 0, HOLD_MS = 900;
+  function tryBuy(fromHoldStart) {
+    var t = TOWERS[towerI], r = sel.r, i = sel.t, st = tierState(t, r, i), tr = t.routes[r].tiers[i];
+    var tierEl = $('.tier[data-r="' + r + '"][data-i="' + i + '"]', routesEl);
+    if (st === 'owned') { toast('<b>' + tr.name + '</b>　已经装好了'); return; }
+    if (st === 'excluded') { bump(tierEl); toast('路线 ' + 'AB'[1 - r] + ' 已封顶，<b>' + tr.name + '</b>不能再装'); return; }
+    if (st === 'locked') { bump(tierEl); toast('先装 <b>' + t.routes[r].tiers[lvl(t, r)].name + '</b>'); return; }
+    if (st === 'next short') { bump(tierEl); bump($('#buyBtn')); pop('还差 ' + (tr.cost - gears), 'warn', $('#gears')); return; }
+    if (i === 2) {                       /* 封顶级：按住 0.9 秒，代替确认弹窗 */
+      if (fromHoldStart) beginHold(); else toast('封顶级要<b>按住</b>安装按钮');
+      return;
+    }
+    buy();
+  }
+  function beginHold() {
+    var bb = $('#buyBtn'); if (!bb) return;
+    cancelAnimationFrame(holdRaf); holdT0 = performance.now(); bb.classList.add('pressed');
+    (function f(now) {
+      var p = Math.min(1, (now - holdT0) / HOLD_MS); bb.style.setProperty('--hold', p);
+      if (p >= 1) { holdSrc = null; buy(); return; }
+      holdRaf = requestAnimationFrame(f);
+    })(holdT0);
+  }
+  function endHold() {
+    cancelAnimationFrame(holdRaf);
+    var bb = $('#buyBtn'); if (bb) { bb.classList.remove('pressed'); bb.style.setProperty('--hold', 0); }
+    if (holdSrc && holdSrc !== 'done') { holdSrc = null; }
+  }
+  function buy() {
+    var t = TOWERS[towerI], r = sel.r, i = sel.t, tr = t.routes[r].tiers[i], from = gears;
+    if (r === 0) t.a = i + 1; else t.b = i + 1;
+    gears -= tr.cost;
+    var amt = $('#gears'); delete amt.dataset.counted; Motion.count(amt, { from: from, to: gears, duration: 650 });
+    var coin = $('#coin'); coin.style.rotate = (parseFloat(coin.style.rotate || 0) - 120) + 'deg';
+    pop(MINUS + tr.cost, 'spend', amt);
+    $$('.chip')[towerI].innerHTML = chipHTML(t, towerI); syncGlyphs();
+    var nextI = Math.min(i + 1, 2);
+    selectTier(r, i < 2 ? nextI : i, true);
+    var el = $('.tier[data-r="' + r + '"][data-i="' + i + '"]', routesEl);
+    if (el) { el.classList.add('pop'); setTimeout(function () { el.classList.remove('pop'); }, 700); }
+    if (i === 2) { var other = $('.tier[data-r="' + (1 - r) + '"][data-i="2"]', routesEl); if (other) bump(other); }
+    toast('已安装 <b>' + tr.name + '</b>　剩 ' + gears + ' 齿轮');
+    var tb = $('.tier[data-r="' + sel.r + '"][data-i="' + sel.t + '"]', routesEl);
+    if (tb && game.contains(document.activeElement)) tb.focus({ preventScroll: true });
+  }
+
+  /* ================================================================ 飘字与提示 */
+  function pop(text, cls, el) {
+    var g = game.getBoundingClientRect(), r = el.getBoundingClientRect();
+    var p = document.createElement('span'); p.className = 'pop ' + cls; p.textContent = text;
+    p.style.left = (r.left + r.width / 2 - g.left) + 'px'; p.style.top = (r.bottom - g.top) + 'px';
+    game.appendChild(p);
+    var a = Motion.spring(p, [{ transform: 'translate(-50%, 0) scale(.6)', opacity: 0 }, { transform: 'translate(-50%, 1.5cqh) scale(1.15)', opacity: 1, offset: .3 },
+                              { transform: 'translate(-50%, 5cqh) scale(1)', opacity: 0 }], 'gentle', { duration: 950, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    (a ? a.finished : Promise.resolve()).then(function () { p.remove(); }, function () { p.remove(); });
+  }
+  var toastEl = $('#toast'), toastT = 0;
+  function toast(html) {
+    toastEl.innerHTML = html; toastEl.classList.add('on');
+    clearTimeout(toastT); toastT = setTimeout(function () { toastEl.classList.remove('on'); }, 2200);
+  }
+
+  /* ================================================================ 屏幕 */
+  var screen = 'map', shopShown = false;
+  var scrMap = $('#scrMap'), scrShop = $('#scrShop');
+  function show(name) {
+    if (name === screen) return;
+    endHold();
+    if (name === 'shop') {
+      var l = L[battleLevel];
+      $('#bLevel').innerHTML = '<span class="rn">' + l.rn + '</span>' + l.name;
+      $('#bWaves').textContent = l.waves;
+      $('#bWave').textContent = Math.min(6, l.waves);
+      scrMap.style.transformOrigin = (5 + .84 * l.x / 10) + 'cqh ' + (10 + .84 * l.y / 10) + 'cqh';   /* 推近到选中的街区 */
+      if (!shopShown) { shopShown = true; buildChips(); setTower(0); }
+    }
+    screen = name;
+    scrMap.classList.toggle('is-active', name === 'map'); scrShop.classList.toggle('is-active', name === 'shop');
+    scrMap.inert = name !== 'map'; scrShop.inert = name !== 'shop';
+    $('#tabMap').setAttribute('aria-selected', name === 'map'); $('#tabShop').setAttribute('aria-selected', name === 'shop');
+    setTimeout(function () {
+      if (name === 'map') nodes[mapI].focus({ preventScroll: true });
+      else { var b = $('.tier.is-focus', routesEl); if (b) b.focus({ preventScroll: true }); }
+    }, 60);
+  }
+  $('#tabMap').addEventListener('click', function () { show('map'); });
+  $('#tabShop').addEventListener('click', function () { show('shop'); });
+
+  /* ================================================================ 输入：键盘 + 手柄 → 同一组动作 */
+  var device = 'kb';
+  function glyph(kb, pad) { return device === 'pad' ? pad : kb; }
+  function syncGlyphs() {
+    $$('[data-kb]').forEach(function (g) { var v = device === 'pad' ? g.dataset.pad : g.dataset.kb; g.textContent = v; g.hidden = !v; });
+    $$('[data-device]').forEach(function (b) { b.textContent = '按键提示：' + (device === 'pad' ? '手柄' : '键盘'); });
+    game.classList.toggle('is-pad', device === 'pad');
+  }
+  function setDevice(d) { if (d && d !== device) { device = d; syncGlyphs(); } }
+  $$('[data-device]').forEach(function (b) { b.addEventListener('click', function () { setDevice(device === 'pad' ? 'kb' : 'pad'); }); });
+
+  function act(a, src) {
+    setDevice(src);
+    if (a === 'tabPrev' || a === 'tabNext') { show(screen === 'map' ? 'shop' : 'map'); return; }
+    if (screen === 'map') {
+      if (a === 'up' || a === 'down' || a === 'left' || a === 'right') moveMap(a);
+      else if (a === 'confirm') startLevel();
+      else if (a === 'home') { focusMap(curLevel); nodes[curLevel].focus({ preventScroll: true }); }
+      else if (a === 'back') toast('已经在地图上了　按 <b>' + glyph('E', 'RB') + '</b> 去塔坊');
+    } else {
+      if (a === 'up' && sel.t < 2) selectTier(sel.r, sel.t + 1);
+      else if (a === 'down' && sel.t > 0) selectTier(sel.r, sel.t - 1);
+      else if (a === 'left' && sel.r > 0) selectTier(0, sel.t);
+      else if (a === 'right' && sel.r < 1) selectTier(1, sel.t);
+      else if (a === 'up' || a === 'down' || a === 'left' || a === 'right') bump($('.tier.is-focus', routesEl));
+      else if (a === 'confirm') { holdSrc = src; tryBuy(true); }
+      else if (a === 'confirmUp') { if (holdSrc === src) endHold(); }
+      else if (a === 'towerPrev') setTower(towerI - 1);
+      else if (a === 'towerNext') setTower(towerI + 1);
+      else if (/^tower\d$/.test(a)) setTower(+a.slice(5));
+      else if (a === 'back') show('map');
+    }
+  }
+
+  var KEYS = { ArrowUp: 'up', w: 'up', W: 'up', ArrowDown: 'down', s: 'down', S: 'down', ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right',
+               Enter: 'confirm', ' ': 'confirm', Escape: 'back', Backspace: 'back', q: 'tabPrev', Q: 'tabPrev', e: 'tabNext', E: 'tabNext', c: 'home', C: 'home',
+               '1': 'tower0', '2': 'tower1', '3': 'tower2' };
+  addEventListener('keydown', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    var a = KEYS[e.key]; if (!a) return;
+    var tgt = e.target;
+    /* 页签、换塔按钮、提示切换：交给原生按钮 */
+    if (a === 'confirm' && tgt.closest && tgt.closest('.tab, .chip, [data-device], #forceLand')) return;
+    e.preventDefault();
+    if (e.repeat && (a === 'confirm' || a === 'tabPrev' || a === 'tabNext')) return;
+    act(a, 'kb');
+  });
+  addEventListener('keyup', function (e) { if (e.key === 'Enter' || e.key === ' ') { if (e.target.closest && e.target.closest('.tab, .chip, [data-device], #forceLand')) return; e.preventDefault(); act('confirmUp', 'kb'); } });
+
+  /* 标准手柄映射：0 A · 1 B · 2 X · 4 LB · 5 RB · 6 LT · 7 RT · 12–15 十字键 */
+  var PAD = { 0: 'confirm', 1: 'back', 2: 'home', 4: 'tabPrev', 5: 'tabNext', 6: 'towerPrev', 7: 'towerNext' };
+  var DPAD = { 12: 'up', 13: 'down', 14: 'left', 15: 'right' };
+  var prev = {}, dirHeld = null, dirNext = 0, polling = false;
+  function poll(now) {
+    var list = navigator.getGamepads ? navigator.getGamepads() : [], gp = null;
+    for (var i = 0; i < list.length; i++) if (list[i] && list[i].connected) { gp = list[i]; break; }
+    if (!gp) { polling = false; return; }
+    for (var k in PAD) {
+      var b = gp.buttons[k], on = !!b && (b.pressed || b.value > .5);
+      if (on && !prev[k]) act(PAD[k], 'pad');
+      if (!on && prev[k] && PAD[k] === 'confirm') act('confirmUp', 'pad');
+      prev[k] = on;
+    }
+    var dir = null;
+    for (var d in DPAD) { var db = gp.buttons[d]; if (db && db.pressed) dir = DPAD[d]; }
+    if (!dir) {
+      var x = gp.axes[0] || 0, y = gp.axes[1] || 0;
+      if (Math.hypot(x, y) > .55) dir = Math.abs(x) > Math.abs(y) ? (x > 0 ? 'right' : 'left') : (y > 0 ? 'down' : 'up');
+    }
+    if (dir !== dirHeld) { dirHeld = dir; if (dir) { act(dir, 'pad'); dirNext = now + 380; } }
+    else if (dir && now > dirNext) { act(dir, 'pad'); dirNext = now + 140; }    /* 按住时连续移动 */
+    requestAnimationFrame(poll);
+  }
+  addEventListener('gamepadconnected', function () {
+    setDevice('pad'); toast('手柄已连接　<b>' + glyph('Enter', 'A') + '</b> 确认 · <b>' + glyph('Esc', 'B') + '</b> 返回');
+    if (!polling) { polling = true; requestAnimationFrame(poll); }
+  });
+  addEventListener('pointerdown', function (e) { if (e.pointerType === 'mouse' && device === 'pad') setDevice('kb'); });
+
+  $('#forceLand').addEventListener('click', function () { document.documentElement.classList.add('force-land'); });
+
+  /* ================================================================ 开场：城先亮，管道依次通汽，节点按时位落下，时针走到第七时 */
+  $('#starN').textContent = '0';
+  $('#starNote').textContent = '第二章需要 24 颗，还差 ' + (24 - totalStars) + ' 颗';
+  focusMap(curLevel, true, true);
+  setTimeout(function () { hourHand.style.transform = 'rotate(' + L[curLevel].ang + 'deg)'; }, 520);
+  setTimeout(function () { minuteAngle = L[mapI].ang; minuteHand.style.transform = 'rotate(' + minuteAngle + 'deg)'; }, 820);   /* 顺时针扫到焦点 */
+  setTimeout(function () { Motion.count($('#starN'), { from: 0, to: totalStars, duration: 900 }); }, 500);
+  setTimeout(function () { if (!game.contains(document.activeElement)) nodes[mapI].focus({ preventScroll: true }); }, 900);
+  syncGlyphs();
+
+  window.__clock = { act: act, show: show, L: L, TOWERS: TOWERS, statsOf: statsOf };
+})();
+</script>
+</body>
+</html>

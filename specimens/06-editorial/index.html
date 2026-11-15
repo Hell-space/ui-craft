@@ -1,0 +1,764 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Machines That Knew the Sea — The Almanac</title>
+<meta name="description" content="For a century, the tides of the world’s harbours were foretold by brass computers the size of wardrobes. A short history of predicting the ocean by turning a crank.">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&display=swap">
+<style>
+:root {
+  --paper:   #f5f1e8;
+  --paper-2: #ece5d6;
+  --ink:     #1c1b18;
+  --ink-2:   #48443c;
+  --ink-3:   #777164;
+  --rule:    #d5ccb9;
+  --sea:     #1d5266;
+  --sea-wash:#1d526614;
+  --brass:   #94661c;
+  --select:  #cfe0e3;
+
+  --serif: "Newsreader", "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --mono:  "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --body-size: 1.0625rem;   /* 17px on phones */
+  --body-lh: 1.58;
+}
+@media (min-width: 720px) {
+  :root { --body-size: 1.1875rem; --body-lh: 1.6; }   /* 19px / 30.4px */
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper:   #161513;
+    --paper-2: #201e1b;
+    --ink:     #e9e3d6;
+    --ink-2:   #bdb5a5;
+    --ink-3:   #8c8577;
+    --rule:    #3a362f;
+    --sea:     #86bfd1;
+    --sea-wash:#86bfd11a;
+    --brass:   #d4a65a;
+    --select:  #2c4a54;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: var(--body-size);
+  line-height: var(--body-lh);
+  font-optical-sizing: auto;
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  font-kerning: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  counter-reset: sn;
+}
+::selection { background: var(--select); color: var(--ink); }
+
+a {
+  color: inherit;
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in srgb, var(--sea) 45%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  transition: text-decoration-color 160ms ease, color 160ms ease;
+}
+a:hover { color: var(--sea); text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--sea); outline-offset: 3px; border-radius: 2px; }
+
+.mono {
+  font-family: var(--mono);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+sub { font-size: 0.68em; line-height: 0; vertical-align: -0.22em; }
+
+/* ---------- reading progress ---------- */
+.progress {
+  position: fixed; inset: 0 0 auto 0; height: 2px; z-index: 10;
+  background: var(--sea);
+  transform-origin: 0 50%;
+  transform: scaleX(var(--p, 0));
+}
+
+/* ---------- grid ---------- */
+.page {
+  display: grid;
+  grid-template-columns:
+    [full-start] 1.25rem
+    [wide-start text-start] minmax(0, 1fr)
+    [text-end margin-start margin-end wide-end] 1.25rem
+    [full-end];
+}
+.page > * { grid-column: text; }
+@media (min-width: 720px) {
+  .page {
+    grid-template-columns:
+      [full-start] minmax(1.5rem, 1fr)
+      [wide-start] 3rem
+      [text-start] minmax(0, 36rem)
+      [text-end] 3rem
+      [margin-start margin-end wide-end] minmax(1.5rem, 1fr)
+      [full-end];
+  }
+}
+@media (min-width: 1120px) {
+  .page {
+    grid-template-columns:
+      [full-start] minmax(2rem, 1fr)
+      [wide-start] 5rem
+      [text-start] 36rem
+      [text-end] 3rem
+      [margin-start] 14rem
+      [margin-end wide-end] minmax(2rem, 1fr)
+      [full-end];
+  }
+}
+
+/* ---------- masthead ---------- */
+.masthead {
+  grid-column: wide;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+  padding: 1.25rem 0 0.9rem;
+  border-bottom: 1px solid var(--ink);
+}
+.wordmark {
+  font-family: var(--serif);
+  font-size: 1.375rem;
+  font-weight: 600;
+  font-variation-settings: "opsz" 72;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  line-height: 1;
+}
+.wordmark i { font-weight: 400; }
+.masthead .label { color: var(--ink-3); }
+.masthead nav { display: flex; gap: 1.5rem; }
+.masthead nav a { text-decoration: none; color: var(--ink-3); }
+.masthead nav a:hover { color: var(--sea); }
+@media (max-width: 719px) { .masthead nav .hide-sm { display: none; } }
+
+/* ---------- header ---------- */
+.headline-block { grid-column: text-start / margin-end; padding-top: clamp(2.75rem, 7vw, 5.5rem); }
+@media (max-width: 1119px) { .headline-block { grid-column: text; } }
+.kicker { color: var(--sea); margin: 0 0 1.25rem; }
+.kicker span { color: var(--ink-3); }
+h1 {
+  margin: 0;
+  font-weight: 450;
+  font-size: clamp(2.6rem, 1.4rem + 5.2vw, 5rem);
+  line-height: 0.98;
+  letter-spacing: -0.022em;
+  font-variation-settings: "opsz" 72;
+  text-wrap: balance;
+  max-width: 13ch;
+}
+h1 em { font-style: italic; font-weight: 400; }
+.deck {
+  margin: 1.5rem 0 0;
+  max-width: 31em;
+  font-size: clamp(1.1875rem, 1rem + 0.7vw, 1.4375rem);
+  line-height: 1.38;
+  font-style: italic;
+  font-weight: 350;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+.byline {
+  display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 1.25rem; row-gap: 0.35rem;
+  margin: 2rem 0 0;
+  font-size: 1rem; line-height: 1.4;
+}
+.byline .who { font-weight: 600; }
+.byline .who span { font-weight: 400; font-style: italic; color: var(--ink-2); }
+.byline .label { color: var(--ink-3); font-weight: 400; }
+
+.swell {
+  grid-column: full;
+  display: block; width: 100%; height: 56px;
+  margin: 2.5rem 0 0.5rem;
+  color: var(--sea);
+  opacity: 0.55;
+}
+
+/* ---------- body ---------- */
+.prose p {
+  margin: 0;
+  text-wrap: pretty;
+  hanging-punctuation: first;
+}
+.prose p + p { text-indent: 1.4em; }
+@media (max-width: 719px) {
+  .prose p { hyphens: auto; -webkit-hyphens: auto; }
+}
+.prose { margin-top: 2.25rem; }
+.lede::first-letter {
+  float: left;
+  font-size: 4.15em;
+  line-height: 0.82;
+  font-weight: 500;
+  font-variation-settings: "opsz" 72;
+  color: var(--sea);
+  margin: 0.065em 0.09em 0 -0.02em;
+}
+@supports (initial-letter: 3) or (-webkit-initial-letter: 3) {
+  .lede::first-letter {
+    float: none; font-size: inherit; line-height: inherit; margin: 0 0.1em 0 0;
+    -webkit-initial-letter: 3; initial-letter: 3;
+  }
+}
+.lead-in {
+  font-size: 0.8em;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-variant-numeric: lining-nums;
+}
+
+.prose h2 {
+  margin: 3.25rem 0 1rem;
+  font-size: 1.0625em;
+  font-weight: 600;
+  font-variation-settings: "opsz" 24;
+  line-height: 1.3;
+  letter-spacing: 0;
+  display: flex; align-items: baseline; gap: 0.85rem;
+}
+.prose h2 .label { color: var(--sea); font-weight: 500; }
+.prose h2 + p { text-indent: 0; }
+
+/* sidenotes */
+.sn-ref {
+  counter-increment: sn;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 0.62em;
+  font-weight: 500;
+  color: var(--sea);
+  position: relative; top: -0.62em;
+  line-height: 0;
+  padding: 0 0.1em 0 0.12em;
+  text-indent: 0;
+}
+.sn-ref::after { content: counter(sn); }
+.sn-toggle { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.sn-ref:has(+ .sn-toggle:focus-visible) { outline: 2px solid var(--sea); outline-offset: 2px; border-radius: 2px; }
+.sidenote {
+  display: none;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+  text-indent: 0;
+  font-variant-numeric: oldstyle-nums;
+}
+.sidenote::before {
+  content: counter(sn);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--sea);
+  margin-right: 0.5em;
+}
+.sn-toggle:checked + .sidenote {
+  display: block;
+  margin: 0.75rem 0 0.9rem;
+  padding: 0.75rem 0 0.75rem 1rem;
+  border-left: 1px solid var(--sea);
+  background: var(--sea-wash);
+}
+@media (max-width: 1119px) {
+  .sn-ref {
+    top: -0.5em;
+    padding: 0.15em 0.35em;
+    margin-left: 0.08em;
+    border-radius: 3px;
+    background: var(--sea-wash);
+    transition: background-color 160ms ease;
+  }
+  .sn-ref:hover, .sn-ref:has(+ .sn-toggle:checked) { background: color-mix(in srgb, var(--sea) 22%, transparent); }
+}
+@media (min-width: 1120px) {
+  .sn-ref { cursor: default; }
+  .sidenote,
+  .sn-toggle:checked + .sidenote {
+    display: block;
+    float: right; clear: right;
+    width: 14rem;
+    margin: 0.3rem -17rem 1rem 0;
+    padding: 0; border: 0; background: none;
+  }
+}
+
+/* pull quote */
+.pull {
+  grid-column: text;
+  margin: 2.75rem 0;
+  padding: 0;
+}
+@media (min-width: 1120px) { .pull { grid-column: wide-start / text-end; margin: 3.25rem 0; } }
+.pull p {
+  margin: 0;
+  font-size: clamp(1.625rem, 1.2rem + 1.6vw, 2.375rem);
+  line-height: 1.16;
+  font-style: italic;
+  font-weight: 380;
+  font-variation-settings: "opsz" 60;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+  text-indent: -0.42em;  /* hang the opening quote */
+}
+.pull p::after {
+  content: ""; display: block;
+  width: 2.5rem; height: 2px; margin-top: 1.25rem;
+  background: var(--brass);
+}
+
+/* figures */
+.fig {
+  grid-column: text;
+  margin: 2.75rem 0 2.5rem;
+}
+@media (min-width: 720px) { .fig { grid-column: wide; } }
+.fig svg { display: block; width: 100%; height: auto; overflow: visible; }
+.fig-frame {
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--rule);
+  padding: 1.5rem 0 1.25rem;
+}
+.fig figcaption {
+  margin-top: 0.85rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 40em;
+}
+.fig figcaption b { font-family: var(--mono); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); margin-right: 0.5em; }
+@media (min-width: 1120px) { .fig figcaption { margin-left: 5rem; } }
+.key {
+  display: inline-grid; place-items: center;
+  width: 1.25rem; height: 1.25rem; border-radius: 50%;
+  background: var(--sea); color: var(--paper);
+  font-family: var(--mono); font-size: 0.6875rem; font-weight: 500; font-style: normal;
+  vertical-align: 0.08em; margin-right: 0.15em;
+}
+
+/* SVG drawing classes */
+.svg-text { font-family: var(--mono); font-size: 10px; fill: var(--ink-3); letter-spacing: 0.04em; }
+.svg-text.strong { fill: var(--ink); font-weight: 500; }
+.svg-text.accent { fill: var(--sea); font-weight: 500; }
+.svg-ital { font-family: var(--serif); font-style: italic; font-size: 13px; fill: var(--ink-2); }
+.w-part { fill: none; stroke: var(--ink-2); stroke-width: 1.25; stroke-linejoin: round; }
+.w-sum  { fill: none; stroke: var(--sea); stroke-width: 2.25; stroke-linejoin: round; stroke-linecap: round; }
+.w-base { stroke: var(--rule); stroke-width: 1; stroke-dasharray: 2 4; }
+.w-axis { stroke: var(--ink-3); stroke-width: 1; }
+.w-rule { stroke: var(--rule); stroke-width: 1; }
+.m-line { fill: none; stroke: var(--ink); stroke-width: 1.25; }
+.m-thin { fill: none; stroke: var(--ink-3); stroke-width: 1; }
+.m-dash { fill: none; stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 3 3; }
+.m-pulley { fill: var(--paper); stroke: var(--ink); stroke-width: 1.5; }
+.m-hub { fill: var(--ink); }
+.m-wire { fill: none; stroke: var(--brass); stroke-width: 1.75; stroke-linejoin: round; }
+.m-paper { fill: var(--paper-2); stroke: var(--rule); }
+.m-ink { fill: none; stroke: var(--sea); stroke-width: 1.5; stroke-linejoin: round; }
+.callout circle { fill: var(--sea); }
+.callout text { font-family: var(--mono); font-size: 13px; font-weight: 500; fill: var(--paper); text-anchor: middle; dominant-baseline: central; }
+@media (min-width: 720px) and (max-width: 1119px) {
+  .svg-text { font-size: 12px; }
+  .svg-ital { font-size: 15px; }
+  .callout text { font-size: 15px; }
+}
+@media (max-width: 719px) {
+  .svg-text { font-size: 22px; }
+  .svg-ital { font-size: 24px; }
+  .callout text { font-size: 20px; }
+  .fig-frame { padding: 1.25rem 0 1rem; }
+}
+
+/* sidebar */
+.sidebar {
+  grid-column: text;
+  margin: 2.5rem 0;
+  padding: 1.5rem 1.25rem 1.6rem;
+  background: var(--paper-2);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  border-radius: 2px;
+}
+@media (min-width: 720px) { .sidebar { padding: 1.75rem 2rem 2rem; } }
+.sidebar h3 {
+  margin: 0.4rem 0 0.75rem;
+  font-size: 1.375rem;
+  line-height: 1.2;
+  font-weight: 500;
+  font-variation-settings: "opsz" 36;
+  letter-spacing: -0.005em;
+}
+.sidebar .label { color: var(--sea); }
+.sidebar p { margin: 0 0 0.75rem; }
+.sidebar p:last-child { margin-bottom: 0; }
+.tt {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0 1.1rem;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.tt caption { text-align: left; font-family: var(--serif); font-style: italic; font-size: 0.875rem; color: var(--ink-2); padding-bottom: 0.4rem; }
+.tt th { text-align: left; font-weight: 500; font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); padding: 0.4rem 0; border-bottom: 1px solid var(--ink); }
+.tt td { padding: 0.45rem 0; border-bottom: 1px solid var(--rule); }
+.tt td:last-child, .tt th:last-child { text-align: right; }
+.tt tr.hw td:first-child { color: var(--sea); font-weight: 500; }
+
+/* end of article */
+.endmark {
+  display: inline-block;
+  width: 0.5em; height: 0.5em; border-radius: 50%;
+  background: var(--brass);
+  margin-left: 0.35em;
+  vertical-align: 0.05em;
+  box-shadow: inset -0.16em 0 0 0 var(--paper);  /* a waning moon */
+}
+
+.endmatter {
+  grid-column: text;
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--ink);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+.bio { font-style: italic; color: var(--ink-2); margin: 0; }
+.bio b { font-style: normal; font-weight: 600; color: var(--ink); }
+.endmatter h3 { margin: 2.25rem 0 0.75rem; color: var(--ink-3); }
+.sources { list-style: none; margin: 0; padding: 0; }
+.sources li { padding-left: 1.5em; text-indent: -1.5em; margin-bottom: 0.5rem; }
+.sources li cite { font-style: italic; }
+.colophon-note { color: var(--ink-2); margin: 0; }
+.meta-row {
+  display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem;
+  margin-top: 2rem; color: var(--ink-3);
+}
+
+.more {
+  grid-column: wide;
+  margin-top: 4.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+}
+.more > .label { color: var(--ink-3); display: block; margin-bottom: 1.25rem; }
+.more ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.75rem; }
+@media (min-width: 720px) { .more ol { grid-template-columns: repeat(3, 1fr); gap: 2rem; } }
+.more a { display: block; text-decoration: none; }
+.more a .label { color: var(--sea); font-weight: 400; }
+.more strong {
+  display: block; margin: 0.4rem 0 0.35rem;
+  font-size: 1.25rem; line-height: 1.2; font-weight: 500;
+  font-variation-settings: "opsz" 36; letter-spacing: -0.005em;
+  text-wrap: balance;
+  transition: color 160ms ease;
+}
+.more a:hover strong { color: var(--sea); }
+.more span.d { display: block; font-size: 0.9375rem; line-height: 1.45; color: var(--ink-2); }
+
+.footer {
+  grid-column: wide;
+  margin: 4.5rem 0 0;
+  padding: 1.25rem 0 2.5rem;
+  border-top: 1px solid var(--ink);
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem 2rem;
+  color: var(--ink-3);
+}
+.footer .wordmark { font-size: 1.125rem; color: var(--ink); text-transform: none; letter-spacing: -0.01em; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+}
+@media print {
+  :root { --paper: #fff; --paper-2: #f3f3f3; }
+  .progress, .masthead nav, .more, .swell { display: none; }
+  .sidenote { display: block !important; float: none !important; width: auto !important; margin: 0.5rem 0 !important; font-size: 9pt; }
+  .fig, .sidebar, .pull { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"></div>
+
+<div class="page">
+
+  <header class="masthead">
+    <a class="wordmark" href="#">The <i>Almanac</i></a>
+    <nav class="label" aria-label="Sections">
+      <a href="#" class="hide-sm">Essays</a>
+      <a href="#" class="hide-sm">Instruments</a>
+      <a href="#">Issue 31</a>
+    </nav>
+  </header>
+
+  <article class="page" style="grid-column: full;" aria-labelledby="title">
+
+    <header class="headline-block">
+      <p class="kicker label">History of Science <span>/ Instruments</span></p>
+      <h1 id="title">The Machines That Knew the&nbsp;<em>Sea</em></h1>
+      <p class="deck">For a century, the tides of the world’s harbours were foretold by brass computers the size of wardrobes. A short history of predicting the ocean by turning a&nbsp;crank.</p>
+      <div class="byline">
+        <span class="who">By Maren Okafor <span>with figures by the&nbsp;author</span></span>
+        <span class="label"><time datetime="2026-11-10">10 Nov 2026</time></span>
+        <span class="label">9 min read</span>
+      </div>
+    </header>
+
+    <svg class="swell" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <path d="M0,9.1L3,11.7L6,17.5L9,25.5L12,34.5L15,42.8L18,49.2L21,52.4L24,52.1L27,48.3L30,41.8L33,33.6L36,25.3L39,18.3L42,13.9L45,12.6L48,14.7L51,19.6L54,26.3L57,33.4L60,39.7L63,43.7L66,44.8L69,42.7L72,37.7L75,30.8L78,23.2L81,16.4L84,11.7L87,10.1L90,11.8L93,16.8L96,24.2L99,32.8L102,41.2L105,47.8L108,51.7L111,52.2L114,49.1L117,43.2L120,35.4L123,27.2L126,19.9L129,14.8L132,12.7L135,13.8L138,17.9L141,24L144,30.9L147,37.2L150,41.8L153,43.7L156,42.6L159,38.6L162,32.6L165,25.7L168,19.1L171,14.2L174,11.9L177,12.8L180,16.8L183,23.3L186,31.1L189,39.1L192,45.8L195,50L198,51.2L201,49L204,44L207,37L210,29.2L213,22L216,16.6L219,13.7L222,13.9L225,16.8L228,22L231,28.2L234,34.3L237,39.1L240,41.7L243,41.6L246,38.9L249,34.1L252,28.1L255,22.2L258,17.4L261,14.7L264,14.8L267,17.6L270,22.8L273,29.6L276,36.7L279,43.1L282,47.5L285,49.3L288,48.1L291,44.2L294,38.3L297,31.4L300,24.6L303,19L306,15.6L309,14.8L312,16.5L315,20.4L318,25.6L321,31.1L324,35.8L327,39L330,39.9L333,38.5L336,35.1L339,30.5L342,25.4L345,21.1L348,18.2L351,17.5L354,19.2L357,23L360,28.3L363,34.3L366,39.9L369,44.2L372,46.5L375,46.3L378,43.7L381,39.2L384,33.4L387,27.4L390,22.1L393,18.2L396,16.5L399,16.9L402,19.3L405,23.2L408,27.8L411,32.2L414,35.6L417,37.4L420,37.4L423,35.6L426,32.5L429,28.8L432,25.1L435,22.3L438,21L441,21.5L444,23.7L447,27.4L450,31.9L453,36.5L456,40.4L459,43L462,43.7L465,42.5L468,39.5L471,35.2L474,30.3L477,25.4L480,21.5L483,18.9L486,18L489,18.9L492,21.3L495,24.6L498,28.3L501,31.8L504,34.3L507,35.6L510,35.6L513,34.2L516,32L519,29.3L522,26.8L525,25.1L528,24.4L531,25L534,26.9L537,29.7L540,33L543,36.3L546,38.9L549,40.5L552,40.6L555,39.3L558,36.7L561,33L564,29L567,25.1L570,21.9L573,19.8L576,19L579,19.7L582,21.7L585,24.5L588,27.7L591,30.8L594,33.3L597,34.9L600,35.4L603,34.9L606,33.4L609,31.5L612,29.5L615,27.8L618,26.9L621,26.8L624,27.8L627,29.7L630,32L633,34.5L636,36.7L639,38.1L642,38.5L645,37.6L648,35.5L651,32.5L654,28.9L657,25.3L660,22.1L663,19.8L666,18.8L669,19.1L672,20.8L675,23.6L678,27.1L681,30.6L684,33.8L687,36.1L690,37.3L693,37.3L696,36.1L699,34L702,31.6L705,29.2L708,27.3L711,26.4L714,26.6L717,27.9L720,30L723,32.6L726,35.2L729,37.1L732,38L735,37.6L738,35.8L741,32.7L744,28.9L747,24.8L750,21.1L753,18.4L756,17.2L759,17.6L762,19.8L765,23.3L768,27.6L771,32.2L774,36.3L777,39.3L780,40.7L783,40.4L786,38.5L789,35.5L792,31.8L795,28.3L798,25.5L801,24L804,24.1L807,25.7L810,28.4L813,31.9L816,35.2L819,37.8L822,39.1L825,38.6L828,36.3L831,32.5L834,27.8L837,22.9L840,18.7L843,15.9L846,15L849,16.3L852,19.7L855,24.6L858,30.3L861,35.9L864,40.6L867,43.5L870,44.2L873,42.7L876,39.4L879,34.7L882,29.7L885,25.2L888,22L891,20.8L894,21.6L897,24.3L900,28.4L903,33L906,37.1L909,39.9L912,40.8L915,39.5L918,36L921,30.9L924,25.1L927,19.5L930,15.2L933,13.1L936,13.4L939,16.4L942,21.6L945,28.2L948,35.1L951,41.2L954,45.5L957,47.4L960,46.4L963,43L966,37.7L969,31.4L972,25.4L975,20.7L978,18.1L981,18.1L984,20.5L987,24.9L990,30.4L993,35.8L996,40.1L999,42.3L1002,42L1005,39L1008,33.9L1011,27.5L1014,20.9L1017,15.4L1020,12L1023,11.4L1026,13.8L1029,19L1032,26L1035,33.9L1038,41.2L1041,46.8L1044,49.7L1047,49.5L1050,46.2L1053,40.5L1056,33.4L1059,26.1L1062,20.1L1065,16.2L1068,15.2L1071,17.2L1074,21.6L1077,27.7L1080,34.1L1083,39.6L1086,43.1L1089,43.8L1092,41.5L1095,36.6L1098,29.9L1101,22.7L1104,16.2L1107,11.7L1110,10.1L1113,11.9L1116,16.8L1119,24L1122,32.4L1125,40.6L1128,47.2L1131,51.1L1134,51.6L1137,48.7L1140,43L1143,35.4L1146,27.3L1149,20.2L1152,15.2L1155,13.2L1158,14.5L1161,18.7L1164,25L1167,32L1170,38.4L1173,42.9L1176,44.7L1179,43.3L1182,38.9L1185,32.3L1188,24.8L1191,17.7L1194,12.3L1197,9.9L1200,10.9" fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    </svg>
+
+    <div class="prose">
+      <p class="lede">T<span class="lead-in">here is a moment,</span> twice a day in most harbours, when the sea seems to forget what it was doing. The ebb has run out; the flood has not yet begun. Sailors call it slack water, and for most of human history the only way to know when it would come was to have watched it come before&thinsp;—&thinsp;to keep a book, year after year, and trust that the moon would keep its appointments.</p>
+
+      <p>The moon does keep them, more or less. But “more or less” sinks ships. A tide that turns forty minutes later than the almanac promised can leave a laden collier sitting on the bar at the mouth of a river, or float a stack of timber off a beach that was meant to be dry. By the middle of the nineteenth century, with steam shipping multiplying and harbour schedules tightening, the question of exactly when, and how high, the water would stand had become a commercial problem&thinsp;—&thinsp;and, for a few people, a beautiful mathematical one.</p>
+
+      <h2><span class="label">I</span> A sea made of clocks</h2>
+
+      <p>The beautiful version goes like this. The tide at any port is not one wave but many, stacked. The moon pulls the ocean into a bulge that sweeps round the earth roughly every twelve hours and twenty-five minutes; the sun does the same, more weakly, every twelve hours exactly. Because the two periods differ, they drift in and out of step: when they agree you get the big spring tides, when they quarrel you get the sluggish neaps. Add the tilt of the moon’s orbit, its elliptical path, the sun’s own drift through the seasons, and you arrive at dozens of distinct rhythms, each a clean sine wave with its own period.</p>
+
+      <p>Those periods are set by astronomy and are the same everywhere. What differs from port to port is how much of each wave arrives, and how late. The shape of the coastline, the depth of the shelf, the funnel of an estuary&thinsp;—&thinsp;all of it rescales and delays each component. Measure a year of real water levels at a harbour, pull the record apart into its constituents,<label class="sn-ref" for="sn1" aria-label="Note 1"></label><input type="checkbox" id="sn1" class="sn-toggle"><span class="sidenote">The process is called harmonic analysis. Kelvin designed a separate machine to do it mechanically, but for decades most of it was done by hand, on printed forms, over very long afternoons.</span> and you are left with a short list of numbers: for each rhythm, an amplitude and a phase. Those numbers are the port’s signature. With them you can, in principle, run the sea forward as far as you&nbsp;like.</p>
+    </div>
+
+    <figure class="fig" aria-labelledby="fig1-cap">
+      <div class="fig-frame">
+        <svg viewBox="0 0 720 400" role="img" aria-labelledby="fig1-title">
+          <title id="fig1-title">Three sine waves of different periods and sizes, labelled M2, S2 and K1, add up to a tide curve whose high waters shrink over seven days from springs toward neaps.</title>
+          <g>
+            <line class="w-base" x1="64" x2="704" y1="56" y2="56"/>
+            <line class="w-base" x1="64" x2="704" y1="116" y2="116"/>
+            <line class="w-base" x1="64" x2="704" y1="168" y2="168"/>
+            <path class="w-part" d="M64,40L66,40.6L68,42.2L70,44.8L72,48.2L74,52.2L76,56.4L78,60.6L80,64.4L82,67.7L84,70.1L86,71.6L88,72L90,71.2L92,69.4L94,66.7L96,63.1L98,59.1L100,54.9L102,50.8L104,47L106,43.8L108,41.5L110,40.2L112,40.1L114,41L116,43L118,45.9L120,49.5L122,53.6L124,57.8L126,61.9L128,65.6L130,68.6L132,70.8L134,71.9L136,71.9L138,70.7L140,68.6L142,65.5L144,61.8L146,57.7L148,53.5L150,49.4L152,45.8L154,42.9L156,41L158,40.1L160,40.3L162,41.6L164,43.9L166,47.1L168,50.9L170,55L172,59.3L174,63.3L176,66.7L178,69.5L180,71.3L182,72L184,71.6L186,70.1L188,67.6L190,64.3L192,60.4L194,56.2L196,52L198,48.1L200,44.7L202,42.1L204,40.5L206,40L208,40.6L210,42.3L212,44.9L214,48.3L216,52.3L218,56.5L220,60.7L222,64.5L224,67.8L226,70.2L228,71.6L230,72L232,71.2L234,69.3L236,66.6L238,63L240,59L242,54.8L244,50.6L246,46.9L248,43.7L250,41.5L252,40.2L254,40.1L256,41L258,43.1L260,46L262,49.6L264,53.7L266,57.9L268,62L270,65.7L272,68.7L274,70.8L276,71.9L278,71.8L280,70.7L282,68.5L284,65.4L286,61.7L288,57.6L290,53.3L292,49.3L294,45.7L296,42.9L298,40.9L300,40L302,40.3L304,41.6L306,44L308,47.2L310,51L312,55.2L314,59.4L316,63.4L318,66.8L320,69.5L322,71.3L324,72L326,71.6L328,70L330,67.5L332,64.2L334,60.3L336,56.1L338,51.9L340,48L342,44.6L344,42.1L346,40.5L348,40L350,40.6L352,42.3L354,45L356,48.4L358,52.4L360,56.6L362,60.8L364,64.6L366,67.9L368,70.3L370,71.7L372,72L374,71.2L376,69.3L378,66.5L380,62.9L382,58.9L384,54.7L386,50.5L388,46.8L390,43.7L392,41.4L394,40.2L396,40.1L398,41.1L400,43.1L402,46.1L404,49.7L406,53.8L408,58.1L410,62.2L412,65.8L414,68.8L416,70.9L418,71.9L420,71.8L422,70.6L424,68.4L426,65.3L428,61.6L430,57.5L432,53.2L434,49.2L436,45.6L438,42.8L440,40.9L442,40L444,40.3L446,41.7L448,44.1L450,47.3L452,51.1L454,55.3L456,59.5L458,63.5L460,66.9L462,69.6L464,71.3L466,72L468,71.5L470,70L472,67.4L474,64.1L476,60.2L478,56L480,51.8L482,47.9L484,44.6L486,42L488,40.5L490,40L492,40.7L494,42.4L496,45.1L498,48.5L500,52.5L502,56.7L504,60.9L506,64.7L508,67.9L510,70.3L512,71.7L514,72L516,71.1L518,69.2L520,66.4L522,62.8L524,58.8L526,54.5L528,50.4L530,46.7L532,43.6L534,41.4L536,40.2L538,40.1L540,41.1L542,43.2L544,46.2L546,49.8L548,53.9L550,58.2L552,62.3L554,65.9L556,68.9L558,70.9L560,71.9L562,71.8L564,70.6L566,68.3L568,65.2L570,61.5L572,57.3L574,53.1L576,49.1L578,45.5L580,42.7L582,40.8L584,40L586,40.3L588,41.7L590,44.1L592,47.4L594,51.2L596,55.4L598,59.6L600,63.6L602,67L604,69.7L606,71.4L608,72L610,71.5L612,69.9L614,67.4L616,64L618,60.1L620,55.9L622,51.7L624,47.8L626,44.5L628,42L630,40.4L632,40L634,40.7L636,42.5L638,45.2L640,48.6L642,52.6L644,56.8L646,61L648,64.8L650,68L652,70.4L654,71.7L656,72L658,71.1L660,69.1L662,66.3L664,62.7L666,58.7L668,54.4L670,50.3L672,46.6L674,43.5L676,41.3L678,40.2L680,40.1L682,41.2L684,43.3L686,46.3L688,50L690,54.1L692,58.3L694,62.4L696,66L698,68.9L700,71L702,71.9L704,71.8"/>
+            <path class="w-part" d="M64,108.6L66,108.9L68,109.7L70,111L72,112.7L74,114.6L76,116.6L78,118.5L80,120.3L82,121.8L84,122.8L86,123.3L88,123.3L90,122.7L92,121.6L94,120.1L96,118.3L98,116.3L100,114.3L102,112.4L104,110.8L106,109.6L108,108.8L110,108.6L112,109L114,109.9L116,111.2L118,112.9L120,114.8L122,116.9L124,118.8L126,120.6L128,122L130,122.9L132,123.3L134,123.2L136,122.6L138,121.4L140,119.8L142,118L144,116L146,114L148,112.2L150,110.6L152,109.4L154,108.8L156,108.7L158,109.1L160,110L162,111.4L164,113.2L166,115.1L168,117.2L170,119.1L172,120.8L174,122.1L176,123L178,123.4L180,123.2L182,122.4L184,121.2L186,119.6L188,117.7L190,115.7L192,113.7L194,111.9L196,110.4L198,109.3L200,108.7L202,108.7L204,109.2L206,110.2L208,111.7L210,113.5L212,115.4L214,117.4L216,119.3L218,121L220,122.3L222,123.1L224,123.4L226,123.1L228,122.3L230,121L232,119.3L234,117.4L236,115.4L238,113.5L240,111.7L242,110.2L244,109.2L246,108.7L248,108.7L250,109.3L252,110.4L254,111.9L256,113.7L258,115.7L260,117.7L262,119.6L264,121.2L266,122.4L268,123.2L270,123.4L272,123L274,122.1L276,120.8L278,119.1L280,117.2L282,115.1L284,113.2L286,111.4L288,110L290,109.1L292,108.7L294,108.8L296,109.4L298,110.6L300,112.2L302,114L304,116L306,118L308,119.8L310,121.4L312,122.6L314,123.2L316,123.3L318,122.9L320,122L322,120.6L324,118.8L326,116.9L328,114.8L330,112.9L332,111.2L334,109.9L336,109L338,108.6L340,108.8L342,109.6L344,110.8L346,112.4L348,114.3L350,116.3L352,118.3L354,120.1L356,121.6L358,122.7L360,123.3L362,123.3L364,122.8L366,121.8L368,120.3L370,118.5L372,116.6L374,114.6L376,112.7L378,111L380,109.7L382,108.9L384,108.6L386,108.9L388,109.7L390,111L392,112.7L394,114.6L396,116.6L398,118.5L400,120.3L402,121.8L404,122.8L406,123.3L408,123.3L410,122.7L412,121.6L414,120.1L416,118.3L418,116.3L420,114.3L422,112.4L424,110.8L426,109.6L428,108.8L430,108.6L432,109L434,109.9L436,111.2L438,112.9L440,114.8L442,116.9L444,118.8L446,120.6L448,122L450,122.9L452,123.3L454,123.2L456,122.6L458,121.4L460,119.8L462,118L464,116L466,114L468,112.2L470,110.6L472,109.4L474,108.8L476,108.7L478,109.1L480,110L482,111.4L484,113.2L486,115.1L488,117.2L490,119.1L492,120.8L494,122.1L496,123L498,123.4L500,123.2L502,122.4L504,121.2L506,119.6L508,117.7L510,115.7L512,113.7L514,111.9L516,110.4L518,109.3L520,108.7L522,108.7L524,109.2L526,110.2L528,111.7L530,113.5L532,115.4L534,117.4L536,119.3L538,121L540,122.3L542,123.1L544,123.4L546,123.1L548,122.3L550,121L552,119.3L554,117.4L556,115.4L558,113.5L560,111.7L562,110.2L564,109.2L566,108.7L568,108.7L570,109.3L572,110.4L574,111.9L576,113.7L578,115.7L580,117.7L582,119.6L584,121.2L586,122.4L588,123.2L590,123.4L592,123L594,122.1L596,120.8L598,119.1L600,117.2L602,115.1L604,113.2L606,111.4L608,110L610,109.1L612,108.7L614,108.8L616,109.4L618,110.6L620,112.2L622,114L624,116L626,118L628,119.8L630,121.4L632,122.6L634,123.2L636,123.3L638,122.9L640,122L642,120.6L644,118.8L646,116.9L648,114.8L650,112.9L652,111.2L654,109.9L656,109L658,108.6L660,108.8L662,109.6L664,110.8L666,112.4L668,114.3L670,116.3L672,118.3L674,120.1L676,121.6L678,122.7L680,123.3L682,123.3L684,122.8L686,121.8L688,120.3L690,118.5L692,116.6L694,114.6L696,112.7L698,111L700,109.7L702,108.9L704,108.6"/>
+            <path class="w-part" d="M64,165.7L66,166.3L68,167L70,167.7L72,168.4L74,169.1L76,169.8L78,170.4L80,171L82,171.6L84,172L86,172.4L88,172.7L90,173L92,173.1L94,173.1L96,173.1L98,172.9L100,172.6L102,172.3L104,171.9L106,171.4L108,170.8L110,170.2L112,169.5L114,168.8L116,168.1L118,167.4L120,166.7L122,166.1L124,165.4L126,164.9L128,164.3L130,163.9L132,163.5L134,163.2L136,163L138,162.9L140,162.9L142,163L144,163.2L146,163.4L148,163.8L150,164.2L152,164.7L154,165.3L156,165.9L158,166.6L160,167.3L162,168L164,168.7L166,169.4L168,170.1L170,170.7L172,171.3L174,171.8L176,172.2L178,172.6L180,172.8L182,173L184,173.1L186,173.1L188,173L190,172.8L192,172.5L194,172.1L196,171.7L198,171.1L200,170.6L202,169.9L204,169.2L206,168.6L208,167.8L210,167.1L212,166.5L214,165.8L216,165.2L218,164.6L220,164.1L222,163.7L224,163.4L226,163.1L228,162.9L230,162.9L232,162.9L234,163L236,163.3L238,163.6L240,164L242,164.4L244,165L246,165.6L248,166.2L250,166.9L252,167.6L254,168.3L256,169L258,169.7L260,170.3L262,170.9L264,171.5L266,172L268,172.4L270,172.7L272,172.9L274,173.1L276,173.1L278,173.1L280,172.9L282,172.7L284,172.4L286,171.9L288,171.5L290,170.9L292,170.3L294,169.6L296,169L298,168.3L300,167.6L302,166.9L304,166.2L306,165.5L308,164.9L310,164.4L312,163.9L314,163.6L316,163.2L318,163L320,162.9L322,162.9L324,163L326,163.1L328,163.4L330,163.7L332,164.2L334,164.7L336,165.2L338,165.8L340,166.5L342,167.2L344,167.9L346,168.6L348,169.3L350,170L352,170.6L354,171.2L356,171.7L358,172.1L360,172.5L362,172.8L364,173L366,173.1L368,173.1L370,173L372,172.8L374,172.6L376,172.2L378,171.7L380,171.2L382,170.7L384,170L386,169.4L388,168.7L390,168L392,167.3L394,166.6L396,165.9L398,165.3L400,164.7L402,164.2L404,163.8L406,163.4L408,163.1L410,163L412,162.9L414,162.9L416,163L418,163.2L420,163.5L422,163.9L424,164.4L426,164.9L428,165.5L430,166.1L432,166.8L434,167.5L436,168.2L438,168.9L440,169.6L442,170.2L444,170.8L446,171.4L448,171.9L450,172.3L452,172.6L454,172.9L456,173.1L458,173.1L460,173.1L462,173L464,172.7L466,172.4L468,172L470,171.5L472,171L474,170.4L476,169.7L478,169.1L480,168.4L482,167.7L484,167L486,166.3L488,165.6L490,165L492,164.5L494,164L496,163.6L498,163.3L500,163.1L502,162.9L504,162.9L506,162.9L508,163.1L510,163.3L512,163.7L514,164.1L516,164.6L518,165.1L520,165.7L522,166.4L524,167.1L526,167.8L528,168.5L530,169.2L532,169.8L534,170.5L536,171.1L538,171.6L540,172.1L542,172.5L544,172.8L546,173L548,173.1L550,173.1L552,173L554,172.9L556,172.6L558,172.3L560,171.8L562,171.3L564,170.7L566,170.1L568,169.5L570,168.8L572,168.1L574,167.4L576,166.7L578,166L580,165.4L582,164.8L584,164.3L586,163.8L588,163.5L590,163.2L592,163L594,162.9L596,162.9L598,163L600,163.2L602,163.5L604,163.8L606,164.3L608,164.8L610,165.4L612,166L614,166.7L616,167.4L618,168.1L620,168.8L622,169.5L624,170.1L626,170.7L628,171.3L630,171.8L632,172.2L634,172.6L636,172.9L638,173L640,173.1L642,173.1L644,173L646,172.8L648,172.5L650,172.1L652,171.6L654,171.1L656,170.5L658,169.9L660,169.2L662,168.5L664,167.8L666,167.1L668,166.4L670,165.7L672,165.1L674,164.6L676,164.1L678,163.7L680,163.3L682,163.1L684,162.9L686,162.9L688,162.9L690,163.1L692,163.3L694,163.6L696,164L698,164.5L700,165L702,165.6L704,166.3"/>
+            <text class="svg-text strong" x="0" y="60">M₂</text>
+            <text class="svg-text strong" x="0" y="120">S₂</text>
+            <text class="svg-text strong" x="0" y="172">K₁</text>
+          </g>
+          <line class="w-rule" x1="0" x2="704" y1="206" y2="206"/>
+          <g>
+            <line class="w-base" x1="64" x2="704" y1="290" y2="290"/>
+            <path class="w-sum" d="M64,241.8L66,244.6L68,250.5L70,259.1L72,269.9L74,282.2L76,295.1L78,307.9L80,319.6L82,329.4L84,336.8L86,341.3L88,342.5L90,340.4L92,335.2L94,327.2L96,317.1L98,305.6L100,293.4L102,281.5L104,270.6L106,261.4L108,254.7L110,250.8L112,249.9L114,252L116,256.9L118,264.2L120,273.3L122,283.5L124,293.9L126,303.8L128,312.3L130,318.9L132,323L134,324.3L136,322.6L138,318.2L140,311.2L142,302.2L144,291.8L146,280.9L148,270.1L150,260.4L152,252.5L154,246.9L156,244.2L158,244.5L160,248L162,254.4L164,263.4L166,274.3L168,286.4L170,299L172,311.2L174,322.1L176,331.2L178,337.6L180,341.1L182,341.4L184,338.6L186,332.7L188,324.4L190,314L192,302.5L194,290.5L196,278.9L198,268.5L200,260L202,253.9L204,250.6L206,250.2L208,252.7L210,257.9L212,265.2L214,274.2L216,284L218,294L220,303.3L222,311.2L224,317.2L226,320.7L228,321.6L230,319.7L232,315.2L234,308.4L236,299.8L238,290.1L240,280L242,270.2L244,261.5L246,254.6L248,250L250,248.2L252,249.2L254,253L256,259.6L258,268.4L260,278.8L262,290.3L264,302L266,313.1L268,322.9L270,330.8L272,336.2L274,338.8L276,338.3L278,335L280,328.9L282,320.6L284,310.5L286,299.5L288,288.3L290,277.5L292,268L294,260.3L296,254.9L298,252.1L300,252L302,254.7L304,259.6L306,266.6L308,274.9L310,284L312,293.1L314,301.5L316,308.6L318,313.9L320,317L322,317.6L324,315.8L326,311.6L328,305.5L330,297.8L332,289.2L334,280.4L336,271.9L338,264.5L340,258.8L342,255.1L344,253.9L346,255.3L348,259.2L350,265.4L352,273.5L354,283L356,293.2L358,303.5L360,313.2L362,321.7L364,328.3L366,332.6L368,334.4L370,333.6L372,330.1L374,324.3L376,316.5L378,307.3L380,297.3L382,287.1L384,277.5L386,269L388,262.2L390,257.4L392,255L394,255L396,257.3L398,261.7L400,267.8L402,275.1L404,283.1L406,291L408,298.4L410,304.6L412,309.3L414,312.1L416,312.8L418,311.4L420,308L422,303L424,296.7L426,289.6L428,282.3L430,275.4L432,269.4L434,264.8L436,261.9L438,261.1L440,262.4L442,265.9L444,271.2L446,278.1L448,286.1L450,294.7L452,303.3L454,311.4L456,318.3L458,323.7L460,327.2L462,328.5L464,327.6L466,324.5L468,319.4L470,312.7L472,304.8L474,296.2L476,287.4L478,279.1L480,271.7L482,265.6L484,261.3L486,259L488,258.6L490,260.2L492,263.6L494,268.5L496,274.4L498,281L500,287.6L502,293.9L504,299.3L506,303.6L508,306.4L510,307.6L512,307L514,304.9L516,301.4L518,296.9L520,291.6L522,286.1L524,280.7L526,276L528,272.3L530,269.9L532,269.1L534,269.9L536,272.4L538,276.3L540,281.5L542,287.7L544,294.3L546,301.1L548,307.5L550,313L552,317.5L554,320.4L556,321.7L558,321.1L560,318.9L562,315L564,309.7L566,303.4L568,296.4L570,289.2L572,282.2L574,275.7L576,270.3L578,266.1L580,263.4L582,262.3L584,262.8L586,264.9L588,268.2L590,272.5L592,277.6L594,282.9L596,288.2L598,293.2L600,297.3L602,300.5L604,302.5L606,303.3L608,302.8L610,301.2L612,298.6L614,295.3L616,291.5L618,287.7L620,284L622,280.9L624,278.6L626,277.3L628,277.1L630,278.1L632,280.3L634,283.5L636,287.5L638,292.1L640,297L642,301.8L644,306.2L646,310L648,312.8L650,314.4L652,314.8L654,313.8L656,311.5L658,308L660,303.4L662,298.2L664,292.4L666,286.5L668,280.8L670,275.6L672,271.2L674,267.8L676,265.6L678,264.7L680,265.1L682,266.7L684,269.4L686,273L688,277.3L690,281.9L692,286.6L694,291L696,295L698,298.3L700,300.7L702,302.1L704,302.6"/>
+            <text class="svg-text accent" x="0" y="295">Sum</text>
+            <text class="svg-ital" x="88" y="228" text-anchor="middle">springs</text>
+            <text class="svg-ital" x="532" y="342" text-anchor="middle">neaps</text>
+          </g>
+          <g>
+            <line class="w-axis" x1="64" x2="704" y1="362" y2="362"/>
+            <g class="svg-text">
+              <line class="w-axis" x1="64" x2="64" y1="362" y2="368"/><text x="64" y="392" text-anchor="middle">0</text>
+              <line class="w-axis" x1="155.4" x2="155.4" y1="362" y2="368"/><text x="155.4" y="392" text-anchor="middle">1</text>
+              <line class="w-axis" x1="246.9" x2="246.9" y1="362" y2="368"/><text x="246.9" y="392" text-anchor="middle">2</text>
+              <line class="w-axis" x1="338.3" x2="338.3" y1="362" y2="368"/><text x="338.3" y="392" text-anchor="middle">3</text>
+              <line class="w-axis" x1="429.7" x2="429.7" y1="362" y2="368"/><text x="429.7" y="392" text-anchor="middle">4</text>
+              <line class="w-axis" x1="521.1" x2="521.1" y1="362" y2="368"/><text x="521.1" y="392" text-anchor="middle">5</text>
+              <line class="w-axis" x1="612.6" x2="612.6" y1="362" y2="368"/><text x="612.6" y="392" text-anchor="middle">6</text>
+              <line class="w-axis" x1="704" x2="704" y1="362" y2="368"/><text x="704" y="392" text-anchor="middle">7</text>
+              <text x="0" y="392">Day</text>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <figcaption id="fig1-cap"><b>Fig. 1</b>Three of the constituent tides at an imaginary port across one week: principal lunar (M<sub>2</sub>, 12.42&nbsp;h), principal solar (S<sub>2</sub>, 12.00&nbsp;h) and lunisolar diurnal (K<sub>1</sub>, 23.93&nbsp;h). As M<sub>2</sub> and S<sub>2</sub> slip out of step, the springs of the first day decay toward neaps; K<sub>1</sub> makes each day’s two high waters unequal. Amplitudes are illustrative.</figcaption>
+    </figure>
+
+    <div class="prose">
+      <p>In principle. In practice, adding together twenty or thirty sine waves at every hour of every day of a year is a staggering amount of arithmetic. Human computers did it, slowly, and made mistakes. What was wanted was a device that could do the adding by itself.</p>
+
+      <h2><span class="label">II</span> Turning the crank</h2>
+
+      <p>It came from William Thomson, later Lord Kelvin, who in 1872 worked out a way to sum the waves mechanically. The trick was disarmingly simple. Each constituent tide is represented by a pulley mounted on a crank. Turn the crank and the pulley rises and falls in a perfect sine. Gear the cranks so that each turns at its constituent’s proper speed, then thread a single fine wire under and over all the pulleys in turn, with one end fixed and the other holding a pen. Every pulley tugs on the wire by its own amount. The pen, at the free end, feels the total.</p>
+
+      <p>The first machine handled ten constituents and drew its curve on a roll of paper while an operator wound a handle. A year of tides for one port could be traced in an afternoon. That number is the whole revolution. Tide tables stopped being a record of what the sea had done and became a forecast of what it would do, produced on&nbsp;demand.</p>
+    </div>
+
+    <figure class="fig" aria-labelledby="fig2-cap">
+      <div class="fig-frame">
+        <svg viewBox="0 0 720 320" role="img" aria-labelledby="fig2-title">
+          <title id="fig2-title">Schematic of a tide-predicting machine: eight pulleys on cranks in two staggered rows, a wire fixed at one end threading under and over them, and a pen on the free end drawing a tide curve on a moving strip of paper.</title>
+          <!-- gear trains -->
+          <line class="m-dash" x1="96" x2="404" y1="272" y2="272"/>
+          <line class="m-dash" x1="172" x2="448" y1="36" y2="36"/>
+          <!-- hand crank -->
+          <circle class="m-line" cx="80" cy="272" r="16"/>
+          <path class="m-line" d="M80,272 L66,258 L58,262"/>
+          <circle class="m-hub" cx="80" cy="272" r="2.5"/>
+
+          <!-- fixed anchor -->
+          <rect x="104" y="26" width="28" height="10" fill="var(--paper-2)" stroke="var(--ink)" stroke-width="1.25"/>
+          <path class="m-thin" d="M108,26 l-4,-6 M116,26 l-4,-6 M124,26 l-4,-6 M132,26 l-4,-6"/>
+
+          <!-- crank rods + disks : bottom row -->
+          <g>
+            <circle class="m-line" cx="140" cy="272" r="12"/><line class="m-thin" x1="140" y1="204" x2="146" y2="266"/><circle class="m-hub" cx="146" cy="266" r="2"/>
+            <circle class="m-line" cx="228" cy="272" r="12"/><line class="m-thin" x1="228" y1="196" x2="218" y2="278"/><circle class="m-hub" cx="218" cy="278" r="2"/>
+            <circle class="m-line" cx="316" cy="272" r="12"/><line class="m-thin" x1="316" y1="210" x2="324" y2="264"/><circle class="m-hub" cx="324" cy="264" r="2"/>
+            <circle class="m-line" cx="404" cy="272" r="12"/><line class="m-thin" x1="404" y1="192" x2="396" y2="280"/><circle class="m-hub" cx="396" cy="280" r="2"/>
+          </g>
+          <!-- crank rods + disks : top row -->
+          <g>
+            <circle class="m-line" cx="184" cy="36" r="12"/><line class="m-thin" x1="184" y1="96" x2="192" y2="42"/><circle class="m-hub" cx="192" cy="42" r="2"/>
+            <circle class="m-line" cx="272" cy="36" r="12"/><line class="m-thin" x1="272" y1="88" x2="264" y2="28"/><circle class="m-hub" cx="264" cy="28" r="2"/>
+            <circle class="m-line" cx="360" cy="36" r="12"/><line class="m-thin" x1="360" y1="102" x2="368" y2="44"/><circle class="m-hub" cx="368" cy="44" r="2"/>
+            <circle class="m-line" cx="448" cy="36" r="12"/><line class="m-thin" x1="448" y1="92" x2="440" y2="30"/><circle class="m-hub" cx="440" cy="30" r="2"/>
+          </g>
+
+          <!-- pulleys -->
+          <g>
+            <circle class="m-pulley" cx="140" cy="204" r="22"/><circle class="m-hub" cx="140" cy="204" r="3"/>
+            <circle class="m-pulley" cx="184" cy="96"  r="22"/><circle class="m-hub" cx="184" cy="96"  r="3"/>
+            <circle class="m-pulley" cx="228" cy="196" r="22"/><circle class="m-hub" cx="228" cy="196" r="3"/>
+            <circle class="m-pulley" cx="272" cy="88"  r="22"/><circle class="m-hub" cx="272" cy="88"  r="3"/>
+            <circle class="m-pulley" cx="316" cy="210" r="22"/><circle class="m-hub" cx="316" cy="210" r="3"/>
+            <circle class="m-pulley" cx="360" cy="102" r="22"/><circle class="m-hub" cx="360" cy="102" r="3"/>
+            <circle class="m-pulley" cx="404" cy="192" r="22"/><circle class="m-hub" cx="404" cy="192" r="3"/>
+            <circle class="m-pulley" cx="448" cy="92"  r="22"/><circle class="m-hub" cx="448" cy="92"  r="3"/>
+          </g>
+          <!-- the wire: under the low pulleys, over the high ones -->
+          <path class="m-wire" d="M118,36 L118,204 A22,22 0 0 0 162,204 L162,96 A22,22 0 0 1 206,96 L206,196 A22,22 0 0 0 250,196 L250,88 A22,22 0 0 1 294,88 L294,210 A22,22 0 0 0 338,210 L338,102 A22,22 0 0 1 382,102 L382,192 A22,22 0 0 0 426,192 L426,92 A22,22 0 0 1 470,92 L470,250"/>
+
+          <!-- constituent labels -->
+          <g class="svg-text strong" text-anchor="middle">
+            <text x="140" y="306">M₂</text><text x="228" y="306">N₂</text><text x="316" y="306">K₁</text><text x="404" y="306">P₁</text>
+            <text x="184" y="12">S₂</text><text x="272" y="12">K₂</text><text x="360" y="12">O₁</text><text x="448" y="12">M₄</text>
+          </g>
+
+          <!-- paper strip and pen -->
+          <rect class="m-paper" x="470" y="254" width="242" height="48"/>
+          <path class="m-ink" d="M470,278L472,280.2L474,282.9L476,285.6L478,288.2L480,290.3L482,291.7L484,292.4L486,292.1L488,291L490,289.1L492,286.7L494,283.9L496,281.1L498,278.5L500,276.5L502,275.2L504,274.8L506,275.4L508,277L510,279.4L512,282.4L514,285.8L516,289.3L518,292.5L520,295.2L522,297.1L524,298L526,297.8L528,296.6L530,294.4L532,291.5L534,288L536,284.4L538,280.9L540,277.9L542,275.6L544,274.2L546,273.8L548,274.5L550,276.1L552,278.5L554,281.5L556,284.6L558,287.6L560,290.2L562,292.2L564,293.3L566,293.4L568,292.5L570,290.7L572,288.2L574,285.3L576,282.2L578,279.3L580,276.8L582,275.1L584,274.4L586,274.6L588,276L590,278.3L592,281.3L594,284.9L596,288.6L598,292.1L600,295.1L602,297.4L604,298.6L606,298.7L608,297.6L610,295.5L612,292.5L614,288.9L616,285L618,281.2L620,277.8L622,275.1L624,273.4L626,272.7L628,273.2L630,274.7L632,277.1L634,280.1L636,283.5L638,286.9L640,289.9L642,292.2L644,293.7L646,294.1L648,293.6L650,292L652,289.6L654,286.6L656,283.4L658,280.3L660,277.6L662,275.5L664,274.4L666,274.4L668,275.5L670,277.6L672,280.5L674,284L676,287.8L678,291.4L680,294.7L682,297.1L684,298.6L686,299L688,298.1L690,296.2L692,293.3L694,289.7L696,285.7L698,281.7L700,278.1L702,275.1L704,273.1L706,272.2"/>
+          <path d="M464,248 L476,248 L476,268 L470,278 L464,268 Z" fill="var(--ink)"/>
+          <path class="m-thin" d="M664,246 L700,246 M694,242 L700,246 L694,250"/>
+          <text class="svg-text" x="700" y="236" text-anchor="end">paper</text>
+
+          <!-- callouts -->
+          <g class="callout"><circle cx="58" cy="230" r="15"/><text x="58" y="231">1</text></g>
+          <g class="callout"><circle cx="82" cy="31" r="15"/><text x="82" y="32">2</text></g>
+          <g class="callout"><circle cx="228" cy="142" r="15"/><text x="228" y="143">3</text></g>
+          <g class="callout"><circle cx="510" cy="212" r="15"/><text x="510" y="213">4</text></g>
+        </svg>
+      </div>
+      <figcaption id="fig2-cap"><b>Fig. 2</b>Kelvin’s principle, simplified. <i class="key">1</i>&#8202;A hand crank drives gear trains that turn each constituent’s crank at its own astronomical speed. <i class="key">2</i>&#8202;One end of the wire is fixed. <i class="key">3</i>&#8202;Each pulley rides up and down on its crank; the wire passes under and over them in turn. <i class="key">4</i>&#8202;The free end carries a pen, whose height is the running sum of every displacement, traced onto a moving strip of&nbsp;paper.</figcaption>
+    </figure>
+
+    <div class="prose">
+      <p>Other nations built their own. In the United States, William Ferrel’s machine of 1882 went further, indicating the times and heights of high and low water directly instead of leaving them to be read off a curve. Its successor, designed at the Coast and Geodetic Survey and finished around 1912, summed thirty-seven constituents and weighed well over a ton. The staff called it Old Brass Brains.<label class="sn-ref" for="sn2" aria-label="Note 2"></label><input type="checkbox" id="sn2" class="sn-toggle"><span class="sidenote">It survives, and is held by the National Oceanic and Atmospheric Administration. Setting it up for a new port meant adjusting every crank by hand, which took longer than the run itself.</span> It stayed in service until the mid-1960s, when electronic computers finally took over a job it had done, without complaint, for half a&nbsp;century.</p>
+    </div>
+
+    <aside class="sidebar" aria-labelledby="sb-title">
+      <span class="label">Sidebar</span>
+      <h3 id="sb-title">How to read a tide table</h3>
+      <p>A tide table gives the times and heights of each high and low water. Heights are measured not from mean sea level but from <em>chart datum</em>, a deliberately low reference, so that a depth printed on a chart is the least you should expect to find.</p>
+      <table class="tt">
+        <caption>An imaginary port, one spring day</caption>
+        <thead><tr><th scope="col"></th><th scope="col">Time</th><th scope="col">Height</th></tr></thead>
+        <tbody>
+          <tr class="hw"><td>High</td><td>04:12</td><td>5.4 m</td></tr>
+          <tr><td>Low</td><td>10:31</td><td>0.9 m</td></tr>
+          <tr class="hw"><td>High</td><td>16:38</td><td>5.1 m</td></tr>
+          <tr><td>Low</td><td>22:50</td><td>1.2 m</td></tr>
+        </tbody>
+      </table>
+      <p>Two cautions. Times are usually printed in standard time, so add an hour in summer. And between the printed extremes, the water does not move evenly: by the old <em>rule of twelfths</em>, it rises one twelfth of its range in the first hour, two in the second, three in each of the third and fourth, then two, then one.</p>
+    </aside>
+
+    <div class="prose">
+      <h2><span class="label">III</span> The Normandy question</h2>
+
+      <p>The most consequential tide prediction ever made came off machines like these. In 1943 the Allied planners preparing to land in France needed to know, for a coast they could not survey openly, when the water would be low enough to expose the beach obstacles but rising fast enough to float landing craft in behind them. The work went, discreetly, to Arthur Doodson at the Liverpool Tidal Institute, who was handed a set of harmonic constants without being told where they came from.<label class="sn-ref" for="sn3" aria-label="Note 3"></label><input type="checkbox" id="sn3" class="sn-toggle"><span class="sidenote">Doodson is said to have worked out, from the constants alone, roughly which stretch of coast he was predicting. He kept it to himself.</span> He ran them through two machines and sent back the tables. The window they described is one reason the landings fell in the first week of June&thinsp;—&thinsp;and one reason they so nearly did not, when the weather broke.</p>
+
+      <p>There is something moving in that picture: a man in a provincial institute, turning brass gears in wartime, rehearsing a sea he had never seen for a reason he was not allowed to know. The ocean, it turned out, could be rehearsed in a workshop. That was the deep claim of Kelvin’s machine, more than any of its gearing: that something as large and wild as a tide was, underneath, a sum of&nbsp;clocks.</p>
+
+      <h2><span class="label">IV</span> What the machine could not see</h2>
+
+      <p>It was never the whole truth, and the people who used these machines knew it. A tide predictor computes the astronomical tide, the part driven by the moon and sun. It knows nothing of weather. A strong onshore gale or a deep area of low pressure can pile water against a coast a metre or more above the prediction. The North Sea flood of 1953, which killed more than two thousand people in the Netherlands and Britain, was a storm surge riding on a spring tide that every table had correctly foreseen. The machines were right, and it did not help.</p>
+    </div>
+
+    <blockquote class="pull">
+      <p>“The ocean, it turned out, could be rehearsed in a workshop.”</p>
+    </blockquote>
+
+    <div class="prose">
+      <p>Modern forecasting stitches the two halves together: harmonic predictions for the astronomical part, numerical weather models for the surge. The harmonics are now computed in milliseconds, and the constants for a major port can run past a hundred terms. But the method is still Kelvin’s. Open the tide app on your phone and you are looking at the output of a calculation he would recognise at once&thinsp;—&thinsp;a few dozen clocks, each with its amplitude and phase, added up hour by hour.</p>
+
+      <p>Several of the old machines survive, in museums in Liverpool, London, Washington and elsewhere, mostly under glass and mostly not running. It is worth finding one. They are beautiful in the plain way that honest instruments often are, all exposed gears and taut wire, and they make visible something a screen hides: that prediction, at least of this kind, is neither mystery nor guess. It is a mechanism. You could stand beside it with your hand on the crank and watch the future come out of the end.<span class="endmark" role="img" aria-label="End of article"></span></p>
+    </div>
+
+    <footer class="endmatter">
+      <p class="bio"><b>Maren Okafor</b> writes about instruments, measurement and the sea. She is working on a book about the people who keep the world’s tide gauges.</p>
+
+      <h3 class="label">Sources &amp; further reading</h3>
+      <ol class="sources">
+        <li>David Edgar Cartwright, <cite>Tides: A Scientific History</cite>. Cambridge University Press, 1999. The standard account, from Kepler to satellites.</li>
+        <li>Bruce Parker, <cite>The Power of the Sea: Tsunamis, Storm Surges, Rogue Waves, and Our Quest to Predict Disasters</cite>. Palgrave Macmillan, 2010. Includes a lively chapter on D-Day.</li>
+        <li>William Thomson, “The Tide Gauge, Tidal Harmonic Analyser, and Tide Predicter”, <cite>Minutes of Proceedings of the Institution of Civil Engineers</cite>, 1881.</li>
+      </ol>
+
+      <h3 class="label">A note on the figures</h3>
+      <p class="colophon-note">Both figures were drawn for this piece. Figure 1 is computed from three real constituent periods with invented amplitudes and phases; Figure 2 shows the principle of the machine, not the layout of any particular one, which in practice ran to dozens of pulleys in a single long&nbsp;row.</p>
+
+      <div class="meta-row label">
+        <span>Issue 31 · Winter 2026</span>
+        <span>Filed under Instruments, The Sea</span>
+      </div>
+    </footer>
+
+  </article>
+
+  <section class="more" aria-labelledby="more-title">
+    <span class="label" id="more-title">Also in this issue</span>
+    <ol>
+      <li><a href="#"><span class="label">Essay</span><strong>A short life of the metre, told through its&nbsp;copies</strong><span class="d">Thirty platinum bars, a vault outside Paris, and the long argument about what length really&nbsp;is.</span></a></li>
+      <li><a href="#"><span class="label">Field notes</span><strong>Listening for icebergs off&nbsp;Newfoundland</strong><span class="d">A week aboard a survey ship that hears the ocean better than it&nbsp;sees&nbsp;it.</span></a></li>
+      <li><a href="#"><span class="label">Instruments</span><strong>The barometer in the hallway</strong><span class="d">Why every Victorian house wanted one, and why most of them were&nbsp;wrong.</span></a></li>
+    </ol>
+  </section>
+
+  <footer class="footer label">
+    <a class="wordmark" href="#">The <i>Almanac</i></a>
+    <span>An independent magazine of science &amp; the long view</span>
+    <span>Reader-funded since 2019</span>
+  </footer>
+
+</div>
+
+<script>
+(() => {
+  const bar = document.querySelector('.progress');
+  const art = document.querySelector('article');
+  let ticking = false;
+  const update = () => {
+    const r = art.getBoundingClientRect();
+    const total = r.height - window.innerHeight;
+    const p = total > 0 ? Math.min(1, Math.max(0, -r.top / total)) : 1;
+    bar.style.setProperty('--p', p.toFixed(4));
+    ticking = false;
+  };
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  addEventListener('resize', update);
+  update();
+})();
+</script>
+</body>
+</html>
